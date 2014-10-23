@@ -1,3 +1,4 @@
+# Copyright 2014 Patrick Dawson
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
 #
 # This software is provided 'as-is', without any express or implied
@@ -16,15 +17,13 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
 
-parse_cflags("sdl2-config --cflags")
-sdl_libs = parse_libs("sdl2-config --libs")
+from sdl2 cimport SDL_Surface
 
-pymodule("pygame_sdl2.__init__")
-cython("pygame_sdl2.surface", libs=sdl_libs)
-cython("pygame_sdl2.display", libs=sdl_libs)
+cdef class Surface:
+    # The SDL surface that corresponds to this surface.
+    cdef SDL_Surface* surface
 
-setup("pygame_sdl2", "0.1")
-
-find_unnecessary_gen()
+    # True if we own our surface. False if some other Surface owns our
+    # surface.
+    cdef bint owns_surface

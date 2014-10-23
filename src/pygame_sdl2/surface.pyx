@@ -1,3 +1,4 @@
+# Copyright 2014 Patrick Dawson
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
 #
 # This software is provided 'as-is', without any express or implied
@@ -16,15 +17,31 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+from sdl2 cimport *
 
-parse_cflags("sdl2-config --cflags")
-sdl_libs = parse_libs("sdl2-config --libs")
+cdef class Surface:
 
-pymodule("pygame_sdl2.__init__")
-cython("pygame_sdl2.surface", libs=sdl_libs)
-cython("pygame_sdl2.display", libs=sdl_libs)
+    def __cinit__(self):
+        self.surface = NULL
+        self.owns_surface = False
 
-setup("pygame_sdl2", "0.1")
+    def __dealloc__(self):
+        if self.surface and self.owns_surface:
+            SDL_FreeSurface(self.surface)
 
-find_unnecessary_gen()
+    def __init__(self, size, flags=0, depth=32, masks=None):
+        try:
+            w, h = size
+            assert isinstance(w, int)
+            assert isinstance(h, int)
+            assert w >= 0
+            assert h >= 0
+        except:
+
+            # We pass the empty tuple to create an empty surface, that we can
+            # add an SDL surface to.
+            if size == ():
+                return
+
+        self.surface = SDL_CreateRGBSurface(0, w, h, depth, 0, 0, 0, 0)
+        self.owns_surface = True
