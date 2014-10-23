@@ -1,0 +1,6 @@
+gen
+build
+*.pyc
+*.pyo
+.project
+.pydevproject
