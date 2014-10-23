@@ -19,6 +19,7 @@
 import os
 import sys
 import re
+import subprocess
 
 import distutils.core
 
@@ -38,6 +39,40 @@ extensions = [ ]
 
 # A list of macros that are defined for all modules.
 global_macros = [ ]
+
+def parse_cflags(command):
+    """
+    Runs `command`, and uses the command's output to set up include_dirs
+    and extra_compile_args.
+    """
+
+    output = subprocess.check_output(command, shell=True)
+
+    for i in output.split():
+        if i.startswith("-I"):
+            include_dirs.append(i[2:])
+        else:
+            extra_compile_args.append(i)
+
+def parse_libs(command):
+    """
+    Runs `command`, and uses the command's output to set up library_dirs and
+    extra_link_args. Returns a list of libraries to link against.
+    """
+
+    output = subprocess.check_output(command, shell=True)
+
+    libs = [ ]
+
+    for i in output.split():
+        if i.startswith("-L"):
+            include_dirs.append(i[2:])
+        elif i.startswith("-l"):
+            libs.append(i[2:])
+        else:
+            extra_compile_args.append(i)
+
+    return libs
 
 def cmodule(name, source, libs=[], define_macros=[]):
     """
@@ -142,7 +177,6 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
         print name, "is out of date."
 
         try:
-            import subprocess
             subprocess.check_call([
                 cython_command,
                 "-Iinclude",

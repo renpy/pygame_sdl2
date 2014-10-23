@@ -16,10 +16,13 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import cython, pymodule, setup, find_unnecessary_gen
+from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+
+parse_cflags("sdl2-config --cflags")
+sdl_libs = parse_libs("sdl2-config --libs")
 
 pymodule("pygame_sdl2.__init__")
-cython("pygame_sdl2.display")
+cython("pygame_sdl2.display", libs=sdl_libs)
 
 setup("pygame_sdl2", "0.1")
 find_unnecessary_gen()
