@@ -859,16 +859,19 @@ cdef extern from "SDL.h" nogil:
         SDL_PIXELFORMAT_YUY2
         SDL_PIXELFORMAT_UYVY
         SDL_PIXELFORMAT_YVYU
+
     cdef struct SDL_Color:
         Uint8 r
         Uint8 g
         Uint8 b
         Uint8 a
+
     cdef struct SDL_Palette:
         int ncolors
         SDL_Color *colors
         Uint32 version
         int refcount
+
     cdef struct SDL_PixelFormat:
         Uint32 format
         SDL_Palette *palette
