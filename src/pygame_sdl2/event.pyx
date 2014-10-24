@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+# Copyright 2014 Patrick Dawson
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
 #
 # This software is provided 'as-is', without any express or implied
@@ -18,17 +17,31 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+from sdl2 cimport *
 
-parse_cflags("sdl2-config --cflags")
-sdl_libs = parse_libs("sdl2-config --libs")
+include "event_names.pxi"
 
-pymodule("pygame_sdl2.__init__")
-cython("pygame_sdl2.surface", libs=sdl_libs)
-cython("pygame_sdl2.display", libs=sdl_libs)
-cython("pygame_sdl2.event", libs=sdl_libs)
-cython("pygame_sdl2.locals", libs=sdl_libs)
+class EventType:
+    def __init__(self, type, dict=None, **kwargs):
+        self.type = type
 
-setup("pygame_sdl2", "0.1")
+        if dict:
+            self.__dict__.update(dict)
 
-find_unnecessary_gen()
+        self.__dict__.update(kwargs)
+
+Event = EventType
+
+cdef make_event(SDL_Event *e):
+    return EventType(e.type)
+
+def wait():
+    cdef SDL_Event evt
+
+    if SDL_WaitEvent(&evt):
+        return make_event(&evt)
+    else:
+        return EventType(0) # NOEVENT
+
+def init():
+    SDL_Init(SDL_INIT_EVENTS)
