@@ -4,3 +4,4 @@ build
 *.pyo
 .project
 .pydevproject
+sdl2.i
