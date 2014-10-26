@@ -4,6 +4,9 @@ import pycparser
 import pycparser.c_generator
 import pycparser.c_ast as c_ast
 
+import os
+import re
+import subprocess
 import sys
 
 whitelist = {
@@ -269,6 +272,63 @@ def generate_decl(n, ckind='', name=None):
     else:
         return False
 
+define_prefixes = [
+    "SDL_RELEASED",
+    "SDL_PRESSED",
+    "SDL_TEXTEDITINGEVENT_TEXT_SIZE",
+    "SDL_TEXTINPUTEVENT_TEXT_SIZE",
+    "SDL_QUERY",
+    "SDL_IGNORE",
+    "SDL_DISABLE",
+    "SDL_ENABLE",
+    "SDL_INIT_",
+    "SDL_RWOPS_",
+    "RW_SEEK_",
+    "SDLK_SCANCODE_MASK",
+    "KMOD_",
+    "SDL_AUDIO_",
+    "AUDIO_",
+    "SDL_AUDIOCVT_",
+    "SDL_HAPTIC_",
+    "SDL_HAT",
+    "SDL_SWSURFACE",
+    "SDL_PREALLOC",
+    "SDL_RLEACCEL",
+    "SDL_DONTFREE",
+    "SDL_MUSTLOCK",
+    "SDL_BUTTON",
+    "SDL_HINT_",
+    ]
+
+def auto_defines(dirname):
+    defines = [ ]
+
+    for fn in os.listdir(dirname):
+        fn = os.path.join(dirname, fn)
+
+        if not fn.endswith(".h"):
+            continue
+
+        with open(fn) as f:
+            for l in f:
+
+                m = re.match(r'\s*#define\s+(\w+)', l)
+                if not m:
+                    continue
+
+                name = m.group(1)
+
+                for i in define_prefixes:
+                    if name.startswith(i):
+                        defines.append(name)
+                        break
+
+    defines.sort()
+
+    sys.stdout.write('    cdef enum:\n')
+    for i in defines:
+        sys.stdout.write('        ' + i + "\n")
+
 PREAMBLE = """\
 from libc.stdint cimport *
 from libc.stdio cimport *
@@ -284,6 +344,9 @@ cdef extern from "SDL.h" nogil:
 """
 
 def main():
+
+    subprocess.check_call(["gcc", "-E", "-I/usr/include/SDL2",  "-D_REENTRANT", "sdl2.c", "-o",  "sdl2.i"])
+
     a = pycparser.parse_file("sdl2.i")
 
     sys.stdout.write(PREAMBLE)
@@ -293,6 +356,8 @@ def main():
         if check_name(n):
             remove_modifiers(n)
             generate_decl(n, '')
+
+    auto_defines("/usr/include/SDL2")
 
 if __name__ == "__main__":
     main()
