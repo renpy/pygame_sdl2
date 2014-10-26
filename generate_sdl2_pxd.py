@@ -4,10 +4,13 @@ import pycparser
 import pycparser.c_generator
 import pycparser.c_ast as c_ast
 
+import json
 import os
 import re
 import subprocess
 import sys
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 whitelist = {
     "Sint8",
@@ -116,6 +119,8 @@ def anonymous(n):
 
     return "{}_{}_{}".format(name, kind, anonymous_serial)
 
+# The file we write generated code to.
+output = None
 
 class Writer(object):
     def __init__(self, s):
@@ -126,11 +131,11 @@ class Writer(object):
         self.rest.append(s)
 
     def write(self):
-        sys.stdout.write("    " + self.first + "\n")
+        output.write("    " + self.first + "\n")
         for i in self.rest:
-            sys.stdout.write("        " + i + "\n")
+            output.write("        " + i + "\n")
 
-        sys.stdout.write("\n")
+        output.write("\n")
 
 def remove_modifiers(n):
     """
@@ -200,6 +205,8 @@ def generate_struct_or_union(kind, n, ckind, name):
 
     w.write()
 
+# A map from the name of an enum to the members of that enum.
+enums = { }
 
 def generate_decl(n, ckind='', name=None):
     """
@@ -262,9 +269,13 @@ def generate_decl(n, ckind='', name=None):
         else:
             w = Writer('{} enum:'.format(ckind, name))
 
+        names = [ ]
+
         for i in n.values.enumerators:
             w.add(i.name)
+            names.append(i.name)
 
+        enums[name] = names
         w.write()
 
         return True
@@ -327,9 +338,11 @@ def auto_defines(dirname):
 
     defines.sort()
 
-    sys.stdout.write('    cdef enum:\n')
+    enums["defines"] = defines
+
+    output.write('    cdef enum:\n')
     for i in defines:
-        sys.stdout.write('        ' + i + "\n")
+        output.write('        ' + i + "\n")
 
 PREAMBLE = """\
 from libc.stdint cimport *
@@ -347,11 +360,16 @@ cdef extern from "SDL.h" nogil:
 
 def main():
 
+    os.chdir(ROOT)
+
     subprocess.check_call(["gcc", "-E", "-I/usr/include/SDL2",  "-D_REENTRANT", "sdl2.c", "-o",  "sdl2.i"])
+
+    global output
+    output = open("include/sdl2.pxd", "w")
 
     a = pycparser.parse_file("sdl2.i")
 
-    sys.stdout.write(PREAMBLE)
+    output.write(PREAMBLE)
 
     for n in a.ext:
         # n.show(nodenames=True, attrnames=True)
@@ -360,6 +378,11 @@ def main():
             generate_decl(n, '')
 
     auto_defines("/usr/include/SDL2")
+
+    output.close()
+
+    with open("include/enums.json", "w") as f:
+        json.dump(enums, f, indent=4)
 
 if __name__ == "__main__":
     main()
