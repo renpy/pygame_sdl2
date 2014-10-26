@@ -1,4 +1,5 @@
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
+# Copyright 2014 Patrick Dawson <pat@dw.is>
 #
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -15,3 +16,10 @@
 # 2. Altered source versions must be plainly marked as such, and must not be
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
+
+import event
+import display
+
+def init():
+    event.init()
+    display.init()
