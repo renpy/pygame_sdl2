@@ -24,6 +24,15 @@ include "event_names.pxi"
 
 event_queue = []
 
+# Add events to emulate SDL 1.2
+ACTIVEEVENT = SDL_LASTEVENT - 1
+VIDEORESIZE = SDL_LASTEVENT - 2
+VIDEOEXPOSE = SDL_LASTEVENT - 3
+
+event_names[ACTIVEEVENT] = "ACTIVEEVENT"
+event_names[VIDEORESIZE] = "VIDEORESIZE"
+event_names[VIDEOEXPOSE] = "VIDEOEXPOSE"
+
 class EventType:
     def __init__(self, type, dict=None, **kwargs):
         self.type = type
@@ -87,12 +96,39 @@ cdef make_joyhat_event(SDL_JoyHatEvent *e):
 cdef make_joybtn_event(SDL_JoyButtonEvent *e):
     return EventType(e.type, joy=e.which, button=e.button)
 
+cdef make_window_event(SDL_WindowEvent *e):
+    # SDL_APPMOUSEFOCUS
+    if e.event == SDL_WINDOWEVENT_ENTER:
+        return EventType(ACTIVEEVENT, state=1, gain=1)
+    elif e.event == SDL_WINDOWEVENT_LEAVE:
+        return EventType(ACTIVEEVENT, state=1, gain=0)
+
+    # SDL_APPINPUTFOCUS
+    elif e.event == SDL_WINDOWEVENT_FOCUS_GAINED:
+        return EventType(ACTIVEEVENT, state=2, gain=1)
+    elif e.event == SDL_WINDOWEVENT_FOCUS_LOST:
+        return EventType(ACTIVEEVENT, state=2, gain=0)
+
+    # SDL_APPACTIVE
+    elif e.event == SDL_WINDOWEVENT_RESTORED:
+        return EventType(ACTIVEEVENT, state=4, gain=1)
+    elif e.event == SDL_WINDOWEVENT_MINIMIZED:
+        return EventType(ACTIVEEVENT, state=4, gain=0)
+
+    elif e.event == SDL_WINDOWEVENT_RESIZED:
+        return EventType(VIDEORESIZE, size=(e.data1, e.data2), w=e.data1, h=e.data2)
+
+    elif e.event == SDL_WINDOWEVENT_EXPOSED:
+        return EventType(VIDEOEXPOSE)
+
+    return EventType(SDL_WINDOWEVENT, event=e.event, data1=e.data1, data2=e.data2)
+
 cdef make_event(SDL_Event *e):
-    if e.type in [SDL_KEYDOWN, SDL_KEYUP]:
+    if e.type in (SDL_KEYDOWN, SDL_KEYUP):
         return make_keyboard_event(<SDL_KeyboardEvent*>e)
     elif e.type == SDL_MOUSEMOTION:
         return make_mousemotion_event(<SDL_MouseMotionEvent*>e)
-    elif e.type in [SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP]:
+    elif e.type in (SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP):
         return make_mousebtn_event(<SDL_MouseButtonEvent*>e)
     elif e.type == SDL_MOUSEWHEEL:
         return make_mousewheel_event(<SDL_MouseWheelEvent*>e)
@@ -102,24 +138,41 @@ cdef make_event(SDL_Event *e):
         return make_joyball_event(<SDL_JoyBallEvent*>e)
     elif e.type == SDL_JOYHATMOTION:
         return make_joyhat_event(<SDL_JoyHatEvent*>e)
-    elif e.type in [SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP]:
+    elif e.type in (SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP):
         return make_joybtn_event(<SDL_JoyButtonEvent*>e)
+    elif e.type == SDL_WINDOWEVENT:
+        return make_window_event(<SDL_WindowEvent*>e)
 
     return EventType(e.type)
 
 
 def pump():
-    get()
+    SDL_PumpEvents()
+
+cdef get_bytype(Uint32 tmin, Uint32 tmax):
+    evts = []
+    for e in event_queue:
+        if tmin <= e.type <= tmax:
+            evts.append(e)
+    for e in evts:
+        event_queue.remove(e)
+
+    cdef SDL_Event evt
+    while SDL_PeepEvents(&evt, 1, SDL_GETEVENT, tmin, tmax) > 0:
+        evts.append(make_event(&evt))
+    return evts
 
 def get(t=None):
-    # TODO: filtering by type
-    evts = []
-    while True:
-        e = poll()
-        if e.type == 0:
-            break
-        evts.append(e)
-    return evts
+    SDL_PumpEvents()
+    if t == None:
+        return get_bytype(SDL_FIRSTEVENT, SDL_LASTEVENT)
+    elif type(t) == int:
+        return get_bytype(t, t)
+    else:
+        evts = []
+        for et in t:
+            evts += get_bytype(et, et)
+        return evts
 
 def poll():
     cdef SDL_Event evt
@@ -144,39 +197,50 @@ def wait():
         return EventType(0) # NOEVENT
 
 def peek(t=None):
-    if type(t) == int:
+    if t == None:
+        return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
+    elif type(t) == int:
         return SDL_HasEvent(t)
-    elif type(t) == list:
+    else:
         for et in t:
             if SDL_HasEvent(et):
                 return True
         return False
-    else:
-        return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
 
 def clear(t=None):
-    if type(t) == int:
+    if t == None:
+        SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
+    elif type(t) == int:
         SDL_FlushEvent(t)
-    elif type(t) == list:
+    else:
         for et in t:
             SDL_FlushEvent(t)
-    else:
-        SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
 
 def event_name(t):
     return event_names[t]
 
 def set_blocked(t=None):
-    # TODO: implement
-    pass
+    if t == None:
+        for et in event_names.keys():
+            SDL_EventState(et, SDL_ENABLE)
+    elif type(t) == int:
+        SDL_EventState(t, SDL_IGNORE)
+    else:
+        for et in t:
+            SDL_EventState(et, SDL_IGNORE)
 
 def set_allowed(t=None):
-    # TODO: implement
-    pass
+    if t == None:
+        for et in event_names.keys():
+            SDL_EventState(et, SDL_IGNORE)
+    elif type(t) == int:
+        SDL_EventState(t, SDL_ENABLE)
+    else:
+        for et in t:
+            SDL_EventState(et, SDL_ENABLE)
 
 def get_blocked(t):
-    # TODO: implement
-    pass
+    return SDL_EventState(t, SDL_QUERY) == SDL_IGNORE
 
 def set_grab(on):
     SDL_SetWindowGrab(main_window.window, on)
