@@ -47,9 +47,27 @@ class EventType:
 
 Event = EventType
 
+cdef get_textinput():
+    cdef SDL_Event evt
+    if SDL_PeepEvents(&evt, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT) > 0:
+        return evt.text.text.decode('utf-8')
+    return u''
+
 cdef make_keyboard_event(SDL_KeyboardEvent *e):
-    # TODO: unicode
-    return EventType(e.type, scancode=e.keysym.scancode, key=e.keysym.sym, mod=e.keysym.mod)
+    dargs = { 'scancode' : e.keysym.scancode,
+              'key' : e.keysym.sym,
+              'mod' : e.keysym.mod }
+    if e.type == SDL_KEYDOWN:
+        # Be careful not to check event queue for TEXTINPUT events that are
+        # not associated with the current KEYDOWN event.
+        if e.keysym.sym <= 0x20:
+            uchar = unichr(e.keysym.sym)
+        elif e.keysym.sym <= 0xFFFF:
+            uchar = get_textinput()
+        else:
+            uchar = u''
+        dargs['unicode'] = uchar
+    return EventType(e.type, dict=dargs)
 
 cdef make_mousemotion_event(SDL_MouseMotionEvent *e):
     buttons = (1 if e.state & SDL_BUTTON_LMASK else 0,
