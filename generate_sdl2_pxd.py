@@ -298,6 +298,8 @@ define_prefixes = [
     "SDL_MUSTLOCK",
     "SDL_BUTTON",
     "SDL_HINT_",
+    "SDL_WINDOWPOS_UNDEFINED",
+    "SDL_WINDOWPOS_CENTERED",
     ]
 
 def auto_defines(dirname):
