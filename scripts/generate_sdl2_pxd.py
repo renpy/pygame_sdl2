@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import pycparser
 import pycparser.c_generator
 import pycparser.c_ast as c_ast
 
@@ -8,9 +7,8 @@ import json
 import os
 import re
 import subprocess
-import sys
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 whitelist = {
     "Sint8",
