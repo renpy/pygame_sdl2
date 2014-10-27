@@ -196,7 +196,7 @@ def poll():
     cdef SDL_Event evt
 
     if len(event_queue) > 0:
-        return event_queue.pop()
+        return event_queue.pop(0)
 
     if SDL_PollEvent(&evt) == 1:
         return make_event(&evt)
@@ -207,7 +207,7 @@ def wait():
     cdef SDL_Event evt
 
     if len(event_queue) > 0:
-        return event_queue.pop()
+        return event_queue.pop(0)
 
     if SDL_WaitEvent(&evt):
         return make_event(&evt)

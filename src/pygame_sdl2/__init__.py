@@ -22,7 +22,9 @@ import display
 import key
 import mouse
 import joystick
+import time
 
 def init():
     event.init()
     display.init()
+    time.init()
