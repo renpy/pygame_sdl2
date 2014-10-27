@@ -18,6 +18,8 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from color cimport map_color
+from rect cimport to_sdl_rect
 
 cdef class Surface:
 
@@ -45,3 +47,15 @@ cdef class Surface:
 
         self.surface = SDL_CreateRGBSurface(0, w, h, depth, 0, 0, 0, 0)
         self.owns_surface = True
+
+    def fill(self, color, rect=None):
+
+        cdef SDL_Rect sdl_rect
+        cdef Uint32 pixel = map_color(self.surface, color)
+
+        if rect is not None:
+            to_sdl_rect(rect, &sdl_rect)
+            SDL_FillRect(self.surface, &sdl_rect, pixel)
+        else:
+            SDL_FillRect(self.surface, NULL, pixel)
+
