@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-# Copyright 2014 Tom Rothamel <tom@rothamel.us>
+# Copyright 2014 Patrick Dawson <pat@dw.is>
 #
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -18,22 +16,39 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+from sdl2 cimport *
 
-parse_cflags("sdl2-config --cflags")
-sdl_libs = parse_libs("sdl2-config --libs")
+def init():
+    pass
 
-pymodule("pygame_sdl2.__init__")
-cython("pygame_sdl2.color", libs=sdl_libs)
-cython("pygame_sdl2.rect", libs=sdl_libs)
-cython("pygame_sdl2.surface", libs=sdl_libs)
-cython("pygame_sdl2.display", libs=sdl_libs)
-cython("pygame_sdl2.event", libs=sdl_libs)
-cython("pygame_sdl2.locals", libs=sdl_libs)
-cython("pygame_sdl2.key", libs=sdl_libs)
-cython("pygame_sdl2.mouse", libs=sdl_libs)
-cython("pygame_sdl2.joystick", libs=sdl_libs)
+def quit():
+    pass
 
-setup("pygame_sdl2", "0.1")
+def get_focused():
+    return SDL_GetKeyboardFocus() != NULL
 
-find_unnecessary_gen()
+def get_pressed():
+    cdef int numkeys
+    cdef const Uint8 *state = SDL_GetKeyboardState(&numkeys)
+    ret = [0] * numkeys
+    for n in range(numkeys):
+        if state[n]:
+            ret[n] = 1
+    return tuple(ret)
+
+def get_mods():
+    return SDL_GetModState()
+
+def set_mods(state):
+    SDL_SetModState(state)
+
+def set_repeat(delay=0, interval=0):
+    # Not possible with SDL2.
+    pass
+
+def get_repeat():
+    # Not possible with SDL2.
+    return (0,0)
+
+def name(key):
+    return SDL_GetKeyName(key)

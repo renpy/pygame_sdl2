@@ -58,16 +58,16 @@ cdef make_keyboard_event(SDL_KeyboardEvent *e):
               'key' : e.keysym.sym,
               'mod' : e.keysym.mod }
     if e.type == SDL_KEYDOWN:
-        # Be careful not to check event queue for TEXTINPUT events that are
-        # not associated with the current KEYDOWN event.
-        if e.keysym.sym <= 0x20:
+        # Be careful to only check for a TEXTINPUT event when you know that
+        # there will be one associated with this KEYDOWN event.
+        if e.keysym.sym < 0x20:
             uchar = unichr(e.keysym.sym)
         elif e.keysym.sym <= 0xFFFF:
             uchar = get_textinput()
         else:
             uchar = u''
         dargs['unicode'] = uchar
-    return EventType(e.type, dict=dargs)
+    return EventType(e.type, dict=dargs, repeat=e.repeat)
 
 cdef make_mousemotion_event(SDL_MouseMotionEvent *e):
     buttons = (1 if e.state & SDL_BUTTON_LMASK else 0,
@@ -263,7 +263,7 @@ def get_blocked(t):
 def set_grab(on):
     SDL_SetWindowGrab(main_window.window, on)
 
-def get_grab(on):
+def get_grab():
     return SDL_GetWindowGrab(main_window.window)
 
 def post(e):

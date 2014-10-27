@@ -19,6 +19,9 @@
 
 import event
 import display
+import key
+import mouse
+import joystick
 
 def init():
     event.init()
