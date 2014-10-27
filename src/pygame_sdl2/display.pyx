@@ -19,12 +19,28 @@
 
 from sdl2 cimport *
 from surface cimport *
+from rect cimport to_sdl_rect
+
+from libc.stdlib cimport calloc, free
+
+
+# True if init has been called without quit being called.
+init_done = False
 
 def init():
     SDL_Init(SDL_INIT_VIDEO)
 
-def quit():
-    pass
+    global init_done
+    init_done = True
+
+def quit(): # @ReservedAssignment
+
+    global init_done
+    init_done = False
+
+def get_init():
+    return init_done
+
 
 cdef class Window:
     def __init__(self, resolution=(0, 0), flags=0, depth=0):
@@ -40,13 +56,57 @@ cdef class Window:
     def flip(self):
         SDL_UpdateWindowSurface(self.window)
 
+    def get_surface(self):
+        return self.surface
+
+    def update(self, rectangles=None):
+
+        cdef SDL_Rect *rects
+        cdef int count = 0
+
+        if rectangles is None:
+            self.flip()
+            return
+
+        if not isinstance(rectangles, list):
+            rectangles = [ rectangles ]
+
+        rects = <SDL_Rect *> calloc(len(rectangles), sizeof(SDL_Rect))
+        if rects == NULL:
+            raise MemoryError("Couldn't allocate rectangles.")
+
+        try:
+
+            for i in rectangles:
+                if i is None:
+                    continue
+
+                to_sdl_rect(i, &rects[count])
+                count += 1
+
+            SDL_UpdateWindowSurfaceRects(self.window, rects, count)
+
+        finally:
+            free(rects)
+
+
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
 
     main_window = Window(resolution, flags, depth)
     return main_window.surface
 
+
+def get_surface():
+    if main_window is None:
+        return None
+
+    return main_window.get_surface()
+
 def flip():
     if main_window:
         main_window.flip()
 
+def update(rectangles=None):
+    if main_window:
+        main_window.update(rectangles)
