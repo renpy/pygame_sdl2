@@ -1,4 +1,3 @@
-# Copyright 2014 Tom Rothamel <tom@rothamel.us>
 # Copyright 2014 Patrick Dawson <pat@dw.is>
 #
 # This software is provided 'as-is', without any express or implied
@@ -17,14 +16,39 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-import event
-import display
-import key
-import mouse
-import joystick
-import time
+from sdl2 cimport *
 
 def init():
-    event.init()
-    display.init()
-    time.init()
+    pass
+
+def quit():
+    pass
+
+def get_focused():
+    return SDL_GetKeyboardFocus() != NULL
+
+def get_pressed():
+    cdef int numkeys
+    cdef const Uint8 *state = SDL_GetKeyboardState(&numkeys)
+    ret = [0] * numkeys
+    for n in range(numkeys):
+        if state[n]:
+            ret[n] = 1
+    return tuple(ret)
+
+def get_mods():
+    return SDL_GetModState()
+
+def set_mods(state):
+    SDL_SetModState(state)
+
+def set_repeat(delay=0, interval=0):
+    # Not possible with SDL2.
+    pass
+
+def get_repeat():
+    # Not possible with SDL2.
+    return (0,0)
+
+def name(key):
+    return SDL_GetKeyName(key)

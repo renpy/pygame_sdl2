@@ -1,0 +1,105 @@
+# Copyright 2014 Patrick Dawson <pat@dw.is>
+#
+# This software is provided 'as-is', without any express or implied
+# warranty.  In no event will the authors be held liable for any damages
+# arising from the use of this software.
+#
+# Permission is granted to anyone to use this software for any purpose,
+# including commercial applications, and to alter it and redistribute it
+# freely, subject to the following restrictions:
+#
+# 1. The origin of this software must not be misrepresented; you must not
+#    claim that you wrote the original software. If you use this software
+#    in a product, an acknowledgment in the product documentation would be
+#    appreciated but is not required.
+# 2. Altered source versions must be plainly marked as such, and must not be
+#    misrepresented as being the original software.
+# 3. This notice may not be removed or altered from any source distribution.
+
+from sdl2 cimport *
+
+cdef int timer_id = 0
+
+def init():
+    SDL_InitSubSystem(SDL_INIT_TIMER)
+
+def quit():
+    SDL_QuitSubSystem(SDL_INIT_TIMER)
+
+def get_ticks():
+    return SDL_GetTicks()
+
+cpdef wait(milliseconds):
+    cdef int start
+
+    start = SDL_GetTicks()
+    SDL_Delay(milliseconds)
+    return SDL_GetTicks() - start
+
+cpdef delay(milliseconds):
+    # SDL_Delay() should be accurate enough.
+    return wait(milliseconds)
+
+cdef Uint32 timer_callback(Uint32 interval, void *param):
+    cdef SDL_Event e
+    e.type = <int>param
+    e.user.code = 0
+    e.user.data1 = NULL
+    e.user.data2 = NULL
+    SDL_PushEvent(&e)
+    return interval
+
+def set_timer(eventid, milliseconds):
+    global timer_id
+    if milliseconds == 0:
+        if timer_id != 0:
+            SDL_RemoveTimer(timer_id)
+            timer_id = 0
+            return
+
+    if timer_id != 0:
+        SDL_RemoveTimer(timer_id)
+        timer_id = 0
+    timer_id = SDL_AddTimer(milliseconds, <SDL_TimerCallback>timer_callback, <void*><int>eventid)
+    if timer_id == 0:
+        raise Exception(SDL_GetError())
+
+class Clock:
+    def __init__(self):
+        self.last = SDL_GetTicks()
+        self.last_frames = []
+        self.frametime = 0
+        self.raw_frametime = 0
+
+    def tick(self, framerate=0):
+        cdef int now = SDL_GetTicks()
+        self.raw_frametime = now - self.last
+        while len(self.last_frames) > 9:
+            self.last_frames.pop(0)
+        if framerate == 0:
+            self.last = now
+            self.last_frames.append(self.raw_frametime)
+            return self.raw_frametime
+        cdef int frame_duration = 1.0 / framerate * 1000
+        if self.raw_frametime < frame_duration:
+            delay(frame_duration - self.raw_frametime)
+        now = SDL_GetTicks()
+        self.frametime = now - self.last
+        self.last = now
+        self.last_frames.append(self.frametime)
+        return self.frametime
+
+    def tick_busy_loop(self, framerate=0):
+        return self.tick(framerate)
+
+    def get_time(self):
+        return self.frametime
+
+    def get_rawtime(self):
+        return self.raw_frametime
+
+    def get_fps(self):
+        cdef int total_time = sum(self.last_frames)
+        cdef float average_time = total_time / 1000.0 / len(self.last_frames)
+        cdef float average_fps = 1.0 / average_time
+        return average_fps

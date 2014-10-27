@@ -30,6 +30,10 @@ cython("pygame_sdl2.surface", libs=sdl_libs)
 cython("pygame_sdl2.display", libs=sdl_libs)
 cython("pygame_sdl2.event", libs=sdl_libs)
 cython("pygame_sdl2.locals", libs=sdl_libs)
+cython("pygame_sdl2.key", libs=sdl_libs)
+cython("pygame_sdl2.mouse", libs=sdl_libs)
+cython("pygame_sdl2.joystick", libs=sdl_libs)
+cython("pygame_sdl2.time", libs=sdl_libs)
 
 setup("pygame_sdl2", "0.1")
 
