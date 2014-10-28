@@ -43,7 +43,11 @@ class EventType:
         self.__dict__.update(kwargs)
 
     def __repr__(self):
-        return '<Event(%d-%s %s)>' % (self.type, event_names[self.type], self.__dict__)
+        if SDL_USEREVENT < self.type < VIDEOEXPOSE:
+            ename = "UserEvent%d" % (self.type - SDL_USEREVENT)
+        else:
+            ename = event_names[self.type]
+        return '<Event(%d-%s %s)>' % (self.type, ename, self.__dict__)
 
 Event = EventType
 
@@ -160,6 +164,9 @@ cdef make_event(SDL_Event *e):
         return make_joybtn_event(<SDL_JoyButtonEvent*>e)
     elif e.type == SDL_WINDOWEVENT:
         return make_window_event(<SDL_WindowEvent*>e)
+    elif e.type >= SDL_USEREVENT:
+        # Can't do anything useful with data1 and data2 here.
+        return EventType(e.type, code=e.user.code)
 
     return EventType(e.type)
 
