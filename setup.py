@@ -35,6 +35,7 @@ cython("pygame_sdl2.key", libs=sdl_libs)
 cython("pygame_sdl2.mouse", libs=sdl_libs)
 cython("pygame_sdl2.joystick", libs=sdl_libs)
 cython("pygame_sdl2.time", libs=sdl_libs)
+cython("pygame_sdl2.image", libs=sdl_libs + ['SDL2_image'])
 
 setup("pygame_sdl2", "0.1")
 

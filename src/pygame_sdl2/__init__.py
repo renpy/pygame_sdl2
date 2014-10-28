@@ -23,8 +23,10 @@ import key
 import mouse
 import joystick
 import time
+import image
 
 def init():
     event.init()
     display.init()
     time.init()
+    image.init()
