@@ -24,6 +24,7 @@ import mouse
 import joystick
 import time
 import image
+import transform
 
 def init():
     event.init()
