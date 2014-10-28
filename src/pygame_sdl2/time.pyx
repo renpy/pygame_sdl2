@@ -55,7 +55,7 @@ def set_timer(eventid, milliseconds):
         if timer_id != 0:
             SDL_RemoveTimer(timer_id)
             timer_id = 0
-            return
+        return
 
     if timer_id != 0:
         SDL_RemoveTimer(timer_id)
