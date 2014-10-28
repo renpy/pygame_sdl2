@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
 #
 # This software is provided 'as-is', without any express or implied
@@ -18,24 +16,7 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+from sdl2 cimport SDL_RWops
 
-parse_cflags("sdl2-config --cflags")
-sdl_libs = parse_libs("sdl2-config --libs")
+cdef SDL_RWops *to_rwops(filelike, mode=*) except NULL
 
-pymodule("pygame_sdl2.__init__")
-cython("pygame_sdl2.color", libs=sdl_libs)
-cython("pygame_sdl2.rect", libs=sdl_libs)
-cython("pygame_sdl2.rwobject", libs=sdl_libs)
-cython("pygame_sdl2.surface", libs=sdl_libs)
-cython("pygame_sdl2.display", libs=sdl_libs)
-cython("pygame_sdl2.event", libs=sdl_libs)
-cython("pygame_sdl2.locals", libs=sdl_libs)
-cython("pygame_sdl2.key", libs=sdl_libs)
-cython("pygame_sdl2.mouse", libs=sdl_libs)
-cython("pygame_sdl2.joystick", libs=sdl_libs)
-cython("pygame_sdl2.time", libs=sdl_libs)
-
-setup("pygame_sdl2", "0.1")
-
-find_unnecessary_gen()
