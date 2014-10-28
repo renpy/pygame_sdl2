@@ -9,7 +9,7 @@ cdef extern from "SDL.h" nogil:
     cdef struct SDL_BlitMap
 
     ctypedef struct SDL_AudioCVT
-    char *SDL_GetPlatform()
+    const char *SDL_GetPlatform()
 
     ctypedef enum SDL_bool:
         SDL_FALSE
@@ -39,11 +39,11 @@ cdef extern from "SDL.h" nogil:
 
     void SDL_free(void *mem)
 
-    char *SDL_getenv(char *name)
+    char *SDL_getenv(const char *name)
 
-    int SDL_setenv(char *name, char *value, int overwrite)
+    int SDL_setenv(const char *name, const char *value, int overwrite)
 
-    void SDL_qsort(void *base, size_t nmemb, size_t size, int (*compare)(void *, void *))
+    void SDL_qsort(void *base, size_t nmemb, size_t size, int (*compare)(const void *, const void *))
 
     int SDL_abs(int x)
 
@@ -57,27 +57,27 @@ cdef extern from "SDL.h" nogil:
 
     void *SDL_memset(void *dst, int c, size_t len)
 
-    void *SDL_memcpy(void *dst, void *src, size_t len)
+    void *SDL_memcpy(void *dst, const void *src, size_t len)
 
-    void *SDL_memmove(void *dst, void *src, size_t len)
+    void *SDL_memmove(void *dst, const void *src, size_t len)
 
-    int SDL_memcmp(void *s1, void *s2, size_t len)
+    int SDL_memcmp(const void *s1, const void *s2, size_t len)
 
-    size_t SDL_wcslen(wchar_t *wstr)
+    size_t SDL_wcslen(const wchar_t *wstr)
 
-    size_t SDL_wcslcpy(wchar_t *dst, wchar_t *src, size_t maxlen)
+    size_t SDL_wcslcpy(wchar_t *dst, const wchar_t *src, size_t maxlen)
 
-    size_t SDL_wcslcat(wchar_t *dst, wchar_t *src, size_t maxlen)
+    size_t SDL_wcslcat(wchar_t *dst, const wchar_t *src, size_t maxlen)
 
-    size_t SDL_strlen(char *str)
+    size_t SDL_strlen(const char *str)
 
-    size_t SDL_strlcpy(char *dst, char *src, size_t maxlen)
+    size_t SDL_strlcpy(char *dst, const char *src, size_t maxlen)
 
-    size_t SDL_utf8strlcpy(char *dst, char *src, size_t dst_bytes)
+    size_t SDL_utf8strlcpy(char *dst, const char *src, size_t dst_bytes)
 
-    size_t SDL_strlcat(char *dst, char *src, size_t maxlen)
+    size_t SDL_strlcat(char *dst, const char *src, size_t maxlen)
 
-    char *SDL_strdup(char *str)
+    char *SDL_strdup(const char *str)
 
     char *SDL_strrev(char *str)
 
@@ -85,11 +85,11 @@ cdef extern from "SDL.h" nogil:
 
     char *SDL_strlwr(char *str)
 
-    char *SDL_strchr(char *str, int c)
+    char *SDL_strchr(const char *str, int c)
 
-    char *SDL_strrchr(char *str, int c)
+    char *SDL_strrchr(const char *str, int c)
 
-    char *SDL_strstr(char *haystack, char *needle)
+    char *SDL_strstr(const char *haystack, const char *needle)
 
     char *SDL_itoa(int value, char *str, int radix)
 
@@ -103,31 +103,31 @@ cdef extern from "SDL.h" nogil:
 
     char *SDL_ulltoa(Uint64 value, char *str, int radix)
 
-    int SDL_atoi(char *str)
+    int SDL_atoi(const char *str)
 
-    double SDL_atof(char *str)
+    double SDL_atof(const char *str)
 
-    long SDL_strtol(char *str, char **endp, int base)
+    long SDL_strtol(const char *str, char **endp, int base)
 
-    unsigned long SDL_strtoul(char *str, char **endp, int base)
+    unsigned long SDL_strtoul(const char *str, char **endp, int base)
 
-    Sint64 SDL_strtoll(char *str, char **endp, int base)
+    Sint64 SDL_strtoll(const char *str, char **endp, int base)
 
-    Uint64 SDL_strtoull(char *str, char **endp, int base)
+    Uint64 SDL_strtoull(const char *str, char **endp, int base)
 
-    double SDL_strtod(char *str, char **endp)
+    double SDL_strtod(const char *str, char **endp)
 
-    int SDL_strcmp(char *str1, char *str2)
+    int SDL_strcmp(const char *str1, const char *str2)
 
-    int SDL_strncmp(char *str1, char *str2, size_t maxlen)
+    int SDL_strncmp(const char *str1, const char *str2, size_t maxlen)
 
-    int SDL_strcasecmp(char *str1, char *str2)
+    int SDL_strcasecmp(const char *str1, const char *str2)
 
-    int SDL_strncasecmp(char *str1, char *str2, size_t len)
+    int SDL_strncasecmp(const char *str1, const char *str2, size_t len)
 
-    int SDL_sscanf(char *text, char *fmt, ...)
+    int SDL_sscanf(const char *text, const char *fmt, ...)
 
-    int SDL_snprintf(char *text, size_t maxlen, char *fmt, ...)
+    int SDL_snprintf(char *text, size_t maxlen, const char *fmt, ...)
 
     double SDL_acos(double x)
 
@@ -163,13 +163,13 @@ cdef extern from "SDL.h" nogil:
 
     ctypedef _SDL_iconv_t *SDL_iconv_t
 
-    SDL_iconv_t SDL_iconv_open(char *tocode, char *fromcode)
+    SDL_iconv_t SDL_iconv_open(const char *tocode, const char *fromcode)
 
     int SDL_iconv_close(SDL_iconv_t cd)
 
-    size_t SDL_iconv(SDL_iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
+    size_t SDL_iconv(SDL_iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
 
-    char *SDL_iconv_string(char *tocode, char *fromcode, char *inbuf, size_t inbytesleft)
+    char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inbuf, size_t inbytesleft)
 
     int SDL_main(int argc, char *argv[])
 
@@ -185,15 +185,15 @@ cdef extern from "SDL.h" nogil:
     ctypedef struct SDL_assert_data:
         int always_ignore
         unsigned int trigger_count
-        char *condition
-        char *filename
+        const char *condition
+        const char *filename
         int linenum
-        char *function
-        SDL_assert_data *next
+        const char *function
+        const SDL_assert_data *next
 
-    SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, char *, char *, int)
+    SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, const char *, const char *, int)
 
-    ctypedef SDL_assert_state (*SDL_AssertionHandler)(SDL_assert_data *data, void *userdata)
+    ctypedef SDL_assert_state (*SDL_AssertionHandler)(const SDL_assert_data *data, void *userdata)
 
     void SDL_SetAssertionHandler(SDL_AssertionHandler handler, void *userdata)
 
@@ -201,7 +201,7 @@ cdef extern from "SDL.h" nogil:
 
     SDL_AssertionHandler SDL_GetAssertionHandler(void **puserdata)
 
-    SDL_assert_data *SDL_GetAssertionReport()
+    const SDL_assert_data *SDL_GetAssertionReport()
 
     void SDL_ResetAssertionReport()
 
@@ -230,9 +230,9 @@ cdef extern from "SDL.h" nogil:
 
     void *SDL_AtomicGetPtr(void **a)
 
-    int SDL_SetError(char *fmt, ...)
+    int SDL_SetError(const char *fmt, ...)
 
-    char *SDL_GetError()
+    const char *SDL_GetError()
 
     void SDL_ClearError()
 
@@ -303,9 +303,9 @@ cdef extern from "SDL.h" nogil:
 
     ctypedef int (*SDL_ThreadFunction)(void *data)
 
-    SDL_Thread *SDL_CreateThread(SDL_ThreadFunction fn, char *name, void *data)
+    SDL_Thread *SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data)
 
-    char *SDL_GetThreadName(SDL_Thread *thread)
+    const char *SDL_GetThreadName(SDL_Thread *thread)
 
     SDL_threadID SDL_ThreadID()
 
@@ -321,7 +321,7 @@ cdef extern from "SDL.h" nogil:
 
     void *SDL_TLSGet(SDL_TLSID id)
 
-    int SDL_TLSSet(SDL_TLSID id, void *value, void (*destructor)(void *))
+    int SDL_TLSSet(SDL_TLSID id, const void *value, void (*destructor)(void *))
 
     cdef struct anon_struct_2:
         SDL_bool autoclose
@@ -345,18 +345,18 @@ cdef extern from "SDL.h" nogil:
         Sint64 (*size)(SDL_RWops *context)
         Sint64 (*seek)(SDL_RWops *context, Sint64 offset, int whence)
         size_t (*read)(SDL_RWops *context, void *ptr, size_t size, size_t maxnum)
-        size_t (*write)(SDL_RWops *context, void *ptr, size_t size, size_t num)
+        size_t (*write)(SDL_RWops *context, const void *ptr, size_t size, size_t num)
         int (*close)(SDL_RWops *context)
         Uint32 type
         anon_union_1 hidden
 
-    SDL_RWops *SDL_RWFromFile(char *file, char *mode)
+    SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 
     SDL_RWops *SDL_RWFromFP(FILE *fp, SDL_bool autoclose)
 
     SDL_RWops *SDL_RWFromMem(void *mem, int size)
 
-    SDL_RWops *SDL_RWFromConstMem(void *mem, int size)
+    SDL_RWops *SDL_RWFromConstMem(const void *mem, int size)
 
     SDL_RWops *SDL_AllocRW()
 
@@ -422,13 +422,13 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_GetNumAudioDrivers()
 
-    char *SDL_GetAudioDriver(int index)
+    const char *SDL_GetAudioDriver(int index)
 
-    int SDL_AudioInit(char *driver_name)
+    int SDL_AudioInit(const char *driver_name)
 
     void SDL_AudioQuit()
 
-    char *SDL_GetCurrentAudioDriver()
+    const char *SDL_GetCurrentAudioDriver()
 
     int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 
@@ -436,9 +436,9 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_GetNumAudioDevices(int iscapture)
 
-    char *SDL_GetAudioDeviceName(int index, int iscapture)
+    const char *SDL_GetAudioDeviceName(int index, int iscapture)
 
-    SDL_AudioDeviceID SDL_OpenAudioDevice(char *device, int iscapture, SDL_AudioSpec *desired, SDL_AudioSpec *obtained, int allowed_changes)
+    SDL_AudioDeviceID SDL_OpenAudioDevice(const char *device, int iscapture, const SDL_AudioSpec *desired, SDL_AudioSpec *obtained, int allowed_changes)
 
     ctypedef enum SDL_AudioStatus:
         SDL_AUDIO_STOPPED
@@ -461,9 +461,9 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_ConvertAudio(SDL_AudioCVT *cvt)
 
-    void SDL_MixAudio(Uint8 *dst, Uint8 *src, Uint32 len, int volume)
+    void SDL_MixAudio(Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 
-    void SDL_MixAudioFormat(Uint8 *dst, Uint8 *src, SDL_AudioFormat format, Uint32 len, int volume)
+    void SDL_MixAudioFormat(Uint8 *dst, const Uint8 *src, SDL_AudioFormat format, Uint32 len, int volume)
 
     void SDL_LockAudio()
 
@@ -477,7 +477,7 @@ cdef extern from "SDL.h" nogil:
 
     void SDL_CloseAudioDevice(SDL_AudioDeviceID dev)
 
-    int SDL_SetClipboardText(char *text)
+    int SDL_SetClipboardText(const char *text)
 
     char *SDL_GetClipboardText()
 
@@ -630,7 +630,7 @@ cdef extern from "SDL.h" nogil:
         int refcount
         SDL_PixelFormat *next
 
-    char *SDL_GetPixelFormatName(Uint32 format)
+    const char *SDL_GetPixelFormatName(Uint32 format)
 
     SDL_bool SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 *Rmask, Uint32 *Gmask, Uint32 *Bmask, Uint32 *Amask)
 
@@ -644,17 +644,17 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_SetPixelFormatPalette(SDL_PixelFormat *format, SDL_Palette *palette)
 
-    int SDL_SetPaletteColors(SDL_Palette *palette, SDL_Color *colors, int firstcolor, int ncolors)
+    int SDL_SetPaletteColors(SDL_Palette *palette, const SDL_Color *colors, int firstcolor, int ncolors)
 
     void SDL_FreePalette(SDL_Palette *palette)
 
-    Uint32 SDL_MapRGB(SDL_PixelFormat *format, Uint8 r, Uint8 g, Uint8 b)
+    Uint32 SDL_MapRGB(const SDL_PixelFormat *format, Uint8 r, Uint8 g, Uint8 b)
 
-    Uint32 SDL_MapRGBA(SDL_PixelFormat *format, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+    Uint32 SDL_MapRGBA(const SDL_PixelFormat *format, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 
-    void SDL_GetRGB(Uint32 pixel, SDL_PixelFormat *format, Uint8 *r, Uint8 *g, Uint8 *b)
+    void SDL_GetRGB(Uint32 pixel, const SDL_PixelFormat *format, Uint8 *r, Uint8 *g, Uint8 *b)
 
-    void SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat *format, Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a)
+    void SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat *format, Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a)
 
     void SDL_CalculateGammaRamp(float gamma, Uint16 *ramp)
 
@@ -668,15 +668,15 @@ cdef extern from "SDL.h" nogil:
         int w
         int h
 
-    SDL_bool SDL_HasIntersection(SDL_Rect *A, SDL_Rect *B)
+    SDL_bool SDL_HasIntersection(const SDL_Rect *A, const SDL_Rect *B)
 
-    SDL_bool SDL_IntersectRect(SDL_Rect *A, SDL_Rect *B, SDL_Rect *result)
+    SDL_bool SDL_IntersectRect(const SDL_Rect *A, const SDL_Rect *B, SDL_Rect *result)
 
-    void SDL_UnionRect(SDL_Rect *A, SDL_Rect *B, SDL_Rect *result)
+    void SDL_UnionRect(const SDL_Rect *A, const SDL_Rect *B, SDL_Rect *result)
 
-    SDL_bool SDL_EnclosePoints(SDL_Point *points, int count, SDL_Rect *clip, SDL_Rect *result)
+    SDL_bool SDL_EnclosePoints(const SDL_Point *points, int count, const SDL_Rect *clip, SDL_Rect *result)
 
-    SDL_bool SDL_IntersectRectAndLine(SDL_Rect *rect, int *X1, int *Y1, int *X2, int *Y2)
+    SDL_bool SDL_IntersectRectAndLine(const SDL_Rect *rect, int *X1, int *Y1, int *X2, int *Y2)
 
     ctypedef enum SDL_BlendMode:
         SDL_BLENDMODE_NONE
@@ -734,27 +734,27 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_GetSurfaceBlendMode(SDL_Surface *surface, SDL_BlendMode *blendMode)
 
-    SDL_bool SDL_SetClipRect(SDL_Surface *surface, SDL_Rect *rect)
+    SDL_bool SDL_SetClipRect(SDL_Surface *surface, const SDL_Rect *rect)
 
     void SDL_GetClipRect(SDL_Surface *surface, SDL_Rect *rect)
 
-    SDL_Surface *SDL_ConvertSurface(SDL_Surface *src, SDL_PixelFormat *fmt, Uint32 flags)
+    SDL_Surface *SDL_ConvertSurface(SDL_Surface *src, const SDL_PixelFormat *fmt, Uint32 flags)
 
     SDL_Surface *SDL_ConvertSurfaceFormat(SDL_Surface *src, Uint32 pixel_format, Uint32 flags)
 
-    int SDL_ConvertPixels(int width, int height, Uint32 src_format, void *src, int src_pitch, Uint32 dst_format, void *dst, int dst_pitch)
+    int SDL_ConvertPixels(int width, int height, Uint32 src_format, const void *src, int src_pitch, Uint32 dst_format, void *dst, int dst_pitch)
 
-    int SDL_FillRect(SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
+    int SDL_FillRect(SDL_Surface *dst, const SDL_Rect *rect, Uint32 color)
 
-    int SDL_FillRects(SDL_Surface *dst, SDL_Rect *rects, int count, Uint32 color)
+    int SDL_FillRects(SDL_Surface *dst, const SDL_Rect *rects, int count, Uint32 color)
 
-    int SDL_UpperBlit(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
+    int SDL_UpperBlit(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
 
     int SDL_LowerBlit(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
 
-    int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
+    int SDL_SoftStretch(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, const SDL_Rect *dstrect)
 
-    int SDL_UpperBlitScaled(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
+    int SDL_UpperBlitScaled(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
 
     int SDL_LowerBlitScaled(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)
 
@@ -841,17 +841,17 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_GetNumVideoDrivers()
 
-    char *SDL_GetVideoDriver(int index)
+    const char *SDL_GetVideoDriver(int index)
 
-    int SDL_VideoInit(char *driver_name)
+    int SDL_VideoInit(const char *driver_name)
 
     void SDL_VideoQuit()
 
-    char *SDL_GetCurrentVideoDriver()
+    const char *SDL_GetCurrentVideoDriver()
 
     int SDL_GetNumVideoDisplays()
 
-    char *SDL_GetDisplayName(int displayIndex)
+    const char *SDL_GetDisplayName(int displayIndex)
 
     int SDL_GetDisplayBounds(int displayIndex, SDL_Rect *rect)
 
@@ -863,19 +863,19 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_GetCurrentDisplayMode(int displayIndex, SDL_DisplayMode *mode)
 
-    SDL_DisplayMode *SDL_GetClosestDisplayMode(int displayIndex, SDL_DisplayMode *mode, SDL_DisplayMode *closest)
+    SDL_DisplayMode *SDL_GetClosestDisplayMode(int displayIndex, const SDL_DisplayMode *mode, SDL_DisplayMode *closest)
 
     int SDL_GetWindowDisplayIndex(SDL_Window *window)
 
-    int SDL_SetWindowDisplayMode(SDL_Window *window, SDL_DisplayMode *mode)
+    int SDL_SetWindowDisplayMode(SDL_Window *window, const SDL_DisplayMode *mode)
 
     int SDL_GetWindowDisplayMode(SDL_Window *window, SDL_DisplayMode *mode)
 
     Uint32 SDL_GetWindowPixelFormat(SDL_Window *window)
 
-    SDL_Window *SDL_CreateWindow(char *title, int x, int y, int w, int h, Uint32 flags)
+    SDL_Window *SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
 
-    SDL_Window *SDL_CreateWindowFrom(void *data)
+    SDL_Window *SDL_CreateWindowFrom(const void *data)
 
     Uint32 SDL_GetWindowID(SDL_Window *window)
 
@@ -883,15 +883,15 @@ cdef extern from "SDL.h" nogil:
 
     Uint32 SDL_GetWindowFlags(SDL_Window *window)
 
-    void SDL_SetWindowTitle(SDL_Window *window, char *title)
+    void SDL_SetWindowTitle(SDL_Window *window, const char *title)
 
-    char *SDL_GetWindowTitle(SDL_Window *window)
+    const char *SDL_GetWindowTitle(SDL_Window *window)
 
     void SDL_SetWindowIcon(SDL_Window *window, SDL_Surface *icon)
 
-    void *SDL_SetWindowData(SDL_Window *window, char *name, void *userdata)
+    void *SDL_SetWindowData(SDL_Window *window, const char *name, void *userdata)
 
-    void *SDL_GetWindowData(SDL_Window *window, char *name)
+    void *SDL_GetWindowData(SDL_Window *window, const char *name)
 
     void SDL_SetWindowPosition(SDL_Window *window, int x, int y)
 
@@ -929,7 +929,7 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_UpdateWindowSurface(SDL_Window *window)
 
-    int SDL_UpdateWindowSurfaceRects(SDL_Window *window, SDL_Rect *rects, int numrects)
+    int SDL_UpdateWindowSurfaceRects(SDL_Window *window, const SDL_Rect *rects, int numrects)
 
     void SDL_SetWindowGrab(SDL_Window *window, SDL_bool grabbed)
 
@@ -939,7 +939,7 @@ cdef extern from "SDL.h" nogil:
 
     float SDL_GetWindowBrightness(SDL_Window *window)
 
-    int SDL_SetWindowGammaRamp(SDL_Window *window, Uint16 *red, Uint16 *green, Uint16 *blue)
+    int SDL_SetWindowGammaRamp(SDL_Window *window, const Uint16 *red, const Uint16 *green, const Uint16 *blue)
 
     int SDL_GetWindowGammaRamp(SDL_Window *window, Uint16 *red, Uint16 *green, Uint16 *blue)
 
@@ -951,13 +951,13 @@ cdef extern from "SDL.h" nogil:
 
     void SDL_DisableScreenSaver()
 
-    int SDL_GL_LoadLibrary(char *path)
+    int SDL_GL_LoadLibrary(const char *path)
 
-    void *SDL_GL_GetProcAddress(char *proc)
+    void *SDL_GL_GetProcAddress(const char *proc)
 
     void SDL_GL_UnloadLibrary()
 
-    SDL_bool SDL_GL_ExtensionSupported(char *extension)
+    SDL_bool SDL_GL_ExtensionSupported(const char *extension)
 
     void SDL_GL_ResetAttributes()
 
@@ -1490,7 +1490,7 @@ cdef extern from "SDL.h" nogil:
 
     SDL_Window *SDL_GetKeyboardFocus()
 
-    Uint8 *SDL_GetKeyboardState(int *numkeys)
+    const Uint8 *SDL_GetKeyboardState(int *numkeys)
 
     SDL_Keymod SDL_GetModState()
 
@@ -1500,13 +1500,13 @@ cdef extern from "SDL.h" nogil:
 
     SDL_Scancode SDL_GetScancodeFromKey(SDL_Keycode key)
 
-    char *SDL_GetScancodeName(SDL_Scancode scancode)
+    const char *SDL_GetScancodeName(SDL_Scancode scancode)
 
-    SDL_Scancode SDL_GetScancodeFromName(char *name)
+    SDL_Scancode SDL_GetScancodeFromName(const char *name)
 
-    char *SDL_GetKeyName(SDL_Keycode key)
+    const char *SDL_GetKeyName(SDL_Keycode key)
 
-    SDL_Keycode SDL_GetKeyFromName(char *name)
+    SDL_Keycode SDL_GetKeyFromName(const char *name)
 
     void SDL_StartTextInput()
 
@@ -1549,7 +1549,7 @@ cdef extern from "SDL.h" nogil:
 
     SDL_bool SDL_GetRelativeMouseMode()
 
-    SDL_Cursor *SDL_CreateCursor(Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
+    SDL_Cursor *SDL_CreateCursor(const Uint8 *data, const Uint8 *mask, int w, int h, int hot_x, int hot_y)
 
     SDL_Cursor *SDL_CreateColorCursor(SDL_Surface *surface, int hot_x, int hot_y)
 
@@ -1574,11 +1574,11 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_NumJoysticks()
 
-    char *SDL_JoystickNameForIndex(int device_index)
+    const char *SDL_JoystickNameForIndex(int device_index)
 
     SDL_Joystick *SDL_JoystickOpen(int device_index)
 
-    char *SDL_JoystickName(SDL_Joystick *joystick)
+    const char *SDL_JoystickName(SDL_Joystick *joystick)
 
     SDL_JoystickGUID SDL_JoystickGetDeviceGUID(int device_index)
 
@@ -1586,7 +1586,7 @@ cdef extern from "SDL.h" nogil:
 
     void SDL_JoystickGetGUIDString(SDL_JoystickGUID guid, char *pszGUID, int cbGUID)
 
-    SDL_JoystickGUID SDL_JoystickGetGUIDFromString(char *pchGUID)
+    SDL_JoystickGUID SDL_JoystickGetGUIDFromString(const char *pchGUID)
 
     SDL_bool SDL_JoystickGetAttached(SDL_Joystick *joystick)
 
@@ -1637,7 +1637,7 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_GameControllerAddMappingsFromRW(SDL_RWops *rw, int freerw)
 
-    int SDL_GameControllerAddMapping(char *mappingString)
+    int SDL_GameControllerAddMapping(const char *mappingString)
 
     char *SDL_GameControllerMappingForGUID(SDL_JoystickGUID guid)
 
@@ -1645,11 +1645,11 @@ cdef extern from "SDL.h" nogil:
 
     SDL_bool SDL_IsGameController(int joystick_index)
 
-    char *SDL_GameControllerNameForIndex(int joystick_index)
+    const char *SDL_GameControllerNameForIndex(int joystick_index)
 
     SDL_GameController *SDL_GameControllerOpen(int joystick_index)
 
-    char *SDL_GameControllerName(SDL_GameController *gamecontroller)
+    const char *SDL_GameControllerName(SDL_GameController *gamecontroller)
 
     SDL_bool SDL_GameControllerGetAttached(SDL_GameController *gamecontroller)
 
@@ -1669,9 +1669,9 @@ cdef extern from "SDL.h" nogil:
         SDL_CONTROLLER_AXIS_TRIGGERRIGHT
         SDL_CONTROLLER_AXIS_MAX
 
-    SDL_GameControllerAxis SDL_GameControllerGetAxisFromString(char *pchString)
+    SDL_GameControllerAxis SDL_GameControllerGetAxisFromString(const char *pchString)
 
-    char *SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis axis)
+    const char *SDL_GameControllerGetStringForAxis(SDL_GameControllerAxis axis)
 
     SDL_GameControllerButtonBind SDL_GameControllerGetBindForAxis(SDL_GameController *gamecontroller, SDL_GameControllerAxis axis)
 
@@ -1696,9 +1696,9 @@ cdef extern from "SDL.h" nogil:
         SDL_CONTROLLER_BUTTON_DPAD_RIGHT
         SDL_CONTROLLER_BUTTON_MAX
 
-    SDL_GameControllerButton SDL_GameControllerGetButtonFromString(char *pchString)
+    SDL_GameControllerButton SDL_GameControllerGetButtonFromString(const char *pchString)
 
-    char *SDL_GameControllerGetStringForButton(SDL_GameControllerButton button)
+    const char *SDL_GameControllerGetStringForButton(SDL_GameControllerButton button)
 
     SDL_GameControllerButtonBind SDL_GameControllerGetBindForButton(SDL_GameController *gamecontroller, SDL_GameControllerButton button)
 
@@ -2048,7 +2048,7 @@ cdef extern from "SDL.h" nogil:
 
     char *SDL_GetBasePath()
 
-    char *SDL_GetPrefPath(char *org, char *app)
+    char *SDL_GetPrefPath(const char *org, const char *app)
 
     ctypedef struct SDL_Haptic
 
@@ -2146,7 +2146,7 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_NumHaptics()
 
-    char *SDL_HapticName(int device_index)
+    const char *SDL_HapticName(int device_index)
 
     SDL_Haptic *SDL_HapticOpen(int device_index)
 
@@ -2209,23 +2209,23 @@ cdef extern from "SDL.h" nogil:
         SDL_HINT_NORMAL
         SDL_HINT_OVERRIDE
 
-    SDL_bool SDL_SetHintWithPriority(char *name, char *value, SDL_HintPriority priority)
+    SDL_bool SDL_SetHintWithPriority(const char *name, const char *value, SDL_HintPriority priority)
 
-    SDL_bool SDL_SetHint(char *name, char *value)
+    SDL_bool SDL_SetHint(const char *name, const char *value)
 
-    char *SDL_GetHint(char *name)
+    const char *SDL_GetHint(const char *name)
 
-    ctypedef void (*SDL_HintCallback)(void *userdata, char *name, char *oldValue, char *newValue)
+    ctypedef void (*SDL_HintCallback)(void *userdata, const char *name, const char *oldValue, const char *newValue)
 
-    void SDL_AddHintCallback(char *name, SDL_HintCallback callback, void *userdata)
+    void SDL_AddHintCallback(const char *name, SDL_HintCallback callback, void *userdata)
 
-    void SDL_DelHintCallback(char *name, SDL_HintCallback callback, void *userdata)
+    void SDL_DelHintCallback(const char *name, SDL_HintCallback callback, void *userdata)
 
     void SDL_ClearHints()
 
-    void *SDL_LoadObject(char *sofile)
+    void *SDL_LoadObject(const char *sofile)
 
-    void *SDL_LoadFunction(void *handle, char *name)
+    void *SDL_LoadFunction(void *handle, const char *name)
 
     void SDL_UnloadObject(void *handle)
 
@@ -2268,23 +2268,23 @@ cdef extern from "SDL.h" nogil:
 
     void SDL_LogResetPriorities()
 
-    void SDL_Log(char *fmt, ...)
+    void SDL_Log(const char *fmt, ...)
 
-    void SDL_LogVerbose(int category, char *fmt, ...)
+    void SDL_LogVerbose(int category, const char *fmt, ...)
 
-    void SDL_LogDebug(int category, char *fmt, ...)
+    void SDL_LogDebug(int category, const char *fmt, ...)
 
-    void SDL_LogInfo(int category, char *fmt, ...)
+    void SDL_LogInfo(int category, const char *fmt, ...)
 
-    void SDL_LogWarn(int category, char *fmt, ...)
+    void SDL_LogWarn(int category, const char *fmt, ...)
 
-    void SDL_LogError(int category, char *fmt, ...)
+    void SDL_LogError(int category, const char *fmt, ...)
 
-    void SDL_LogCritical(int category, char *fmt, ...)
+    void SDL_LogCritical(int category, const char *fmt, ...)
 
-    void SDL_LogMessage(int category, SDL_LogPriority priority, char *fmt, ...)
+    void SDL_LogMessage(int category, SDL_LogPriority priority, const char *fmt, ...)
 
-    ctypedef void (*SDL_LogOutputFunction)(void *userdata, int category, SDL_LogPriority priority, char *message)
+    ctypedef void (*SDL_LogOutputFunction)(void *userdata, int category, SDL_LogPriority priority, const char *message)
 
     void SDL_LogGetOutputFunction(SDL_LogOutputFunction *callback, void **userdata)
 
@@ -2302,7 +2302,7 @@ cdef extern from "SDL.h" nogil:
     ctypedef struct SDL_MessageBoxButtonData:
         Uint32 flags
         int buttonid
-        char *text
+        const char *text
 
     ctypedef struct SDL_MessageBoxColor:
         Uint8 r
@@ -2323,15 +2323,15 @@ cdef extern from "SDL.h" nogil:
     ctypedef struct SDL_MessageBoxData:
         Uint32 flags
         SDL_Window *window
-        char *title
-        char *message
+        const char *title
+        const char *message
         int numbuttons
-        SDL_MessageBoxButtonData *buttons
-        SDL_MessageBoxColorScheme *colorScheme
+        const SDL_MessageBoxButtonData *buttons
+        const SDL_MessageBoxColorScheme *colorScheme
 
-    int SDL_ShowMessageBox(SDL_MessageBoxData *messageboxdata, int *buttonid)
+    int SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 
-    int SDL_ShowSimpleMessageBox(Uint32 flags, char *title, char *message, SDL_Window *window)
+    int SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, SDL_Window *window)
 
     ctypedef enum SDL_PowerState:
         SDL_POWERSTATE_UNKNOWN
@@ -2349,7 +2349,7 @@ cdef extern from "SDL.h" nogil:
         SDL_RENDERER_TARGETTEXTURE
 
     ctypedef struct SDL_RendererInfo:
-        char *name
+        const char *name
         Uint32 flags
         Uint32 num_texture_formats
         Uint32 texture_formats[16]
@@ -2409,11 +2409,11 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_GetTextureBlendMode(SDL_Texture *texture, SDL_BlendMode *blendMode)
 
-    int SDL_UpdateTexture(SDL_Texture *texture, SDL_Rect *rect, void *pixels, int pitch)
+    int SDL_UpdateTexture(SDL_Texture *texture, const SDL_Rect *rect, const void *pixels, int pitch)
 
-    int SDL_UpdateYUVTexture(SDL_Texture *texture, SDL_Rect *rect, Uint8 *Yplane, int Ypitch, Uint8 *Uplane, int Upitch, Uint8 *Vplane, int Vpitch)
+    int SDL_UpdateYUVTexture(SDL_Texture *texture, const SDL_Rect *rect, const Uint8 *Yplane, int Ypitch, const Uint8 *Uplane, int Upitch, const Uint8 *Vplane, int Vpitch)
 
-    int SDL_LockTexture(SDL_Texture *texture, SDL_Rect *rect, void **pixels, int *pitch)
+    int SDL_LockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int *pitch)
 
     void SDL_UnlockTexture(SDL_Texture *texture)
 
@@ -2427,11 +2427,11 @@ cdef extern from "SDL.h" nogil:
 
     void SDL_RenderGetLogicalSize(SDL_Renderer *renderer, int *w, int *h)
 
-    int SDL_RenderSetViewport(SDL_Renderer *renderer, SDL_Rect *rect)
+    int SDL_RenderSetViewport(SDL_Renderer *renderer, const SDL_Rect *rect)
 
     void SDL_RenderGetViewport(SDL_Renderer *renderer, SDL_Rect *rect)
 
-    int SDL_RenderSetClipRect(SDL_Renderer *renderer, SDL_Rect *rect)
+    int SDL_RenderSetClipRect(SDL_Renderer *renderer, const SDL_Rect *rect)
 
     void SDL_RenderGetClipRect(SDL_Renderer *renderer, SDL_Rect *rect)
 
@@ -2451,25 +2451,25 @@ cdef extern from "SDL.h" nogil:
 
     int SDL_RenderDrawPoint(SDL_Renderer *renderer, int x, int y)
 
-    int SDL_RenderDrawPoints(SDL_Renderer *renderer, SDL_Point *points, int count)
+    int SDL_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count)
 
     int SDL_RenderDrawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2)
 
-    int SDL_RenderDrawLines(SDL_Renderer *renderer, SDL_Point *points, int count)
+    int SDL_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count)
 
-    int SDL_RenderDrawRect(SDL_Renderer *renderer, SDL_Rect *rect)
+    int SDL_RenderDrawRect(SDL_Renderer *renderer, const SDL_Rect *rect)
 
-    int SDL_RenderDrawRects(SDL_Renderer *renderer, SDL_Rect *rects, int count)
+    int SDL_RenderDrawRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
 
-    int SDL_RenderFillRect(SDL_Renderer *renderer, SDL_Rect *rect)
+    int SDL_RenderFillRect(SDL_Renderer *renderer, const SDL_Rect *rect)
 
-    int SDL_RenderFillRects(SDL_Renderer *renderer, SDL_Rect *rects, int count)
+    int SDL_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
 
-    int SDL_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, SDL_Rect *srcrect, SDL_Rect *dstrect)
+    int SDL_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect)
 
-    int SDL_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, SDL_Rect *srcrect, SDL_Rect *dstrect, double angle, SDL_Point *center, SDL_RendererFlip flip)
+    int SDL_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect, const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
 
-    int SDL_RenderReadPixels(SDL_Renderer *renderer, SDL_Rect *rect, Uint32 format, void *pixels, int pitch)
+    int SDL_RenderReadPixels(SDL_Renderer *renderer, const SDL_Rect *rect, Uint32 format, void *pixels, int pitch)
 
     void SDL_RenderPresent(SDL_Renderer *renderer)
 
@@ -2504,7 +2504,7 @@ cdef extern from "SDL.h" nogil:
 
     void SDL_GetVersion(SDL_version *ver)
 
-    char *SDL_GetRevision()
+    const char *SDL_GetRevision()
 
     int SDL_GetRevisionNumber()
 

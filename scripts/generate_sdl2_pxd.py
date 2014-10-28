@@ -140,11 +140,14 @@ def remove_modifiers(n):
     Removes quals and storage modifiers from `n` and its children.
     """
 
-    for name, node in n.children():
+    for _name, node in n.children():
         remove_modifiers(node)
 
     if hasattr(n, "quals"):
-        n.quals = [ ]
+        if "const" in n.quals:
+            n.quals = [ "const" ]
+        else:
+            n.quals = [ ]
     if hasattr(n, "storage"):
         n.storage = [ ]
 
