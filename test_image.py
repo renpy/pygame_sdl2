@@ -28,4 +28,4 @@ img_45 = pygame.transform.rotate(img, 45)
 pygame.image.save(img_45, fn + "_45.png")
 
 img_scale = pygame.transform.scale(img, (200, 200))
-pygame.image.save(img_scale, fn + "_scale.png")
+pygame.image.save(img_scale, fn + "_scale.bmp")

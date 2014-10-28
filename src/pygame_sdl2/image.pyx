@@ -66,7 +66,7 @@ def save(surface, filename):
     if ext == '.PNG':
         err = IMG_SavePNG(surf.surface, filename)
     elif ext == '.BMP':
-        err = SDL_SaveBMP_RW(surf.surface, to_rwops(filename), 1)
+        err = SDL_SaveBMP_RW(surf.surface, to_rwops(filename, "wb"), 1)
     else:
         raise ValueError("Unsupported format: %s" % ext)
 
