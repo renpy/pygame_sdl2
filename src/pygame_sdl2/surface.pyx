@@ -21,6 +21,8 @@ from sdl2 cimport *
 from color cimport map_color
 from rect cimport to_sdl_rect
 
+from pygame_sdl2.error import error
+
 cdef class Surface:
 
     def __cinit__(self):
@@ -55,7 +57,24 @@ cdef class Surface:
 
         if rect is not None:
             to_sdl_rect(rect, &sdl_rect)
-            SDL_FillRect(self.surface, &sdl_rect, pixel)
+            if SDL_FillRect(self.surface, &sdl_rect, pixel):
+                raise error()
         else:
-            SDL_FillRect(self.surface, NULL, pixel)
+            if SDL_FillRect(self.surface, NULL, pixel):
+                raise error()
 
+    def blit(self, Surface source, dest, area=None, special_flags=0):
+        cdef SDL_Rect dest_rect
+        cdef SDL_Rect area_rect
+        cdef SDL_Rect *area_ptr = NULL
+
+        SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_BLEND)
+
+        to_sdl_rect(dest, &dest_rect, "dest")
+
+        if area is not None:
+            to_sdl_rect(area, &area_rect, "area")
+            area_ptr = &area_rect
+
+        if SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect):
+            raise error()
