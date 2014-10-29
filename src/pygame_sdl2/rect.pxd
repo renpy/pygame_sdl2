@@ -25,4 +25,4 @@ cdef class Rect:
     cdef public int h
 
 
-cdef int to_sdl_rect(rectlike, SDL_Rect *rect) except -1
+cdef int to_sdl_rect(rectlike, SDL_Rect *rect, argname=*) except -1

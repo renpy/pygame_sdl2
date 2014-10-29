@@ -25,13 +25,22 @@ cdef class Rect:
         len_args = len(args)
 
         if len_args == 1:
+
             if isinstance(args, Rect):
                 x = args[0].x
                 y = args[0].y
                 w = args[0].w
                 h = args[0].h
+
             else:
-                x, y, w, h = args[0]
+                if len(args) == 4:
+                    x, y, w, h = args[0]
+                elif len(args) == 2:
+                    x, y = args[0]
+                    w = 0
+                    h = 0
+                else:
+                    raise TypeError("Argument must be a rect style object.")
 
         elif len_args == 2:
             (x, y) = args[0]
@@ -49,7 +58,7 @@ cdef class Rect:
         self.h = h
 
 
-cdef int to_sdl_rect(rectlike, SDL_Rect *rect) except -1:
+cdef int to_sdl_rect(rectlike, SDL_Rect *rect, argname=None) except -1:
     """
     Converts `rectlike` to the SDL_Rect `rect`.
 
@@ -62,23 +71,25 @@ cdef int to_sdl_rect(rectlike, SDL_Rect *rect) except -1:
     if isinstance(rectlike, Rect):
         rl = rectlike
 
-        x = rl.x
-        y = rl.y
-        w = rl.w
-        h = rl.h
+        rect.x = rl.x
+        rect.y = rl.y
+        rect.w = rl.w
+        rect.h = rl.h
 
+        valid = 1
+
+    elif isinstance(rectlike, (tuple, list)):
+
+        if len(rectlike) == 4:
+            rect.x, rect.y, rect.w, rect.h = rectlike
+            return 0
+
+        elif len(rectlike) == 2:
+            rect.x, rect.y = rectlike
+            rect.w, rect.h = rectlike
+            return 0
+
+    if argname:
+        raise TypeError("Argument {} must be a rect style object.".format(argname))
     else:
-        try:
-            x = rectlike[0]
-            y = rectlike[1]
-            w = rectlike[2]
-            h = rectlike[3]
-        except:
-            raise TypeError("Argument must be a rect style object.")
-
-    rect.x = x
-    rect.y = y
-    rect.w = w
-    rect.h = h
-
-    return 0
+        raise TypeError("Argument must be a rect style object.")
