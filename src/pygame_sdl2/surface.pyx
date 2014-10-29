@@ -78,3 +78,6 @@ cdef class Surface:
 
         if SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect):
             raise error()
+
+    def get_size(self):
+        return self.surface.w, self.surface.h
