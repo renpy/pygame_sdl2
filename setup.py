@@ -24,6 +24,7 @@ parse_cflags("sdl2-config --cflags")
 sdl_libs = parse_libs("sdl2-config --libs")
 
 pymodule("pygame_sdl2.__init__")
+cython("pygame_sdl2.error", libs=sdl_libs)
 cython("pygame_sdl2.color", libs=sdl_libs)
 cython("pygame_sdl2.rect", libs=sdl_libs)
 cython("pygame_sdl2.rwobject", libs=sdl_libs)

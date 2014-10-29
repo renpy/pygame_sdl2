@@ -1,5 +1,4 @@
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
-# Copyright 2014 Patrick Dawson <pat@dw.is>
 #
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -17,19 +16,24 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from error import *
+from sdl2 cimport *
 
-import event
-import display
-import key
-import mouse
-import joystick
-import time
-import image
-import transform
+class error(RuntimeError):
 
-def init():
-    event.init()
-    display.init()
-    time.init()
-    image.init()
+    def __init__(self, message=None):
+        if message is None:
+            message = SDL_GetError()
+
+        RuntimeError.__init__(self, message)
+
+def get_error():
+    cdef const char *message = SDL_GetError()
+
+    if message:
+        return message
+    else:
+        return ''
+
+def set_error(message):
+    message = bytes(message)
+    SDL_SetError(message)
