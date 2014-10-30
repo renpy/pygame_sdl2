@@ -1,4 +1,5 @@
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
+# Copyright 2014 Patrick Dawson <pat@dw.is>
 #
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -26,16 +27,16 @@ cdef class Rect:
 
         if len_args == 1:
 
-            if isinstance(args, Rect):
+            if isinstance(args[0], Rect):
                 x = args[0].x
                 y = args[0].y
                 w = args[0].w
                 h = args[0].h
 
             else:
-                if len(args) == 4:
+                if len(args[0]) == 4:
                     x, y, w, h = args[0]
-                elif len(args) == 2:
+                elif len(args[0]) == 2:
                     x, y = args[0]
                     w = 0
                     h = 0
@@ -56,6 +57,276 @@ cdef class Rect:
         self.y = y
         self.w = w
         self.h = h
+
+    def __repr__(self):
+        return "<rect(%d, %d, %d, %d)>" % (self.x, self.y, self.w, self.h)
+
+    def __richcmp__(Rect a, b, int op):
+        if not isinstance(b, Rect):
+            b = Rect(b)
+        if op == 2:
+            return a.x == b.x and a.y == b.y and a.w == b.w and a.h == b.h
+
+    property left:
+        def __get__(self):
+            return self.x
+        def __set__(self, val):
+            self.x = val
+
+    property top:
+        def __get__(self):
+            return self.y
+        def __set__(self, val):
+            self.y = val
+
+    property width:
+        def __get__(self):
+            return self.w
+        def __set__(self, val):
+            self.w = val
+
+    property height:
+        def __get__(self):
+            return self.h
+        def __set__(self, val):
+            self.h = val
+
+    property right:
+        def __get__(self):
+            return self.x + self.width
+        def __set__(self, val):
+            self.x += val - self.right
+
+    property bottom:
+        def __get__(self):
+            return self.y + self.height
+        def __set__(self, val):
+            self.y += val - self.bottom
+
+    property size:
+        def __get__(self):
+            return (self.w, self.h)
+        def __set__(self, val):
+            self.w, self.h = val
+
+    property topleft:
+        def __get__(self):
+            return (self.left, self.top)
+        def __set__(self, val):
+            self.left, self.top = val
+
+    property topright:
+        def __get__(self):
+            return (self.right, self.top)
+        def __set__(self, val):
+            self.right, self.top = val
+
+    property bottomright:
+        def __get__(self):
+            return (self.right, self.bottom)
+        def __set__(self, val):
+            self.right, self.bottom = val
+
+    property bottomleft:
+        def __get__(self):
+            return (self.left, self.bottom)
+        def __set__(self, val):
+            self.left, self.bottom = val
+
+    property centerx:
+        def __get__(self):
+            return self.x + (self.w / 2)
+        def __set__(self, val):
+            self.x += val - self.centerx
+
+    property centery:
+        def __get__(self):
+            return self.y + (self.h / 2)
+        def __set__(self, val):
+            self.y += val - self.centery
+
+    property center:
+        def __get__(self):
+            return (self.centerx, self.centery)
+        def __set__(self, val):
+            self.centerx, self.centery = val
+
+    property midtop:
+        def __get__(self):
+            return (self.centerx, self.top)
+        def __set__(self, val):
+            self.centerx, self.top = val
+
+    property midleft:
+        def __get__(self):
+            return (self.left, self.centery)
+        def __set__(self, val):
+            self.left, self.centery = val
+
+    property midbottom:
+        def __get__(self):
+            return (self.centerx, self.bottom)
+        def __set__(self, val):
+            self.centerx, self.bottom = val
+
+    property midright:
+        def __get__(self):
+            return (self.right, self.centery)
+        def __set__(self, val):
+            self.right, self.centery = val
+
+    def copy(self):
+        return Rect(self)
+
+    def move(self, x, y):
+        r = self.copy()
+        r.move_ip(x, y)
+        return r
+
+    def move_ip(self, x, y):
+        self.x += x
+        self.y += y
+
+    def inflate(self, x, y):
+        r = self.copy()
+        r.inflate_ip(x, y)
+        return r
+
+    def inflate_ip(self, x, y):
+        c = self.center
+        self.w += x
+        self.h += y
+        self.center = c
+
+    def clamp(self, other):
+        r = self.copy()
+        r.clamp_ip(other)
+        return r
+
+    def clamp_ip(self, other):
+        if self.w > other.w or self.h > other.h:
+            self.center = other.center
+        else:
+            if self.left < other.left:
+                self.left = other.left
+            elif self.right > other.right:
+                self.right = other.right
+            if self.top < other.top:
+                self.top = other.top
+            elif self.bottom > other.bottom:
+                self.bottom = other.bottom
+
+    def clip(self, other, y=None, w=None, h=None):
+        if type(other) == int:
+            other = Rect(other, y, w, h)
+
+        if not self.colliderect(other):
+            return Rect(0,0,0,0)
+
+        r = self.copy()
+
+        # Remember that (0,0) is the top left.
+        if r.left < other.left:
+            d = other.left - r.left
+            r.left += d
+            r.width -= d
+        if r.right > other.right:
+            d = r.right - other.right
+            r.width -=d
+        if r.top < other.top:
+            d = other.top - r.top
+            r.top += d
+            r.height -= d
+        if r.bottom > other.bottom:
+            d = r.bottom - other.bottom
+            r.height -= d
+
+        return r
+
+    def union(self, other):
+        r = self.copy()
+        r.union_ip(other)
+        return r
+
+    def union_ip(self, other):
+        x = min(self.x, other.x)
+        y = min(self.y, other.y)
+        self.w = max(self.right, other.right) - x
+        self.h = max(self.bottom, other.bottom) - y
+        self.x = x
+        self.y = y
+
+    def unionall(self, other_seq):
+        r = self.copy()
+        r.unionall_ip(other_seq)
+        return r
+
+    def unionall_ip(self, other_seq):
+        for other in other_seq:
+            self.union_ip(other)
+
+    def fit(self, other):
+        # Not sure if this is entirely correct. Docs and tests are ambiguous.
+        r = self.copy()
+        r.topleft = other.topleft
+        w_ratio = other.w / float(r.w)
+        h_ratio = other.h / float(r.h)
+        factor = min(w_ratio, h_ratio)
+        r.w *= factor
+        r.h *= factor
+        return r
+
+    def normalize(self):
+        if self.w < 0:
+            self.x += self.w
+            self.w = -self.w
+        if self.h < 0:
+            self.y += self.h
+            self.h = -self.h
+
+    def contains(self, other):
+        return other.x >= self.x and other.right <= self.right and \
+               other.y >= self.y and other.bottom <= self.bottom and \
+               other.left < self.right and other.top < self.bottom
+
+    def collidepoint(self, x, y=None):
+        if type(x) == tuple:
+            x, y = x
+        return x >= self.x and y >= self.y and \
+               x < self.right and y < self.bottom
+
+    def colliderect(self, other):
+        if not isinstance(other, Rect):
+            other = Rect(other)
+        return self.left < other.right and self.top < other.bottom and \
+               self.right > other.left and self.bottom > other.top
+
+    def collidelist(self, other_list):
+        for n, other in zip(range(len(other_list)), other_list):
+            if self.colliderect(other):
+                return n
+        return -1
+
+    def collidelistall(self, other_list):
+        ret = []
+        for n, other in zip(range(len(other_list)), other_list):
+            if self.colliderect(other):
+                ret.append(n)
+        return ret
+
+    def collidedict(self, other_dict, rects_values=0):
+        # What is rects_values supposed to do? Not in docs.
+        for key, val in other_dict.iteritems():
+            if self.colliderect(val):
+                return key, val
+        return None
+
+    def collidedictall(self, other_dict, rects_values=0):
+        ret = []
+        for key, val in other_dict.iteritems():
+            if self.colliderect(val):
+                ret.append((key,val))
+        return ret
 
 
 cdef int to_sdl_rect(rectlike, SDL_Rect *rect, argname=None) except -1:
