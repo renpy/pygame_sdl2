@@ -22,6 +22,7 @@ from color cimport map_color
 from rect cimport to_sdl_rect
 
 from pygame_sdl2.error import error
+import pygame_sdl2
 
 cdef class Surface:
 
@@ -81,3 +82,83 @@ cdef class Surface:
 
     def get_size(self):
         return self.surface.w, self.surface.h
+
+    def convert(self, surface=None):
+        if not isinstance(surface, Surface):
+            surface = pygame_sdl2.display.get_surface()
+
+        if surface is None:
+            raise error("No video mode has been set.")
+
+        cdef SDL_PixelFormat *sample_format = (<Surface> surface).surface.format
+
+        cdef Uint32 amask
+        cdef Uint32 rmask
+        cdef Uint32 gmask
+        cdef Uint32 bmask
+
+        cdef Uint32 pixel_format
+        cdef SDL_Surface *new_surface
+
+        # If the sample surface has alpha, use it.
+        if not sample_format.Amask:
+            use_format = sample_format
+            new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
+
+        else:
+
+            rmask = sample_format.Rmask
+            gmask = sample_format.Gmask
+            bmask = sample_format.Bmask
+            amask = 0
+
+            pixel_format = SDL_MasksToPixelFormatEnum(32, rmask, gmask, bmask, amask)
+            new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
+
+        cdef Surface rv = Surface(())
+        rv.surface = new_surface
+
+        return rv
+
+    def convert_alpha(self, Surface surface=None):
+        if surface is None:
+            surface = pygame_sdl2.display.get_surface()
+
+        if surface is None:
+            raise error("No video mode has been set.")
+
+        cdef SDL_PixelFormat *sample_format = surface.surface.format
+
+        cdef Uint32 amask = 0xff000000
+        cdef Uint32 rmask = 0x00ff0000
+        cdef Uint32 gmask = 0x0000ff00
+        cdef Uint32 bmask = 0x000000ff
+
+        cdef Uint32 pixel_format
+        cdef SDL_Surface *new_surface
+
+        # If the sample surface has alpha, use it.
+        if sample_format.Amask:
+            use_format = sample_format
+            new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
+
+        else:
+
+            if sample_format.BytesPerPixel == 4:
+                rmask = sample_format.Rmask
+                gmask = sample_format.Gmask
+                bmask = sample_format.Bmask
+                amask = 0xffffffff & ~(rmask | gmask | bmask)
+
+            pixel_format = SDL_MasksToPixelFormatEnum(32, rmask, gmask, bmask, amask)
+            new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
+
+        cdef Surface rv = Surface(())
+        rv.surface = new_surface
+
+        return rv
+
+    def get_masks(self):
+        cdef SDL_PixelFormat *format = self.surface.format
+        return (format.Rmask, format.Gmask, format.Bmask, format.Amask)
+
