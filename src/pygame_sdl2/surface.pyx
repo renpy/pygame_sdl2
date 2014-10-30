@@ -20,7 +20,7 @@
 from libc.string cimport memmove
 from sdl2 cimport *
 
-from color cimport map_color
+from color cimport map_color, get_color
 from rect cimport to_sdl_rect
 
 from pygame_sdl2.error import error
@@ -226,3 +226,20 @@ cdef class Surface:
             move_width * per_pixel,
             self.surface.pitch,
             self.surface.pitch)
+
+    def set_colorkey(self, color, flags=0):
+        if color is None:
+            if SDL_SetColorKey(self.surface, SDL_FALSE, 0):
+                raise error()
+        else:
+            if SDL_SetColorKey(self.surface, SDL_TRUE, map_color(self.surface, color)):
+                raise error()
+
+    def get_colorkey(self):
+        cdef Uint32 key
+
+        if SDL_GetColorKey(self.surface, &key):
+            return None
+
+        return get_color(key, self.surface)
+

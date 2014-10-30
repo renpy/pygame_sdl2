@@ -31,3 +31,13 @@ cdef Uint32 map_color(SDL_Surface *surface, color) except? 0xaabbccdd:
         raise TypeError("Expected a color.")
 
     return SDL_MapRGBA(surface.format, r, g, b, a)
+
+cdef object get_color(Uint32 pixel, SDL_Surface *surface):
+    cdef Uint8 r
+    cdef Uint8 g
+    cdef Uint8 b
+    cdef Uint8 a
+
+    SDL_GetRGBA(pixel, surface.format, &r, &g, &b, &a)
+
+    return (r, g, b, a)
