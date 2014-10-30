@@ -107,7 +107,7 @@ cdef make_mousewheel_event_sdl2(SDL_MouseWheelEvent *e):
     return EventType(e.type, x=e.x, y=e.y)
 
 cdef make_joyaxis_event(SDL_JoyAxisEvent *e):
-    return EventType(e.type, joy=e.which, axis=e.axis, value=e.value)
+    return EventType(e.type, joy=e.which, axis=e.axis, value=e.value/32768.0)
 
 cdef make_joyball_event(SDL_JoyBallEvent *e):
     return EventType(e.type, joy=e.which, ball=e.ball, rel=(e.xrel, e.yrel))
