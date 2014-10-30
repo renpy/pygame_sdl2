@@ -17,6 +17,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from error import error
 
 def init():
     SDL_InitSubSystem(SDL_INIT_JOYSTICK)
@@ -81,7 +82,7 @@ cdef class Joystick:
         if SDL_JoystickGetBall(self.joystick, ball_number, &dx, &dy) == 0:
             return (dx, dy)
         else:
-            raise Exception(SDL_GetError())
+            raise error()
 
     def get_button(self, button):
         return SDL_JoystickGetButton(self.joystick, button) == 1

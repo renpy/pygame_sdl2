@@ -21,6 +21,7 @@ from sdl2_image cimport *
 from surface cimport *
 from rwobject cimport to_rwops
 import os
+from error import error
 
 cdef int image_formats = 0
 
@@ -28,7 +29,7 @@ def init():
     global image_formats
     image_formats = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP)
     if image_formats == 0:
-        raise Exception(SDL_GetError())
+        raise error()
 
 def quit():
     IMG_Quit()
@@ -50,28 +51,24 @@ def load(fi, namehint=""):
         ftype = process_namehint(namehint)
         img = IMG_LoadTyped_RW(to_rwops(fi), 1, ftype)
     if img == NULL:
-        raise Exception(SDL_GetError())
+        raise error()
     cdef Surface surf = Surface.__new__(Surface)
     surf.surface = img
     return surf
 
-def save(surface, filename):
-    if not isinstance(surface, Surface):
-        raise TypeError("not a surface")
-    cdef Surface surf = surface
-
+def save(Surface surface not None, filename):
     ext = os.path.splitext(filename)[1]
     ext = ext.upper()
     err = 0
     if ext == '.PNG':
-        err = IMG_SavePNG(surf.surface, filename)
+        err = IMG_SavePNG(surface.surface, filename)
     elif ext == '.BMP':
-        err = SDL_SaveBMP_RW(surf.surface, to_rwops(filename, "wb"), 1)
+        err = SDL_SaveBMP_RW(surface.surface, to_rwops(filename, "wb"), 1)
     else:
         raise ValueError("Unsupported format: %s" % ext)
 
     if err != 0:
-        raise Exception(SDL_GetError())
+        raise error()
 
 def get_extended():
     return image_formats != 0

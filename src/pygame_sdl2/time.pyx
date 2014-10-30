@@ -17,6 +17,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from error import error
 
 cdef int timer_id = 0
 
@@ -62,7 +63,7 @@ def set_timer(eventid, milliseconds):
         timer_id = 0
     timer_id = SDL_AddTimer(milliseconds, <SDL_TimerCallback>timer_callback, <void*><int>eventid)
     if timer_id == 0:
-        raise Exception(SDL_GetError())
+        raise error()
 
 class Clock:
     def __init__(self):
