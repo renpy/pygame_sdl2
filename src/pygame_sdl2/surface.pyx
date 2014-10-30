@@ -17,12 +17,30 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+from libc.string cimport memmove
 from sdl2 cimport *
+
 from color cimport map_color
 from rect cimport to_sdl_rect
 
 from pygame_sdl2.error import error
 import pygame_sdl2
+
+
+cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int dstpitch):
+    if src < dst:
+        src += (h - 1) * srcpitch;
+        dst += (h - 1) * dstpitch;
+        srcpitch = -srcpitch;
+        dstpitch = -dstpitch;
+
+    while h:
+        h -= 1
+        memmove(dst, src, span);
+        src += srcpitch;
+        dst += dstpitch;
+
+
 
 cdef class Surface:
 
@@ -168,3 +186,43 @@ cdef class Surface:
         cdef SDL_PixelFormat *format = self.surface.format
         return (format.Rmask, format.Gmask, format.Bmask, format.Amask)
 
+    def scroll(self, int dx=0, int dy=0):
+        cdef int srcx, destx, move_width
+        cdef int srcy, desty, move_height
+
+        cdef int width = self.surface.w
+        cdef int height = self.surface.h
+
+        cdef int per_pixel = self.surface.format.BytesPerPixel
+
+        if dx >= 0:
+            srcx = 0
+            destx = dx
+            move_width = width - dx
+        else:
+            srcx = -dx
+            destx = 0
+            move_width = width + dx
+
+        if dy >= 0:
+            srcy = 0
+            desty = dy
+            move_height = height - dy
+        else:
+            srcy = -dy
+            desty = 0
+            move_height = height + dy
+
+        cdef Uint8 *srcptr = <Uint8 *> self.surface.pixels
+        cdef Uint8 *destptr = <Uint8 *> self.surface.pixels
+
+        srcptr += srcy * self.surface.pitch + srcx * per_pixel
+        destptr += desty * self.surface.pitch + destx * per_pixel
+
+        move_pixels(
+            srcptr,
+            destptr,
+            move_height,
+            move_width * per_pixel,
+            self.surface.pitch,
+            self.surface.pitch)
