@@ -34,6 +34,7 @@ def get_count():
 
 cdef class Joystick:
     cdef SDL_Joystick *joystick
+    cdef int joyid
 
     def __cinit__(self):
         self.joystick = NULL
@@ -43,15 +44,18 @@ cdef class Joystick:
             SDL_JoystickClose(self.joystick)
 
     def __init__(self, id):
-        self.joystick = SDL_JoystickOpen(id)
-        if self.joystick == NULL:
-            raise ValueError(SDL_GetError())
+        self.joyid = id
 
     def init(self):
-        pass
+        if self.joystick == NULL:
+            self.joystick = SDL_JoystickOpen(self.joyid)
+            if self.joystick == NULL:
+                raise error()
 
     def quit(self):
-        pass
+        if self.joystick and SDL_JoystickGetAttached(self.joystick):
+            SDL_JoystickClose(self.joystick)
+            self.joystick = NULL
 
     def get_init(self):
         return True

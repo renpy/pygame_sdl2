@@ -71,4 +71,5 @@ def save(Surface surface not None, filename):
         raise error()
 
 def get_extended():
-    return image_formats != 0
+    # This may be called before init.
+    return True
