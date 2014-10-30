@@ -51,19 +51,6 @@ cdef class Surface:
         self.surface = SDL_CreateRGBSurface(0, w, h, depth, 0, 0, 0, 0)
         self.owns_surface = True
 
-    def fill(self, color, rect=None):
-
-        cdef SDL_Rect sdl_rect
-        cdef Uint32 pixel = map_color(self.surface, color)
-
-        if rect is not None:
-            to_sdl_rect(rect, &sdl_rect)
-            if SDL_FillRect(self.surface, &sdl_rect, pixel):
-                raise error()
-        else:
-            if SDL_FillRect(self.surface, NULL, pixel):
-                raise error()
-
     def blit(self, Surface source, dest, area=None, special_flags=0):
         cdef SDL_Rect dest_rect
         cdef SDL_Rect area_rect
@@ -79,9 +66,6 @@ cdef class Surface:
 
         if SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect):
             raise error()
-
-    def get_size(self):
-        return self.surface.w, self.surface.h
 
     def convert(self, surface=None):
         if not isinstance(surface, Surface):
@@ -157,6 +141,28 @@ cdef class Surface:
         rv.surface = new_surface
 
         return rv
+
+    def copy(self):
+        if self.surface.format.Amask:
+            return self.convert_alpha(self)
+        else:
+            return self.convert(self)
+
+    def fill(self, color, rect=None):
+
+        cdef SDL_Rect sdl_rect
+        cdef Uint32 pixel = map_color(self.surface, color)
+
+        if rect is not None:
+            to_sdl_rect(rect, &sdl_rect)
+            if SDL_FillRect(self.surface, &sdl_rect, pixel):
+                raise error()
+        else:
+            if SDL_FillRect(self.surface, NULL, pixel):
+                raise error()
+
+    def get_size(self):
+        return self.surface.w, self.surface.h
 
     def get_masks(self):
         cdef SDL_PixelFormat *format = self.surface.format
