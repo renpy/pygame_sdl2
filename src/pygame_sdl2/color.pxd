@@ -1,4 +1,5 @@
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
+# Copyright 2014 Patrick Dawson <pat@dw.is>
 #
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -20,3 +21,11 @@ from sdl2 cimport *
 
 cdef Uint32 map_color(SDL_Surface *surface, color) except? 0xaabbccdd
 cdef object get_color(Uint32 pixel, SDL_Surface *surface)
+
+cdef class Color:
+    cdef public Uint8 r, g, b, a
+    cdef uint8_t length
+
+    cdef from_rgba(self, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+    cdef from_name(self, c)
+    cdef from_hex(self, c)

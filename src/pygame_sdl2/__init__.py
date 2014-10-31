@@ -20,7 +20,6 @@
 from error import *
 
 from surface import Surface
-from rect import Rect
 
 import display
 import event
