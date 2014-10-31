@@ -381,5 +381,10 @@ cdef class Surface:
 
         return pixel
 
+    def map_rgb(self, color):
+        return map_color(self.surface, color)
+
+    def unmap_rgb(self, pixel):
+        return get_color(pixel, self.surface)
 
 
