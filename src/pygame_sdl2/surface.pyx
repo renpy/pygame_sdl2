@@ -387,4 +387,19 @@ cdef class Surface:
     def unmap_rgb(self, pixel):
         return get_color(pixel, self.surface)
 
+    def set_clip(self, rect):
+        cdef SDL_Rect sdl_rect
+
+        if rect is None:
+            SDL_SetClipRect(self.surface, NULL)
+        else:
+            to_sdl_rect(rect, &sdl_rect)
+            SDL_SetClipRect(self.surface, &sdl_rect)
+
+    def get_clip(self):
+        cdef SDL_Rect sdl_rect
+
+        SDL_GetClipRect(self.surface, &sdl_rect)
+
+        return (sdl_rect.x, sdl_rect.y, sdl_rect.w, sdl_rect.h)
 
