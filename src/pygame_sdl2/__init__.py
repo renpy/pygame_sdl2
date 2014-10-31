@@ -18,7 +18,9 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from error import *
+
 from surface import Surface
+from rect import Rect
 
 import display
 import event
@@ -30,11 +32,20 @@ import mouse
 import time
 import transform
 
+# Temporarily import parts of pygame for test purposes.
+import pygame.threads
+import pygame.compat
+
+from locals import *
+
 def init():
     event.init()
     display.init()
     time.init()
     image.init()
+
+def quit():
+    display.quit()
 
 def import_as_pygame():
     """

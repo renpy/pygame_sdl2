@@ -27,6 +27,9 @@ cdef Uint32 map_color(SDL_Surface *surface, color) except? 0xaabbccdd:
 
     if isinstance(color, tuple) and len(color) == 4:
         r, g, b, a = color
+    elif isinstance(color, tuple) and len(color) == 3:
+        r, g, b = color
+        a = 255
     else:
         raise TypeError("Expected a color.")
 
