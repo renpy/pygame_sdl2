@@ -18,14 +18,16 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from error import *
+from surface import Surface
 
-import event
 import display
-import key
-import mouse
-import joystick
-import time
+import event
 import image
+import joystick
+import key
+import locals # @ReservedAssignment
+import mouse
+import time
 import transform
 
 def init():
@@ -33,3 +35,27 @@ def init():
     display.init()
     time.init()
     image.init()
+
+def import_as_pygame():
+    """
+    Imports pygame_sdl2 as pygame, so that running the 'import pygame.whatever'
+    statement will import pygame_sdl2.whatever instead.
+    """
+
+    import sys, os, warnings
+
+    if "PYGAME_SDL2_USE_PYGAME" in os.environ:
+        return
+
+    if "pygame" in sys.modules:
+        warnings.warn("Pygame has already been imported, import_as_pygame may not work.", stacklevel=2)
+
+    for name, mod in list(sys.modules.items()):
+        name = name.split('.')
+        if name[0] != 'pygame_sdl2':
+            continue
+
+        name[0] = 'pygame'
+        name = ".".join(name)
+
+        sys.modules[name] = mod
