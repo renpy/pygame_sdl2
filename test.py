@@ -13,4 +13,7 @@ while True:
     if ev.type == QUIT:
         break
 
+    if ev.type == KEYDOWN and ev.key == K_ESCAPE:
+        break
+
     print ev
