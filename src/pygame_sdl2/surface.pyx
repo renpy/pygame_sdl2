@@ -243,3 +243,19 @@ cdef class Surface:
 
         return get_color(key, self.surface)
 
+    def set_alpha(self, value, flags=0):
+        if value is None:
+            value = 255
+
+        if SDL_SetSurfaceAlphaMod(self.surface, value):
+            raise error()
+
+    def get_alpha(self):
+        cdef Uint8 rv
+
+        if SDL_GetSurfaceAlphaMod(self.surface, &rv):
+            raise error()
+
+        return rv
+
+
