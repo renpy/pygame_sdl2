@@ -2651,7 +2651,6 @@ cdef extern from "SDL.h" nogil:
         SDL_INIT_NOPARACHUTE
         SDL_INIT_TIMER
         SDL_INIT_VIDEO
-        SDL_MUSTLOCK
         SDL_PREALLOC
         SDL_PRESSED
         SDL_QUERY
@@ -2672,3 +2671,7 @@ cdef extern from "SDL.h" nogil:
         SDL_WINDOWPOS_UNDEFINED
         SDL_WINDOWPOS_UNDEFINED_DISPLAY
         SDL_WINDOWPOS_UNDEFINED_MASK
+
+    int SDL_MUSTLOCK(SDL_Surface *)
+
+    

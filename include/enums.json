@@ -550,7 +550,6 @@
         "SDL_INIT_NOPARACHUTE", 
         "SDL_INIT_TIMER", 
         "SDL_INIT_VIDEO", 
-        "SDL_MUSTLOCK", 
         "SDL_PREALLOC", 
         "SDL_PRESSED", 
         "SDL_QUERY", 

@@ -307,7 +307,6 @@ define_prefixes = [
     "SDL_PREALLOC",
     "SDL_RLEACCEL",
     "SDL_DONTFREE",
-    "SDL_MUSTLOCK",
     "SDL_BUTTON",
     "SDL_HINT_",
     "SDL_WINDOWPOS_UNDEFINED",
@@ -359,6 +358,12 @@ cdef extern from "SDL.h" nogil:
     ctypedef struct SDL_AudioCVT
 """
 
+POSTAMBLE = """\
+
+    int SDL_MUSTLOCK(SDL_Surface *)
+
+    """
+
 def main():
 
     os.chdir(ROOT)
@@ -379,6 +384,8 @@ def main():
             generate_decl(n, '')
 
     auto_defines("/usr/include/SDL2")
+
+    output.write(POSTAMBLE)
 
     output.close()
 

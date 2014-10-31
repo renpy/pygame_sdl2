@@ -27,3 +27,14 @@ cdef class Surface:
     # True if we own our surface. False if some other Surface owns our
     # surface.
     cdef bint owns_surface
+
+    # A list of locks involving the surface.
+    cdef object locklist
+
+    # If this surface is a subsurface, the surface this surface is a subsurface
+    # of.
+    cdef Surface parent
+
+    # If this surface has no parent, self. Otherwise, self.parent.root. The
+    # ultimate parent.
+    cdef Surface root

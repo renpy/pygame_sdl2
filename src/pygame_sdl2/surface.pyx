@@ -53,6 +53,11 @@ cdef class Surface:
             SDL_FreeSurface(self.surface)
 
     def __init__(self, size, flags=0, depth=32, masks=None):
+
+        self.locklist = None
+        self.parent = None
+        self.root = self
+
         try:
             w, h = size
             assert isinstance(w, int)
@@ -219,6 +224,8 @@ cdef class Surface:
         srcptr += srcy * self.surface.pitch + srcx * per_pixel
         destptr += desty * self.surface.pitch + destx * per_pixel
 
+        self.lock()
+
         move_pixels(
             srcptr,
             destptr,
@@ -226,6 +233,8 @@ cdef class Surface:
             move_width * per_pixel,
             self.surface.pitch,
             self.surface.pitch)
+
+        self.unlock()
 
     def set_colorkey(self, color, flags=0):
         if color is None:
@@ -257,5 +266,46 @@ cdef class Surface:
             raise error()
 
         return rv
+
+    def lock(self, lock=None):
+        cdef Surface root = self.root
+
+        if lock is None:
+            lock = self
+
+        if root.locklist is None:
+            root.locklist = [ ]
+
+        root.locklist.append(lock)
+
+        SDL_LockSurface(root.surface)
+
+    def unlock(self, lock=None):
+        cdef Surface root = self.root
+
+        if lock is None:
+            lock = self
+
+        if root.locklist is None:
+            root.locklist = [ ]
+
+        root.locklist.remove(lock)
+
+        SDL_UnlockSurface(root.surface)
+
+    def mustlock(self):
+        return SDL_MUSTLOCK(self.root.surface)
+
+    def get_locked(self):
+        if self.locklist:
+            return True
+
+    def get_locks(self):
+        cdef Surface root = self.root
+
+        if root.locklist is None:
+            root.locklist = [ ]
+
+        return root.locklist
 
 
