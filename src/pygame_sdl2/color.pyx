@@ -50,6 +50,7 @@ cdef object get_color(Uint32 pixel, SDL_Surface *surface):
 
     return (r, g, b, a)
 
+
 cdef class Color:
     cdef from_rgba(self, Uint8 r, Uint8 g, Uint8 b, Uint8 a):
         self.r = r
@@ -58,10 +59,9 @@ cdef class Color:
         self.a = a
 
     cdef from_hex(self, c):
-        if len(c) == 3:
-            pass
-        elif len(c) == 4:
-            pass
+        # Handle short hex strings.
+        if len(c) == 3 or len(c) == 4:
+            c = "".join(map(lambda x: x*2, c))
 
         try:
             if len(c) == 6:
@@ -69,8 +69,10 @@ cdef class Color:
                 a = 255
             elif len(c) == 8:
                 r, g, b, a = struct.unpack('BBBB', binascii.unhexlify(c))
+            else:
+                raise ValueError(c)
         except TypeError as e:
-            raise ValueError(str(c))
+            raise ValueError(c)
 
         self.from_rgba(r, g, b, a)
 
@@ -131,7 +133,7 @@ cdef class Color:
         return struct.unpack('>L', packed)[0]
 
     def __hex__(self):
-        return "0x%02x%02x%02x%02x" % (self.r, self.g, self.b, self.a)
+        return hex(int(self))
 
     def __oct__(self):
         return oct(int(self))
