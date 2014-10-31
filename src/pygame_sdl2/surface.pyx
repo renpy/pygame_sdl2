@@ -308,4 +308,78 @@ cdef class Surface:
 
         return root.locklist
 
+    def get_at(self, pos):
+        cdef int x, y
+        cdef Uint8 *p
+
+        x, y = pos
+
+        if not (0 <= x < self.surface.w) or not (0 <= y < self.surface.h):
+            raise ValueError("Position outside surface.")
+
+        if self.surface.format.BytesPerPixel != 4:
+            raise error("Surface has unsupported bytesize.")
+
+        self.lock()
+
+        p = <Uint8 *> self.surface.pixels
+        p += y * self.surface.pitch
+        p += x * 4
+
+        cdef Uint32 pixel = (<Uint32 *> p)[0]
+
+        self.unlock()
+
+        return get_color(pixel, self.surface)
+
+    def set_at(self, pos, color):
+        cdef int x, y
+        cdef Uint8 *p
+        cdef Uint32 pixel
+
+        x, y = pos
+
+        if not (0 <= x < self.surface.w) or not (0 <= y < self.surface.h):
+            raise ValueError("Position outside surface.")
+
+        if self.surface.format.BytesPerPixel != 4:
+            raise error("Surface has unsupported bytesize.")
+
+        pixel = map_color(self.surface, color)
+
+        self.lock()
+
+        p = <Uint8 *> self.surface.pixels
+        p += y * self.surface.pitch
+        p += x * 4
+
+        (<Uint32 *> p)[0] = pixel
+
+        self.unlock()
+
+    def get_at_mapped(self, pos):
+        cdef int x, y
+        cdef Uint8 *p
+
+        x, y = pos
+
+        if not (0 <= x < self.surface.w) or not (0 <= y < self.surface.h):
+            raise ValueError("Position outside surface.")
+
+        if self.surface.format.BytesPerPixel != 4:
+            raise error("Surface has unsupported bytesize.")
+
+        self.lock()
+
+        p = <Uint8 *> self.surface.pixels
+        p += y * self.surface.pitch
+        p += x * 4
+
+        cdef Uint32 pixel = (<Uint32 *> p)[0]
+
+        self.unlock()
+
+        return pixel
+
+
 
