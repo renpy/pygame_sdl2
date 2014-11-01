@@ -38,6 +38,7 @@ def init():
     display.init()
     time.init()
     image.init()
+    joystick.init()
 
 def quit():
     display.quit()

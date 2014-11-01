@@ -94,7 +94,8 @@ cdef class Surface:
 
         if SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect):
             raise error()
-        return Rect(dest[0], dest[1], source.surface.w, source.surface.h)
+        dirty = Rect(dest[0], dest[1], source.surface.w, source.surface.h)
+        return dirty.clip(self.get_rect())
 
     def convert(self, surface=None):
         if not isinstance(surface, Surface):

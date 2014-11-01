@@ -9,3 +9,5 @@ from color import Color
 
 # SRCALPHA is no longer a flag.
 SRCALPHA = 0
+
+RLEACCEL = SDL_RLEACCEL

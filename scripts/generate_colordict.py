@@ -24,8 +24,6 @@ def main():
                 r, g, b, name = m.groups()
                 name = "".join(name.split()).lower()
                 colors[name] = (int(r), int(g), int(b))
-            else:
-                print(l)
 
     with util.open_include("color_dict.pxi") as fout:
         fout.write("cdef object colors = {\n")

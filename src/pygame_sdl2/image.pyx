@@ -55,6 +55,7 @@ def load(fi, namehint=""):
         raise error()
     cdef Surface surf = Surface(())
     surf.surface = img
+    surf.owns_surface = True
     return surf.convert(sample_surface)
 
 def save(Surface surface not None, filename):

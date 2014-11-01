@@ -17,6 +17,21 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from error import error
+
+include "scancode_dict.pxi"
+
+cdef class KeyboardState:
+    cdef object data
+    def __init__(self, data):
+        self.data = data
+
+    def __repr__(self):
+        return str(self.data)
+
+    def __getitem__(self, key):
+        return self.data[scancodes[key]]
+
 
 def init():
     pass
@@ -30,11 +45,12 @@ def get_focused():
 def get_pressed():
     cdef int numkeys
     cdef const Uint8 *state = SDL_GetKeyboardState(&numkeys)
+    # Take a snapshot of the current state, insetad of using pointer directly.
     ret = [0] * numkeys
     for n in range(numkeys):
         if state[n]:
             ret[n] = 1
-    return tuple(ret)
+    return KeyboardState(tuple(ret))
 
 def get_mods():
     return SDL_GetModState()
