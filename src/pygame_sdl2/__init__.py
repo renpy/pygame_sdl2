@@ -31,10 +31,6 @@ import mouse
 import time
 import transform
 
-# Temporarily import parts of pygame for test purposes.
-import pygame.threads
-import pygame.compat
-
 from locals import *
 
 def init():
@@ -59,6 +55,10 @@ def import_as_pygame():
 
     if "pygame" in sys.modules:
         warnings.warn("Pygame has already been imported, import_as_pygame may not work.", stacklevel=2)
+
+    # Temporarily import parts of pygame for test purposes.
+    import pygame.threads
+    import pygame.compat
 
     for name, mod in list(sys.modules.items()):
         name = name.split('.')
