@@ -22,9 +22,12 @@ from sdl2 cimport *
 
 from color cimport map_color, get_color
 from rect cimport to_sdl_rect
+from rect import Rect
 
 from pygame_sdl2.error import error
 import pygame_sdl2
+
+import warnings
 
 
 cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int dstpitch):
@@ -39,7 +42,6 @@ cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int
         memmove(dst, src, span);
         src += srcpitch;
         dst += dstpitch;
-
 
 
 cdef class Surface:
@@ -186,13 +188,6 @@ cdef class Surface:
         else:
             if SDL_FillRect(self.surface, NULL, pixel):
                 raise error()
-
-    def get_size(self):
-        return self.surface.w, self.surface.h
-
-    def get_masks(self):
-        cdef SDL_PixelFormat *format = self.surface.format
-        return (format.Rmask, format.Gmask, format.Bmask, format.Amask)
 
     def scroll(self, int dx=0, int dy=0):
         cdef int srcx, destx, move_width
@@ -467,3 +462,60 @@ cdef class Surface:
             surf = surf.parent
 
         return (offset_x, offset_y)
+
+    def get_size(self):
+        return self.surface.w, self.surface.h
+
+    def get_width(self):
+        return self.surface.w
+
+    def get_height(self):
+        return self.surface.h
+
+    def get_rect(self, **kwargs):
+        rv = Rect((0, 0, self.surface.w, self.surface.h))
+
+        for k, v in kwargs.items():
+            setattr(rv, k, v)
+
+        return rv
+
+    def get_bitsize(self):
+        return self.surface.format.BitsPerPixel
+
+    def get_bytesize(self):
+        return self.surface.format.BytesPerPixel
+
+    def get_flags(self):
+        # We don't support the use of surface flags.
+        return 0
+
+    def get_pitch(self):
+        return self.surface.pitch
+
+    def get_masks(self):
+        cdef SDL_PixelFormat *format = self.surface.format
+        return (format.Rmask, format.Gmask, format.Bmask, format.Amask)
+
+    def set_masks(self):
+        warnings.warn("Surface.set_masks is not supported.")
+
+    def get_shifts(self):
+        cdef SDL_PixelFormat *format = self.surface.format
+        return (format.Rshift, format.Gshift, format.Bshift, format.Ashift)
+
+    def set_shifts(self):
+        warnings.warn("Surface.set_shifts is not supported.")
+
+    def get_shifts(self):
+        cdef SDL_PixelFormat *format = self.surface.format
+        return (format.Rshift, format.Gshift, format.Bshift, format.Ashift)
+
+    def get_losses(self):
+        cdef SDL_PixelFormat *format = self.surface.format
+        return (format.Rloss, format.Gloss, format.Bloss, format.Aloss)
+
+    property _pixels_address:
+        def __get__(self):
+            return <Uint64> self.surface.pixels
+
