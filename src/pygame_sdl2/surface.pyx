@@ -566,6 +566,9 @@ cdef class Surface:
             maxy - miny + 1,
             ))
 
+    def get_view(self, kind='2'):
+        raise error("Surface.get_view is not supported.")
+
     def get_buffer(self):
         cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
         return pixels[self.surface.h * self.surface.pitch]
