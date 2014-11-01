@@ -58,6 +58,9 @@ cdef class Surface:
         self.parent = None
         self.root = self
 
+        self.offset_x = 0
+        self.offset_y = 0
+
         try:
             w, h = size
             assert isinstance(w, int)
@@ -403,3 +406,64 @@ cdef class Surface:
 
         return (sdl_rect.x, sdl_rect.y, sdl_rect.w, sdl_rect.h)
 
+    def subsurface(self, rect):
+        cdef SDL_Rect sdl_rect
+
+        to_sdl_rect(rect, &sdl_rect)
+
+        if sdl_rect.w < 0 or sdl_rect.h < 0:
+            raise error("subsurface size may not be negative.")
+
+        if ((sdl_rect.x < 0)
+            or (sdl_rect.y < 0)
+            or (sdl_rect.x + sdl_rect.w > self.surface.w)
+            or (sdl_rect.y + sdl_rect.h > self.surface.h)):
+
+            raise error("subsurface rectangle outside surface area.")
+
+        cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
+        pixels += sdl_rect.y * self.surface.pitch
+        pixels += sdl_rect.x * self.surface.format.BytesPerPixel
+
+        cdef SDL_Surface *new_surface = SDL_CreateRGBSurfaceFrom(
+            pixels,
+            sdl_rect.w,
+            sdl_rect.h,
+            self.surface.format.BitsPerPixel,
+            self.surface.pitch,
+            self.surface.format.Rmask,
+            self.surface.format.Gmask,
+            self.surface.format.Bmask,
+            self.surface.format.Amask)
+
+        cdef Surface rv = Surface(())
+
+        rv.surface = new_surface
+        rv.parent = self
+        rv.root = self.root
+        rv.offset_x = sdl_rect.x
+        rv.offset_y = sdl_rect.y
+
+        return rv
+
+    def get_parent(self):
+        return self.parent
+
+    def get_abs_parent(self):
+        return self.root
+
+    def get_offset(self):
+        return (self.offset_x, self.offset_y)
+
+    def get_abs_offset(self):
+        cdef Surface surf = self
+
+        cdef int offset_x = 0
+        cdef int offset_y = 0
+
+        while surf:
+            offset_x += surf.offset_x
+            offset_y += surf.offset_y
+            surf = surf.parent
+
+        return (offset_x, offset_y)

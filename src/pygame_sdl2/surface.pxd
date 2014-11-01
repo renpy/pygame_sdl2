@@ -38,3 +38,7 @@ cdef class Surface:
     # If this surface has no parent, self. Otherwise, self.parent.root. The
     # ultimate parent.
     cdef Surface root
+
+    # The offset of this surface within its parent.
+    cdef int offset_x
+    cdef int offset_y
