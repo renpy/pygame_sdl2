@@ -24,6 +24,7 @@ import os
 from error import error
 
 cdef int image_formats = 0
+cdef Surface sample_surface = Surface((1,1))
 
 def init():
     global image_formats
@@ -52,9 +53,9 @@ def load(fi, namehint=""):
         img = IMG_LoadTyped_RW(to_rwops(fi), 1, ftype)
     if img == NULL:
         raise error()
-    cdef Surface surf = Surface.__new__(Surface)
+    cdef Surface surf = Surface(())
     surf.surface = img
-    return surf.convert()
+    return surf.convert(sample_surface)
 
 def save(Surface surface not None, filename):
     ext = os.path.splitext(filename)[1]
