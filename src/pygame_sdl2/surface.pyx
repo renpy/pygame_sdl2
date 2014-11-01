@@ -515,6 +515,57 @@ cdef class Surface:
         cdef SDL_PixelFormat *format = self.surface.format
         return (format.Rloss, format.Gloss, format.Bloss, format.Aloss)
 
+    def get_bounding_rect(self, min_alpha=1):
+
+        cdef Uint32 amask = self.surface.format.Amask
+        cdef Uint32 amin = (0x01010101 * min_alpha) & amask
+
+        cdef int x
+        cdef int y
+
+        cdef int minx = self.surface.w - 1
+        cdef int maxx = 0
+        cdef int miny = self.surface.h - 1
+        cdef int maxy = 0
+
+        cdef Uint32 *row
+
+        if not amask:
+            return Rect((0, 0, self.surface.w, self.surface.h))
+
+        self.lock()
+
+        cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
+
+        for 0 <= y < self.surface.h:
+            row = <Uint32*> (pixels + self.surface.pitch * y)
+
+            for 0 <= x < self.surface.w:
+
+                if (row[x] & amask) > amin:
+
+                    if minx > x:
+                        minx = x
+                    if miny > y:
+                        miny = y
+                    if maxx < x:
+                        maxx = x
+                    if maxy < y:
+                        maxy = y
+
+        self.unlock()
+
+        # Totally empty surface.
+        if minx >= maxx:
+            return Rect((0, 0, 0, 0))
+
+        return Rect((
+            minx,
+            miny,
+            maxx - minx + 1,
+            maxy - miny + 1,
+            ))
+
     def get_buffer(self):
         cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
         return pixels[self.surface.h * self.surface.pitch]
