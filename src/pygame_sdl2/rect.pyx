@@ -67,6 +67,21 @@ cdef class Rect:
         if op == 2:
             return a.x == b.x and a.y == b.y and a.w == b.w and a.h == b.h
 
+    def __getitem__(self, key):
+        return (self.x, self.y, self.w, self.h)[key]
+
+    def __setitem__(self, key, val):
+        if key == 0:
+            self.x = val
+        elif key == 1:
+            self.y = val
+        elif key == 2:
+            self.w = val
+        elif key == 3:
+            self.h = val
+        else:
+            raise IndexError(key)
+
     property left:
         def __get__(self):
             return self.x
@@ -347,7 +362,7 @@ cdef int to_sdl_rect(rectlike, SDL_Rect *rect, argname=None) except -1:
         rect.w = rl.w
         rect.h = rl.h
 
-        valid = 1
+        return 0
 
     elif isinstance(rectlike, (tuple, list)):
 
