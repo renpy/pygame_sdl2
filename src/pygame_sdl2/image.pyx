@@ -54,7 +54,7 @@ def load(fi, namehint=""):
         raise error()
     cdef Surface surf = Surface.__new__(Surface)
     surf.surface = img
-    return surf
+    return surf.convert()
 
 def save(Surface surface not None, filename):
     ext = os.path.splitext(filename)[1]
