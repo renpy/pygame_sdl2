@@ -22,7 +22,22 @@ from display cimport Window, main_window
 
 include "event_names.pxi"
 
-event_queue = []
+class EventQueue(list):
+    def has(self, t):
+        for e in self:
+            if e.type == t:
+                return True
+        return False
+
+    def flush(self, t):
+        to_remove = []
+        for e in self:
+            if e.type == t:
+                to_remove.append(e)
+        for e in to_remove:
+            self.remove(e)
+
+event_queue = EventQueue()
 
 # Add events to emulate SDL 1.2
 ACTIVEEVENT = SDL_LASTEVENT - 1
@@ -33,9 +48,9 @@ event_names[ACTIVEEVENT] = "ACTIVEEVENT"
 event_names[VIDEORESIZE] = "VIDEORESIZE"
 event_names[VIDEOEXPOSE] = "VIDEOEXPOSE"
 
-class EventType:
+class EventType(object):
     def __init__(self, type, dict=None, **kwargs):
-        self.type = type
+        self._type = type
 
         if dict:
             self.__dict__.update(dict)
@@ -46,8 +61,28 @@ class EventType:
         if SDL_USEREVENT < self.type < VIDEOEXPOSE:
             ename = "UserEvent%d" % (self.type - SDL_USEREVENT)
         else:
-            ename = event_names[self.type]
+            try:
+                ename = event_names[self.type]
+            except KeyError:
+                ename = "UNKNOWN"
         return '<Event(%d-%s %s)>' % (self.type, ename, self.__dict__)
+
+    @property
+    def dict(self):
+        return self.__dict__
+
+    @property
+    def type(self):
+        return self._type
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __nonzero__(self):
+        return self.type != 0
 
 Event = EventType
 
@@ -223,26 +258,32 @@ def wait():
 
 def peek(t=None):
     if t == None:
-        return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
+        return len(event_queue) > 0 or SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
     elif type(t) == int:
-        return SDL_HasEvent(t)
+        return event_queue.has(t) or SDL_HasEvent(t)
     else:
         for et in t:
-            if SDL_HasEvent(et):
+            if event_queue.has(et) or SDL_HasEvent(et):
                 return True
         return False
 
 def clear(t=None):
     if t == None:
         SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
+        del event_queue[:]
     elif type(t) == int:
+        event_queue.flush(t)
         SDL_FlushEvent(t)
     else:
         for et in t:
+            event_queue.flush(t)
             SDL_FlushEvent(t)
 
 def event_name(t):
-    return event_names[t]
+    try:
+        return event_names[t]
+    except KeyError:
+        return "UNKNOWN"
 
 def set_blocked(t=None):
     if t == None:
@@ -274,7 +315,9 @@ def get_grab():
     return SDL_GetWindowGrab(main_window.window)
 
 def post(e):
-    event_queue.append(e)
+    # TODO: display.quit() should clear the block list?? Based on unit test.
+    if not get_blocked(e.type):
+        event_queue.append(e)
 
 def init():
     SDL_Init(SDL_INIT_EVENTS)
