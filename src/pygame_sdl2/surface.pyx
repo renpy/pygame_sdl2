@@ -515,6 +515,10 @@ cdef class Surface:
         cdef SDL_PixelFormat *format = self.surface.format
         return (format.Rloss, format.Gloss, format.Bloss, format.Aloss)
 
+    def get_buffer(self):
+        cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
+        return pixels[self.surface.h * self.surface.pitch]
+
     property _pixels_address:
         def __get__(self):
             return <Uint64> self.surface.pixels
