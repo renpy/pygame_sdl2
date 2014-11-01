@@ -1,4 +1,4 @@
-# Copyright 2014 Patrick Dawson
+# Copyright 2014 Patrick Dawson <pat@dw.is>
 # Copyright 2014 Tom Rothamel <tom@rothamel.us>
 #
 # This software is provided 'as-is', without any express or implied
@@ -94,6 +94,7 @@ cdef class Surface:
 
         if SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect):
             raise error()
+        return Rect(dest[0], dest[1], source.surface.w, source.surface.h)
 
     def convert(self, surface=None):
         if not isinstance(surface, Surface):
