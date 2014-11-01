@@ -26,7 +26,7 @@ def quit():
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK)
 
 def get_init():
-    return SDL_WasInit(SDL_INIT_JOYSTICK)
+    return SDL_WasInit(SDL_INIT_JOYSTICK) != 0
 
 def get_count():
     return SDL_NumJoysticks()

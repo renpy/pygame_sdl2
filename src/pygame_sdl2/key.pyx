@@ -19,8 +19,6 @@
 from sdl2 cimport *
 from error import error
 
-include "scancode_dict.pxi"
-
 cdef class KeyboardState:
     cdef object data
     def __init__(self, data):
@@ -30,7 +28,7 @@ cdef class KeyboardState:
         return str(self.data)
 
     def __getitem__(self, key):
-        return self.data[scancodes[key]]
+        return self.data[SDL_GetScancodeFromKey(key)]
 
 
 def init():
