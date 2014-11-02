@@ -25,6 +25,8 @@ from libc.stdlib cimport calloc, free
 from pygame_sdl2.locals import SRCALPHA
 from pygame_sdl2.error import error
 
+import warnings
+
 # True if init has been called without quit being called.
 init_done = False
 
@@ -249,4 +251,14 @@ def get_wm_info():
         return main_window.get_wm_info()
 
     return {}
+
+def list_modes(depth=0, flags=SDL_WINDOW_FULLSCREEN):
+    warnings.warn("pygame_sdl2.display.list_modes is not implemented.")
+    return [ ]
+
+def mode_ok(size, flags=0, depth=0):
+    warnings.warn("pygame_sdl2.display.mode_ok is not implemented.")
+    return True
+
+
 
