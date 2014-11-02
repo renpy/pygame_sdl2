@@ -311,6 +311,9 @@ define_prefixes = [
     "SDL_HINT_",
     "SDL_WINDOWPOS_UNDEFINED",
     "SDL_WINDOWPOS_CENTERED",
+    "SDL_BYTEORDER",
+    "SDL_BIG_ENDIAN",
+    "SDL_LIL_ENDIAN",
     ]
 
 def auto_defines(dirname):
@@ -330,6 +333,9 @@ def auto_defines(dirname):
                     continue
 
                 name = m.group(1)
+
+                if name in defines:
+                    continue
 
                 for i in define_prefixes:
                     if name.startswith(i):

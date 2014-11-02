@@ -2523,22 +2523,18 @@ cdef extern from "SDL.h" nogil:
         AUDIO_F32LSB
         AUDIO_F32MSB
         AUDIO_F32SYS
-        AUDIO_F32SYS
         AUDIO_S16
         AUDIO_S16LSB
         AUDIO_S16MSB
-        AUDIO_S16SYS
         AUDIO_S16SYS
         AUDIO_S32
         AUDIO_S32LSB
         AUDIO_S32MSB
         AUDIO_S32SYS
-        AUDIO_S32SYS
         AUDIO_S8
         AUDIO_U16
         AUDIO_U16LSB
         AUDIO_U16MSB
-        AUDIO_U16SYS
         AUDIO_U16SYS
         AUDIO_U8
         KMOD_ALT
@@ -2549,7 +2545,6 @@ cdef extern from "SDL.h" nogil:
         RW_SEEK_END
         RW_SEEK_SET
         SDLK_SCANCODE_MASK
-        SDL_AUDIOCVT_PACKED
         SDL_AUDIOCVT_PACKED
         SDL_AUDIO_ALLOW_ANY_CHANGE
         SDL_AUDIO_ALLOW_CHANNELS_CHANGE
@@ -2571,6 +2566,7 @@ cdef extern from "SDL.h" nogil:
         SDL_AUDIO_MASK_DATATYPE
         SDL_AUDIO_MASK_ENDIAN
         SDL_AUDIO_MASK_SIGNED
+        SDL_BIG_ENDIAN
         SDL_BUTTON
         SDL_BUTTON_LEFT
         SDL_BUTTON_LMASK
@@ -2582,6 +2578,7 @@ cdef extern from "SDL.h" nogil:
         SDL_BUTTON_X1MASK
         SDL_BUTTON_X2
         SDL_BUTTON_X2MASK
+        SDL_BYTEORDER
         SDL_DISABLE
         SDL_DONTFREE
         SDL_ENABLE
@@ -2651,6 +2648,7 @@ cdef extern from "SDL.h" nogil:
         SDL_INIT_NOPARACHUTE
         SDL_INIT_TIMER
         SDL_INIT_VIDEO
+        SDL_LIL_ENDIAN
         SDL_PREALLOC
         SDL_PRESSED
         SDL_QUERY
