@@ -28,6 +28,9 @@ from pygame_sdl2.error import error
 # True if init has been called without quit being called.
 init_done = False
 
+# The window that is used by the various module globals.
+main_window = None
+
 def init():
     SDL_Init(SDL_INIT_VIDEO)
 
@@ -37,6 +40,12 @@ def init():
 def quit(): # @ReservedAssignment
 
     global init_done
+    global main_window
+
+    if main_window:
+        main_window.destroy()
+        main_window = None
+
     init_done = False
 
 def get_init():
@@ -139,6 +148,9 @@ cdef class Window:
         finally:
             free(rects)
 
+    def get_wm_info(self):
+        return { }
+
 
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
@@ -160,3 +172,81 @@ def flip():
 def update(rectangles=None):
     if main_window:
         main_window.update(rectangles)
+
+def get_driver():
+    cdef const char *driver = SDL_GetCurrentVideoDriver()
+
+    if driver == NULL:
+        raise error()
+
+    return driver
+
+class Info(object):
+
+    def __init__(self):
+        cdef SDL_DisplayMode dm
+        cdef SDL_PixelFormat *format
+
+        if SDL_GetDesktopDisplayMode(0, &dm):
+            raise error()
+
+        format = SDL_AllocFormat(dm.format)
+        if format == NULL:
+            raise error()
+
+        self.bitsize = format.BitsPerPixel
+        self.bytesize = format.BytesPerPixel
+
+        self.masks = (
+            format.Rmask,
+            format.Gmask,
+            format.Bmask,
+            format.Amask,
+            )
+
+        self.shifts = (
+            format.Rshift,
+            format.Gshift,
+            format.Bshift,
+            format.Ashift,
+            )
+
+        self.losses = (
+            format.Rloss,
+            format.Gloss,
+            format.Bloss,
+            format.Aloss,
+            )
+
+        SDL_FreeFormat(format)
+
+        if main_window:
+            self.current_w, self.current_h = main_window.surface.get_size()
+        else:
+
+            self.current_w = dm.w
+            self.current_h = dm.h
+
+        # The rest of these are just guesses.
+        self.hw = False
+        self.wm = True
+        self.video_mem = 256 * 1024 * 1024
+
+        self.blit_hw = False
+        self.blit_hw_CC = False
+        self.blit_hw_A = False
+
+        self.blit_sw = False
+        self.blit_sw_CC = False
+        self.blit_sw_A = False
+
+    def __repr__(self):
+        return "<Info({!r})>".format(self.__dict__)
+
+
+def get_wm_info():
+    if main_window:
+        return main_window.get_wm_info()
+
+    return {}
+
