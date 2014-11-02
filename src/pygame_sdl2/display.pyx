@@ -260,5 +260,29 @@ def mode_ok(size, flags=0, depth=0):
     warnings.warn("pygame_sdl2.display.mode_ok is not implemented.")
     return True
 
+def gl_reset_attributes():
+    SDL_GL_ResetAttributes()
 
+def gl_set_attribute(flag, value):
+    if SDL_GL_SetAttribute(flag, value):
+        raise error()
+
+def gl_get_attribute(flag):
+    cdef int rv
+
+    if SDL_GL_GetAttribute(flag, &rv):
+        raise error()
+
+    return rv
+
+def gl_load_library(path):
+    if path is None:
+        if SDL_GL_LoadLibrary(NULL):
+            raise error()
+    else:
+        if SDL_GL_LoadLibrary(path):
+            raise error()
+
+def gl_unload_library():
+    SDL_GL_UnloadLibrary()
 
