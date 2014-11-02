@@ -24,4 +24,7 @@ cdef class Window:
     cdef SDL_Window *window
     cdef public Surface surface
 
+    # The OpenGL context corresponding to this window.
+    cdef SDL_GLContext gl_context
+
 cdef Window main_window = None

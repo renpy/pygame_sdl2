@@ -106,10 +106,18 @@ cdef class Surface:
                 Amask = sample.format.Amask
 
             else:
-                Rmask = 0xff000000
-                Gmask = 0x00ff0000
-                Bmask = 0x0000ff00
-                Amask = 0x000000ff
+
+                # RGB(A)
+                if SDL_BYTEORDER == SDL_BIG_ENDIAN:
+                    Rmask = 0xff000000
+                    Gmask = 0x00ff0000
+                    Bmask = 0x0000ff00
+                    Amask = 0
+                else:
+                    Rmask = 0x000000ff
+                    Gmask = 0x0000ff00
+                    Bmask = 0x00ff0000
+                    Amask = 0
 
             if (flags & SRCALPHA):
                 if not Amask:
