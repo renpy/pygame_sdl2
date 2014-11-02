@@ -42,3 +42,6 @@ cdef class Surface:
     # The offset of this surface within its parent.
     cdef int offset_x
     cdef int offset_y
+
+    # If not None, a function that returns the window flags.
+    cdef object get_window_flags

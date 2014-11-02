@@ -52,6 +52,10 @@ cdef class Window:
         self.surface = Surface(())
         self.surface.surface = SDL_GetWindowSurface(self.window)
         self.surface.owns_surface = False
+        self.surface.get_window_flags = self.get_window_flags
+
+    def get_window_flags(self):
+        return SDL_GetWindowFlags(self.window)
 
     def flip(self):
         SDL_UpdateWindowSurface(self.window)

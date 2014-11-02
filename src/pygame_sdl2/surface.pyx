@@ -64,6 +64,8 @@ cdef class Surface:
         self.offset_x = 0
         self.offset_y = 0
 
+        self.get_window_flags = None
+
         # When size is an empty tuple, we do not create a surface, and
         # expect our caller to set this object up.
         if size == ():
@@ -533,8 +535,16 @@ cdef class Surface:
         return self.surface.format.BytesPerPixel
 
     def get_flags(self):
-        # We don't support the use of surface flags.
-        return 0
+
+        if self.get_window_flags:
+            rv = self.get_window_flags()
+        else:
+            rv = 0
+
+        if self.surface.format.Amask:
+            rv = rv | SRCALPHA
+
+        return rv
 
     def get_pitch(self):
         return self.surface.pitch
