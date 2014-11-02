@@ -59,10 +59,13 @@ def load(fi, namehint=""):
     if img.format.BitsPerPixel == 32:
         return surf
 
-    if img.format.Amask:
-        return surf.convert_alpha()
-    else:
-        return surf.convert()
+    try:
+        if img.format.Amask:
+            return surf.convert_alpha()
+        else:
+            return surf.convert()
+    except error:
+        return surf
 
 def save(Surface surface not None, filename):
     ext = os.path.splitext(filename)[1]
