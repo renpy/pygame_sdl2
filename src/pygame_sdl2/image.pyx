@@ -24,7 +24,6 @@ import os
 from error import error
 
 cdef int image_formats = 0
-cdef Surface sample_surface = Surface((1,1))
 
 def init():
     global image_formats
@@ -56,7 +55,14 @@ def load(fi, namehint=""):
     cdef Surface surf = Surface(())
     surf.surface = img
     surf.owns_surface = True
-    return surf.convert(sample_surface)
+
+    if img.format.BitsPerPixel == 32:
+        return surf
+
+    if img.format.Amask:
+        return surf.convert_alpha()
+    else:
+        return surf.convert()
 
 def save(Surface surface not None, filename):
     ext = os.path.splitext(filename)[1]
