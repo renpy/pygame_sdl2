@@ -25,6 +25,7 @@ from rect cimport to_sdl_rect
 from rect import Rect
 
 from pygame_sdl2.error import error
+from pygame_sdl2.locals import SRCALPHA
 import pygame_sdl2
 
 import warnings
@@ -63,21 +64,64 @@ cdef class Surface:
         self.offset_x = 0
         self.offset_y = 0
 
-        try:
-            w, h = size
-            assert isinstance(w, int)
-            assert isinstance(h, int)
-            assert w >= 0
-            assert h >= 0
-        except:
+        # When size is an empty tuple, we do not create a surface, and
+        # expect our caller to set this object up.
+        if size == ():
+            return
 
-            # We pass the empty tuple to create an empty surface, that we can
-            # add an SDL surface to.
-            if size == ():
-                return
+        w, h = size
+        assert isinstance(w, int)
+        assert isinstance(h, int)
+        assert w >= 0
+        assert h >= 0
 
-        self.surface = SDL_CreateRGBSurface(0, w, h, depth, 0, 0, 0, 0)
+        cdef Uint32 Rmask, Gmask, Bmask, Amask
+        cdef SDL_Surface *sample
+        cdef Surface pysample
+
+        if masks is not None:
+            Rmask, Gmask, Bmask, Amask = masks
+
+        elif isinstance(depth, Surface):
+
+            pysample = depth
+            sample = pysample.surface
+            Rmask = sample.format.Rmask
+            Gmask = sample.format.Gmask
+            Bmask = sample.format.Bmask
+            Amask = sample.format.Amask
+            depth = sample.format.BitsPerPixel
+
+        else:
+
+            pysample = pygame_sdl2.display.get_surface()
+
+            if pysample:
+                sample = pysample.surface
+                Rmask = sample.format.Rmask
+                Gmask = sample.format.Gmask
+                Bmask = sample.format.Bmask
+                Amask = sample.format.Amask
+
+            else:
+                Rmask = 0xff000000
+                Gmask = 0x00ff0000
+                Bmask = 0x0000ff00
+                Amask = 0x000000ff
+
+            if (flags & SRCALPHA):
+                if not Amask:
+                    Amask = 0xffffffff & ~(Rmask | Gmask | Bmask)
+            else:
+                Amask = 0
+
+            depth = 32
+
+        self.surface = SDL_CreateRGBSurface(0, w, h, depth, Rmask, Gmask, Bmask, Amask)
         self.owns_surface = True
+
+    def __repr__(self):
+        return "<Surface({}x{}x{})>".format(self.surface.w, self.surface.h, self.surface.format.BitsPerPixel)
 
     def blit(self, Surface source, dest, area=None, special_flags=0):
         cdef SDL_Rect dest_rect
