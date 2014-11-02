@@ -153,6 +153,25 @@ cdef class Window:
     def get_wm_info(self):
         return { }
 
+    def get_active(self):
+        if SDL_GetWindowFlags(self.window) & (SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED):
+            return False
+        else:
+            return True
+
+    def iconify(self):
+        SDL_MinimizeWindow(self.window)
+        return True
+
+    def toggle_fullscreen(self):
+        if SDL_GetWindowFlags(self.window) & (SDL_WINDOW_FULLSCREEN):
+            if SDL_SetWindowFullscreen(self.window, 0):
+                raise error()
+        else:
+            if SDL_SetWindowFullscreen(self.window, SDL_WINDOW_FULLSCREEN):
+                raise error()
+
+        return True
 
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
@@ -286,3 +305,19 @@ def gl_load_library(path):
 def gl_unload_library():
     SDL_GL_UnloadLibrary()
 
+def get_active():
+    if main_window:
+        return main_window.get_active()
+    return False
+
+def iconify():
+    if main_window:
+        return main_window.iconify()
+
+    return False
+
+def toggle_fullscreen():
+    if main_window:
+        return main_window.toggle_fullscreen()
+
+    return True
