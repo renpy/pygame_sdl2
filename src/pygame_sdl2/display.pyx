@@ -173,6 +173,42 @@ cdef class Window:
 
         return True
 
+    def set_gamma(self, red, green=None, blue=None):
+        if green is None:
+            green = red
+        if blue is None:
+            blue = red
+
+        cdef Uint16 red_gamma[256]
+        cdef Uint16 green_gamma[256]
+        cdef Uint16 blue_gamma[256]
+
+        SDL_CalculateGammaRamp(red, red_gamma)
+        SDL_CalculateGammaRamp(green, green_gamma)
+        SDL_CalculateGammaRamp(blue, blue_gamma)
+
+        if SDL_SetWindowGammaRamp(self.window, red_gamma, green_gamma, blue_gamma):
+            return False
+
+        return True
+
+    def set_gamma_ramp(self, red, green, blue):
+
+        cdef Uint16 red_gamma[256]
+        cdef Uint16 green_gamma[256]
+        cdef Uint16 blue_gamma[256]
+
+        for i in range(256):
+            red_gamma[i] = red[i]
+            green_gamma[i] = green[i]
+            blue_gamma[i] = blue[i]
+
+        if SDL_SetWindowGammaRamp(self.window, red_gamma, green_gamma, blue_gamma):
+            return False
+
+        return True
+
+
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
 
@@ -321,3 +357,13 @@ def toggle_fullscreen():
         return main_window.toggle_fullscreen()
 
     return True
+
+def set_gamma(red, green=None, blue=None):
+    if main_window:
+        return main_window.set_gamma(red, green, blue)
+    return False
+
+def set_gamma_ramp(red, green, blue):
+    if main_window:
+        return main_window.set_gamma_ramp(red, green, blue)
+    return False
