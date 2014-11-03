@@ -208,11 +208,22 @@ cdef class Window:
 
         return True
 
+    def set_icon(self, Surface surface):
+        SDL_SetWindowIcon(self.window, surface.surface)
+
+
+# The icon that's used for new windows.
+default_icon = None
+
 
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
 
     main_window = Window(resolution, flags, depth)
+
+    if default_icon is not None:
+        main_window.set_icon(default_icon)
+
     return main_window.surface
 
 
@@ -367,3 +378,11 @@ def set_gamma_ramp(red, green, blue):
     if main_window:
         return main_window.set_gamma_ramp(red, green, blue)
     return False
+
+def set_icon(surface):
+    global default_icon
+
+    default_icon = surface.copy()
+
+    if main_window is not None:
+        main_window.set_icon(default_icon)
