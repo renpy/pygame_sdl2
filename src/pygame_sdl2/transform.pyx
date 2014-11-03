@@ -78,9 +78,9 @@ def rotate(Surface surface, angle):
     #     rsurf = rotateSurface90Degrees(surface.surface, angle / 90)
     #     if rsurf == NULL:
     #        raise error()
-    return rotozoom(surface, angle, 1.0)
+    return rotozoom(surface, angle, 1.0, SMOOTHING_OFF)
 
-def rotozoom(Surface surface, angle, scale, smooth=0):
+def rotozoom(Surface surface, angle, scale, smooth=1):
     cdef SDL_Surface *rsurf = NULL
     cdef Surface rv
 
