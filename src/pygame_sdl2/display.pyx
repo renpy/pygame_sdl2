@@ -55,10 +55,13 @@ def get_init():
 
 
 cdef class Window:
-    def __init__(self, resolution=(0, 0), flags=0, depth=0):
+    def __init__(self, title, resolution=(0, 0), flags=0, depth=0):
+
+        if not isinstance(title, bytes):
+            title = title.encode("utf-8")
 
         self.window = SDL_CreateWindow(
-            b"pygame window",
+            title,
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             resolution[0], resolution[1], flags)
 
@@ -211,21 +214,29 @@ cdef class Window:
     def set_icon(self, Surface surface):
         SDL_SetWindowIcon(self.window, surface.surface)
 
+    def set_caption(self, title):
+
+        if not isinstance(title, bytes):
+            title = title.encode("utf-8")
+
+        SDL_SetWindowTitle(self.window, title)
+
 
 # The icon that's used for new windows.
 default_icon = None
 
+# The title that's used for new windows.
+default_title = "pygame window"
 
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
 
-    main_window = Window(resolution, flags, depth)
+    main_window = Window(default_title, resolution, flags, depth)
 
     if default_icon is not None:
         main_window.set_icon(default_icon)
 
     return main_window.surface
-
 
 def get_surface():
     if main_window is None:
@@ -386,3 +397,14 @@ def set_icon(surface):
 
     if main_window is not None:
         main_window.set_icon(default_icon)
+
+def set_caption(title, icontitle = None):
+    global default_title
+
+    default_title = title
+
+    if main_window:
+        main_window.set_caption(default_title)
+
+def get_caption():
+    return default_title
