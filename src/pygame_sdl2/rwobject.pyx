@@ -129,24 +129,6 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
 
     return rv
 
-def test():
-    cdef SDL_Surface *surf
-
-    surf = SDL_LoadBMP_RW(to_rwops("test.bmp"), 1)
-    if surf == NULL:
-        print "Load (1) failed."
-        return
-
-    if SDL_SaveBMP_RW(surf, to_rwops("test1.bmp", "wb"), 1):
-        print "Save (1) failed."
-
-    f = open("test.bmp", "rb")
-    surf = SDL_LoadBMP_RW(to_rwops(f), 1)
-    if surf == NULL:
-        print "Load (2) failed."
-        return
-
-    f = open("test2.bmp", "wb")
-    if SDL_SaveBMP_RW(surf, to_rwops(f, "wb"), 1):
-        print "Save (2) failed."
+cdef api SDL_RWops *RWopsFromPython(filelike):
+    return to_rwops(filelike)
 

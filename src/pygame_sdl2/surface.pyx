@@ -641,3 +641,6 @@ cdef class Surface:
         def __get__(self):
             return <Uint64> self.surface.pixels
 
+
+cdef api SDL_Surface *PySurface_AsSurface(surface):
+    return (<Surface> surface).surface
