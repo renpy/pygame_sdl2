@@ -92,10 +92,76 @@ def rotozoom(Surface surface, angle, scale, smooth=0):
     rv.owns_surface = True
     return rv
 
+cdef uint32_t get_at(SDL_Surface *surf, int x, int y):
+    if x < 0:
+        x = 0
+    elif x >= surf.w:
+        x = surf.w - 1
+    if y < 0:
+        y = 0
+    elif y >= surf.h:
+        y = surf.h - 1
+
+    cdef uint32_t *p = <uint32_t*>surf.pixels
+    p += y * (surf.pitch / sizeof(uint32_t))
+    p += x
+    return p[0]
+
+cdef void set_at(SDL_Surface *surf, int x, int y, uint32_t color):
+    cdef uint32_t *p = <uint32_t*>surf.pixels
+    p += y * (surf.pitch / sizeof(uint32_t))
+    p += x
+    p[0] = color
+
 def scale2x(Surface surface, Surface DestSurface=None):
-    # TODO: Implement scale2x from scratch, because the original code is GPL and
-    # pygame’s is LGPL. http://scale2x.sourceforge.net/algorithm.html
-    return scale(surface, (surface.surface.w*2, surface.surface.h*2), DestSurface)
+    cdef int x, y
+
+    cdef uint32_t a, b, c, d, e, f, g, h, i
+    cdef uint32_t e0, e1, e2, e3
+
+    cdef Surface surf_out = DestSurface
+    if surf_out == None:
+        surf_out = Surface((surface.get_width()*2, surface.get_height()*2))
+
+    if surface.get_bytesize() != 4:
+        raise error("Surface has unsupported bytesize.")
+
+    surface.lock()
+    surf_out.lock()
+
+    for x in range(surface.get_width()):
+        for y in range(surface.get_height()):
+            # Get the surrounding 9 pixels.
+            a = get_at(surface.surface, x - 1, y - 1)
+            b = get_at(surface.surface, x, y - 1)
+            c = get_at(surface.surface, x + 1, y - 1)
+
+            d = get_at(surface.surface, x - 1, y)
+            e = get_at(surface.surface, x, y)
+            f = get_at(surface.surface, x + 1, y)
+
+            g = get_at(surface.surface, x - 1, y + 1)
+            h = get_at(surface.surface, x, y + 1)
+            i = get_at(surface.surface, x + 1, y + 1)
+
+            # Expand the center pixel.
+            if b != h and d != f:
+                e0 = d if d == b else e
+                e1 = f if b == f else e
+                e2 = d if d == h else e
+                e3 = f if h == f else e
+            else:
+                e0 = e1 = e2 = e3 = e
+
+            set_at(surf_out.surface, x*2, y*2, e0)
+            set_at(surf_out.surface, (x*2)+1, y*2, e1)
+            set_at(surf_out.surface, x*2, (y*2)+1, e2)
+            set_at(surf_out.surface, (x*2)+1, (y*2)+1, e3)
+
+    surf_out.unlock()
+    surface.unlock()
+
+    return surf_out
 
 def smoothscale(Surface surface, size, Surface DestSurface=None):
     cdef double scale_x = size[0] / <double>surface.surface.w
