@@ -17,16 +17,14 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from sdl2_gfx cimport *
 from surface cimport *
 from error import error
 
 cdef Surface render_copy(Surface surf_in, double degrees, SDL_RendererFlip rflip):
     w, h = surf_in.surface.w, surf_in.surface.h
     if degrees != 0.0:
-        # TODO: Calculate new rotated surface size.
-        if degrees / 90 % 2 == 1.0:
-            # This doesn't work as intended. Why?
-            w, h = h, w
+        raise error("Don't use this function for rotation.")
 
     cdef Surface surf_out = Surface((w, h))
     cdef SDL_Renderer *render = NULL
@@ -74,11 +72,25 @@ def scale(Surface surface, size, Surface DestSurface=None):
     return surf_out
 
 def rotate(Surface surface, angle):
-    return render_copy(surface, angle, SDL_FLIP_NONE)
+    # rotateSurface90Degrees always returns NULL without setting an error??
+    # cdef SDL_Surface *rsurf
+    # if angle % 90 == 0:
+    #     rsurf = rotateSurface90Degrees(surface.surface, angle / 90)
+    #     if rsurf == NULL:
+    #        raise error()
+    return rotozoom(surface, angle, 1.0)
 
-def rotozoom(Surface surface, angle, scale):
-    # TODO: Requires SDL_gfx.
-    pass
+def rotozoom(Surface surface, angle, scale, smooth=0):
+    cdef SDL_Surface *rsurf = NULL
+    cdef Surface rv
+
+    rsurf = rotozoomSurface(surface.surface, angle, scale, smooth)
+    if rsurf == NULL:
+        raise error()
+    rv = Surface(())
+    rv.surface = rsurf
+    rv.owns_surface = True
+    return rv
 
 def scale2x(Surface surface, Surface DestSurface=None):
     # TODO: Implement scale2x from scratch, because the original code is GPL and
@@ -86,5 +98,20 @@ def scale2x(Surface surface, Surface DestSurface=None):
     return scale(surface, (surface.surface.w*2, surface.surface.h*2), DestSurface)
 
 def smoothscale(Surface surface, size, Surface DestSurface=None):
-    # Maybe just use SDL_HINT_RENDER_SCALE_QUALITY = 1
-    return scale(surface, size, DestSurface)
+    cdef double scale_x = size[0] / <double>surface.surface.w
+    cdef double scale_y = size[1] / <double>surface.surface.h
+
+    cdef SDL_Surface *rsurf = NULL
+    cdef Surface rv
+    rsurf = rotozoomSurfaceXY(surface.surface, 0.0, scale_x, scale_y, SMOOTHING_ON)
+    if rsurf == NULL:
+        raise error()
+    rv = Surface(())
+    rv.surface = rsurf
+    rv.owns_surface = True
+
+    # This is inefficient.
+    if DestSurface:
+        DestSurface.blit(rv, (0,0))
+
+    return rv
