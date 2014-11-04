@@ -22,6 +22,7 @@ from error import *
 from surface import Surface
 
 import display
+import draw
 import event
 import image
 import joystick
