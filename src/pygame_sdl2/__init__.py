@@ -32,6 +32,9 @@ import mouse
 import time
 import transform
 
+import sprite
+import sysfont
+
 from locals import *
 
 def init():

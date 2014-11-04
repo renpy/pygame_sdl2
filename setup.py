@@ -27,6 +27,8 @@ pymodule("pygame_sdl2.__init__")
 pymodule("pygame_sdl2.compat")
 pymodule("pygame_sdl2.threads.__init__")
 pymodule("pygame_sdl2.threads.Py25Queue")
+pymodule("pygame_sdl2.sprite")
+pymodule("pygame_sdl2.sysfont")
 
 cython("pygame_sdl2.error", libs=sdl_libs)
 cython("pygame_sdl2.color", libs=sdl_libs)
