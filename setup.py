@@ -38,6 +38,7 @@ cython("pygame_sdl2.joystick", libs=sdl_libs)
 cython("pygame_sdl2.time", libs=sdl_libs)
 cython("pygame_sdl2.image", libs=sdl_libs + ['SDL2_image'])
 cython("pygame_sdl2.transform", libs=sdl_libs + ['SDL2_gfx'])
+cython("pygame_sdl2.gfxdraw", libs=sdl_libs + ['SDL2_gfx'])
 
 setup("pygame_sdl2", "0.1")
 

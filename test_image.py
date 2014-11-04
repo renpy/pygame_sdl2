@@ -36,3 +36,12 @@ pygame.image.save(img_smoothscale, fn + "_smoothscale.png")
 
 img_scale2x = pygame.transform.scale2x(img)
 pygame.image.save(img_scale2x, fn + "_scale2x.png")
+
+import pygame.gfxdraw
+
+img_draw = img.copy()
+pygame.gfxdraw.pixel(img_draw, 0, 0, (255,0,0))
+pygame.gfxdraw.rectangle(img_draw, (20, 20, 20, 20), (0,255,0))
+pygame.gfxdraw.box(img_draw, (20, 0, 20, 20), (255,0,255))
+pygame.gfxdraw.polygon(img_draw, [(0,0), (100,100), (100,150), (0,150), (20,20)], "blue")
+pygame.image.save(img_draw, fn + "_draw.png")
