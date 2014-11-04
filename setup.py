@@ -24,6 +24,10 @@ parse_cflags("sdl2-config --cflags")
 sdl_libs = parse_libs("sdl2-config --libs")
 
 pymodule("pygame_sdl2.__init__")
+pymodule("pygame_sdl2.compat")
+pymodule("pygame_sdl2.threads.__init__")
+pymodule("pygame_sdl2.threads.Py25Queue")
+
 cython("pygame_sdl2.error", libs=sdl_libs)
 cython("pygame_sdl2.color", libs=sdl_libs)
 cython("pygame_sdl2.rect", libs=sdl_libs)
@@ -40,6 +44,7 @@ cython("pygame_sdl2.image", libs=sdl_libs + ['SDL2_image'])
 cython("pygame_sdl2.transform", libs=sdl_libs + ['SDL2_gfx'])
 cython("pygame_sdl2.gfxdraw", libs=sdl_libs + ['SDL2_gfx'])
 cython("pygame_sdl2.draw", libs=sdl_libs)
+
 
 setup("pygame_sdl2", "0.1")
 
