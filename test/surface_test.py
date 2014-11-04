@@ -27,7 +27,7 @@ else:
 import pygame
 from pygame.locals import *
 from pygame.compat import xrange_, as_bytes, as_unicode
-from pygame.bufferproxy import BufferProxy
+# from pygame.bufferproxy import BufferProxy
 
 import gc
 import weakref

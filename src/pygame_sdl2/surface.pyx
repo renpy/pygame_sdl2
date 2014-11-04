@@ -232,18 +232,36 @@ cdef class Surface:
         else:
             return self.convert(self)
 
-    def fill(self, color, rect=None):
+    def fill(self, color, rect=None, special_flags=0):
 
         cdef SDL_Rect sdl_rect
         cdef Uint32 pixel = map_color(self.surface, color)
 
         if rect is not None:
             to_sdl_rect(rect, &sdl_rect)
+
+            if sdl_rect.x < 0:
+                sdl_rect.w = sdl_rect.w + sdl_rect.x
+                sdl_rect.x = 0
+
+            if sdl_rect.y < 0:
+                sdl_rect.w = sdl_rect.h + sdl_rect.y
+                sdl_rect.y = 0
+
+            if sdl_rect.w <= 0 or sdl_rect.h <= 0:
+                return Rect(0, 0, 0, 0)
+
             if SDL_FillRect(self.surface, &sdl_rect, pixel):
                 raise error()
+
+            return Rect(sdl_rect.x, sdl_rect.y, sdl_rect.w, sdl_rect.h)
+
         else:
             if SDL_FillRect(self.surface, NULL, pixel):
                 raise error()
+
+            return Rect(0, 0, self.surface.w, self.surface.h)
+
 
     def scroll(self, int dx=0, int dy=0):
         cdef int srcx, destx, move_width
@@ -561,14 +579,14 @@ cdef class Surface:
         cdef SDL_PixelFormat *format = self.surface.format
         return (format.Rmask, format.Gmask, format.Bmask, format.Amask)
 
-    def set_masks(self):
+    def set_masks(self, masks):
         warnings.warn("Surface.set_masks is not supported.")
 
     def get_shifts(self):
         cdef SDL_PixelFormat *format = self.surface.format
         return (format.Rshift, format.Gshift, format.Bshift, format.Ashift)
 
-    def set_shifts(self):
+    def set_shifts(self, shifts):
         warnings.warn("Surface.set_shifts is not supported.")
 
     def get_shifts(self):
