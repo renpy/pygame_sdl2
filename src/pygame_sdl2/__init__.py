@@ -67,3 +67,12 @@ def import_as_pygame():
         name = ".".join(name)
 
         sys.modules[name] = mod
+
+def get_sdl_byteorder():
+    return BYTEORDER
+
+def get_sdl_version():
+    return SDL_VERSION_TUPLE
+
+# We have new-style buffers, but not the pygame.newbuffer module.
+HAVE_NEWBUF = False

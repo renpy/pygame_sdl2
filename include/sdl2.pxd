@@ -2649,6 +2649,9 @@ cdef extern from "SDL.h" nogil:
         SDL_INIT_TIMER
         SDL_INIT_VIDEO
         SDL_LIL_ENDIAN
+        SDL_MAJOR_VERSION
+        SDL_MINOR_VERSION
+        SDL_PATCHLEVEL
         SDL_PREALLOC
         SDL_PRESSED
         SDL_QUERY

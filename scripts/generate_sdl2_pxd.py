@@ -314,6 +314,9 @@ define_prefixes = [
     "SDL_BYTEORDER",
     "SDL_BIG_ENDIAN",
     "SDL_LIL_ENDIAN",
+    "SDL_MAJOR_VERSION",
+    "SDL_MINOR_VERSION",
+    "SDL_PATCHLEVEL",
     ]
 
 def auto_defines(dirname):
