@@ -387,7 +387,7 @@ cdef class Surface:
         x, y = pos
 
         if not (0 <= x < self.surface.w) or not (0 <= y < self.surface.h):
-            raise ValueError("Position outside surface.")
+            raise IndexError("Position outside surface.")
 
         if self.surface.format.BytesPerPixel != 4:
             raise error("Surface has unsupported bytesize.")
@@ -475,13 +475,16 @@ cdef class Surface:
 
         return (sdl_rect.x, sdl_rect.y, sdl_rect.w, sdl_rect.h)
 
-    def subsurface(self, rect):
+    def subsurface(self, *args):
         cdef SDL_Rect sdl_rect
 
-        to_sdl_rect(rect, &sdl_rect)
+        if len(args) == 1:
+            to_sdl_rect(args[0], &sdl_rect)
+        else:
+            to_sdl_rect(args, &sdl_rect)
 
-        if sdl_rect.w < 0 or sdl_rect.h < 0:
-            raise error("subsurface size may not be negative.")
+        if sdl_rect.w <= 0 or sdl_rect.h <= 0:
+            raise error("subsurface size must be positive.")
 
         if ((sdl_rect.x < 0)
             or (sdl_rect.y < 0)
@@ -624,7 +627,7 @@ cdef class Surface:
 
             for 0 <= x < self.surface.w:
 
-                if (row[x] & amask) > amin:
+                if (row[x] & amask) >= amin:
 
                     if minx > x:
                         minx = x
@@ -638,7 +641,7 @@ cdef class Surface:
         self.unlock()
 
         # Totally empty surface.
-        if minx >= maxx:
+        if minx > maxx:
             return Rect((0, 0, 0, 0))
 
         return Rect((

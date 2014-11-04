@@ -35,6 +35,8 @@ cdef Uint32 map_color(SDL_Surface *surface, color) except? 0xaabbccdd:
     elif isinstance(color, (tuple, Color)) and len(color) == 3:
         r, g, b = color
         a = 255
+    elif isinstance(color, int):
+        return color
     else:
         raise TypeError("Expected a color.")
 
@@ -48,7 +50,7 @@ cdef object get_color(Uint32 pixel, SDL_Surface *surface):
 
     SDL_GetRGBA(pixel, surface.format, &r, &g, &b, &a)
 
-    return (r, g, b, a)
+    return Color(r, g, b, a)
 
 
 cdef class Color:
