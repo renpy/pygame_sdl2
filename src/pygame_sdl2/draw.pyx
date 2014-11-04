@@ -48,6 +48,7 @@ def polygon(Surface surface, color, pointlist, width=0):
         n = 1
         while n < len(pointlist):
             dirty.union_ip(Rect(pointlist[n], (1,1)))
+            n += 1
         return dirty.clip(surface.get_rect())
     else:
         return lines(surface, color, True, pointlist, width)
@@ -64,6 +65,7 @@ def circle(Surface surface, color, pos, radius, width=0):
         while n < width:
             gfxdraw.circle(surface, x, y, radius - 1, color)
             gfxdraw.circle(surface, x, y, radius + 1, color)
+            n += 1
         dirty = Rect(x - radius - width, y - radius - width, (radius*2) + width, (radius*2) + width)
         return dirty.clip(surface.get_rect())
 
