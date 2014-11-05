@@ -483,8 +483,8 @@ cdef class Surface:
         else:
             to_sdl_rect(args, &sdl_rect)
 
-        if sdl_rect.w <= 0 or sdl_rect.h <= 0:
-            raise error("subsurface size must be positive.")
+        if sdl_rect.w < 0 or sdl_rect.h < 0:
+            raise error("subsurface size must be non-negative.")
 
         if ((sdl_rect.x < 0)
             or (sdl_rect.y < 0)
