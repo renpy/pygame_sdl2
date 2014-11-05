@@ -276,8 +276,8 @@ def clear(t=None):
         SDL_FlushEvent(t)
     else:
         for et in t:
-            event_queue.flush(t)
-            SDL_FlushEvent(t)
+            event_queue.flush(et)
+            SDL_FlushEvent(et)
 
 def event_name(t):
     try:
