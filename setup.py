@@ -19,6 +19,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+import os
 
 parse_cflags("sdl2-config --cflags")
 sdl_libs = parse_libs("sdl2-config --libs")
@@ -47,7 +48,14 @@ cython("pygame_sdl2.transform", libs=sdl_libs + ['SDL2_gfx'])
 cython("pygame_sdl2.gfxdraw", libs=sdl_libs + ['SDL2_gfx'])
 cython("pygame_sdl2.draw", libs=sdl_libs)
 
+if "PYGAME_SDL2_INSTALL_HEADERS" in os.environ:
+    headers = [
+        "gen/pygame_sdl2.rwobject_api.h",
+        "gen/pygame_sdl2.surface_api.h",
+        ]
+else:
+    headers = [ ]
 
-setup("pygame_sdl2", "0.1")
+setup("pygame_sdl2", "0.1", headers=headers)
 
 find_unnecessary_gen()

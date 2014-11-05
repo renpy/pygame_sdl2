@@ -217,7 +217,7 @@ def pymodule(name):
 
     py_modules.append(name)
 
-def setup(name, version):
+def setup(name, version, **kwargs):
     """
     Calls the distutils setup function.
     """
@@ -228,6 +228,7 @@ def setup(name, version):
         ext_modules = extensions,
         py_modules = py_modules,
         package_dir = { '' : 'src' },
+        **kwargs
         )
 
 # Start in the directory containing setup.py.
