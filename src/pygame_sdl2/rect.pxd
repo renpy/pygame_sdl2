@@ -19,6 +19,9 @@
 from sdl2 cimport *
 
 cdef class Rect:
+    # Allow weak references.
+    cdef object __weakref__
+
     cdef public int x
     cdef public int y
     cdef public int w

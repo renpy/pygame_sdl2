@@ -21,6 +21,9 @@
 from sdl2 cimport SDL_Surface
 
 cdef class Surface:
+    # Allow weak references.
+    cdef object __weakref__
+
     # The SDL surface that corresponds to this surface.
     cdef SDL_Surface* surface
 

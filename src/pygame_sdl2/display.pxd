@@ -21,6 +21,9 @@ from sdl2 cimport *
 from surface cimport Surface
 
 cdef class Window:
+    # Allow weak references.
+    cdef object __weakref__
+
     cdef SDL_Window *window
     cdef public Surface surface
 

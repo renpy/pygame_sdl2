@@ -20,6 +20,9 @@ from sdl2 cimport *
 from error import error
 
 cdef class KeyboardState:
+    # Allow weak references.
+    cdef object __weakref__
+
     cdef object data
     def __init__(self, data):
         self.data = data

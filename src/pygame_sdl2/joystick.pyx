@@ -33,6 +33,9 @@ def get_count():
 
 
 cdef class Joystick:
+    # Allow weak references.
+    cdef object __weakref__
+
     cdef SDL_Joystick *joystick
     cdef int joyid
 
