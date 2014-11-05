@@ -37,6 +37,7 @@ import version
 import sprite
 import sysfont
 
+import locals as constants
 from locals import *
 
 def init():
@@ -72,6 +73,8 @@ def import_as_pygame():
         name = ".".join(name)
 
         sys.modules[name] = mod
+
+    sys.modules['pygame.constants'] = constants
 
 def get_sdl_byteorder():
     return BYTEORDER
