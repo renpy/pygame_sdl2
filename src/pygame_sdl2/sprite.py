@@ -86,9 +86,9 @@ Sprites are not thread safe, so lock them yourself if using threads.
 ## specific ones that aren't quite so general but fit into common
 ## specialized cases.
 
-import pygame
-from pygame import Rect
-from pygame.time import get_ticks
+import pygame_sdl2
+from pygame_sdl2 import Rect
+from pygame_sdl2.time import get_ticks
 from operator import truth
 
 # Python 3 does not have the callable function, but an equivalent can be made
@@ -96,9 +96,9 @@ from operator import truth
 if 'callable' not in dir(__builtins__):
     callable = lambda obj: hasattr(obj, '__call__')
 
-# Don't depend on pygame.mask if it's not there...
+# Don't depend on pygame_sdl2.mask if it's not there...
 try:
-    from pygame.mask import from_surface
+    from pygame_sdl2.mask import from_surface
 except:
     pass
 
@@ -1180,7 +1180,7 @@ class LayeredDirty(LayeredUpdates):
 
         """
         if screen_rect is None:
-            self._clip = pygame.display.get_surface().get_rect()
+            self._clip = pygame_sdl2.display.get_surface().get_rect()
         else:
             self._clip = screen_rect
         self._use_update = False
@@ -1367,17 +1367,17 @@ def collide_circle(left, right):
     xdistance = left.rect.centerx - right.rect.centerx
     ydistance = left.rect.centery - right.rect.centery
     distancesquared = xdistance ** 2 + ydistance ** 2
-    
+
     if hasattr(left, 'radius'):
         leftradius = left.radius
     else:
         leftrect = left.rect
-        # approximating the radius of a square by using half of the diagonal, 
+        # approximating the radius of a square by using half of the diagonal,
         # might give false positives (especially if its a long small rect)
         leftradius = 0.5 * ((leftrect.width ** 2 + leftrect.height ** 2) ** 0.5)
         # store the radius on the sprite for next time
         setattr(left, 'radius', leftradius)
-        
+
     if hasattr(right, 'radius'):
         rightradius = right.radius
     else:
@@ -1406,8 +1406,8 @@ class collide_circle_ratio(object):
 
         The given ratio is expected to be a floating point value used to scale
         the underlying sprite radius before checking for collisions.
-        
-        When the ratio is ratio=1.0, then it behaves exactly like the 
+
+        When the ratio is ratio=1.0, then it behaves exactly like the
         collide_circle method.
 
         """

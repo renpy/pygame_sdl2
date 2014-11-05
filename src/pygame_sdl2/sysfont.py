@@ -259,7 +259,7 @@ def initsysfonts_win32():
             except EnvironmentError: break
 
             # try and handle windows unicode strings for some file names.
-            
+
             # here are two documents with some information about it:
             # http://www.python.org/peps/pep-0277.html
             # https://www.microsoft.com/technet/archive/interopmigration/linux/mvc/lintowin.mspx#ECAA
@@ -272,7 +272,7 @@ def initsysfonts_win32():
                 except:
                     # no goodness with str or MBCS encoding... skip this font.
                     continue
-   
+
             if font[-4:].lower() not in [".ttf", ".ttc", ".otf"]:
                 continue
             if os.sep not in font:
@@ -406,7 +406,7 @@ def _search_osx_font_paths(fonts):
         for k, apath in details.items():
             if os.path.exists(apath):
                 bold, italic = k
-                _addfont(name, bold, italic, apath, fonts) 
+                _addfont(name, bold, italic, apath, fonts)
 
 
 def initsysfonts_darwin():
@@ -419,12 +419,12 @@ def initsysfonts_darwin():
         fonts = initsysfonts_unix("/usr/X11/bin/fc-list")
     else:
         fonts = {}
-    
+
     # we look for the default paths.
     _search_osx_font_paths(fonts)
-    
+
     return fonts
-    
+
 
 
 
@@ -532,9 +532,9 @@ def initsysfonts():
 
 # pygame.font specific declarations
 def font_constructor(fontpath, size, bold, italic):
-    import pygame.font
+    import pygame_sdl2.font
 
-    font = pygame.font.Font(fontpath, size)
+    font = pygame_sdl2.font.Font(fontpath, size)
     if bold:
         font.set_bold(1)
     if italic:
@@ -572,7 +572,7 @@ def SysFont(name, size, bold=False, italic=False, constructor=None):
 
     if not Sysfonts:
         initsysfonts()
-    
+
     gotbold = gotitalic = False
     fontname = None
     if name:
@@ -602,7 +602,7 @@ def SysFont(name, size, bold=False, italic=False, constructor=None):
                 elif plainname != fontname:
                     gotbold = bold
                     gotitalic = italic
-            if fontname: 
+            if fontname:
                 break
 
     set_bold = set_italic = False

@@ -20,6 +20,7 @@
 from error import *
 
 from surface import Surface
+from rect import Rect
 
 import display
 import draw
@@ -31,6 +32,7 @@ import locals # @ReservedAssignment
 import mouse
 import time
 import transform
+import version
 
 import sprite
 import sysfont
