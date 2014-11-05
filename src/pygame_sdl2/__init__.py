@@ -25,6 +25,7 @@ from rect import Rect
 import display
 import draw
 import event
+import font
 import image
 import joystick
 import key
@@ -45,6 +46,7 @@ def init():
     display.init()
     time.init()
     image.init()
+    font.init()
     joystick.init()
 
 def quit():

@@ -21,6 +21,7 @@ from sdl2 cimport *
 
 cdef Uint32 map_color(SDL_Surface *surface, color) except? 0xaabbccdd
 cdef object get_color(Uint32 pixel, SDL_Surface *surface)
+cdef to_sdl_color(color, SDL_Color *out)
 
 cdef class Color:
     # Allow weak references.

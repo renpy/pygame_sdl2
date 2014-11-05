@@ -52,6 +52,13 @@ cdef object get_color(Uint32 pixel, SDL_Surface *surface):
 
     return Color(r, g, b, a)
 
+cdef to_sdl_color(color, SDL_Color *out):
+    if not isinstance(color, Color):
+        color = Color(color)
+    out.r = color.r
+    out.g = color.g
+    out.b = color.b
+    out.a = color.a
 
 cdef class Color:
     cdef from_rgba(self, Uint8 r, Uint8 g, Uint8 b, Uint8 a):
