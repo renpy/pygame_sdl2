@@ -30,6 +30,7 @@ import image
 import joystick
 import key
 import locals # @ReservedAssignment
+import mixer
 import mouse
 import time
 import transform
