@@ -45,6 +45,12 @@ cdef process_namehint(namehint):
 
 def load(fi, namehint=""):
     cdef SDL_Surface *img
+
+    # IMG_Load_RW can't load TGA images.
+    if isinstance(fi, str):
+        if fi.lower().endswith('.tga'):
+            namehint = "TGA"
+
     if namehint == "":
         img = IMG_Load_RW(to_rwops(fi), 1)
     else:
