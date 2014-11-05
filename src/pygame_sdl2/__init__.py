@@ -49,6 +49,7 @@ def init():
     image.init()
     font.init()
     joystick.init()
+    mixer.init()
 
 def quit():
     display.quit()
