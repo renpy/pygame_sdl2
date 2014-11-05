@@ -39,7 +39,7 @@ class EventQueue(list):
 
 event_queue = EventQueue()
 
-# Add events to emulate SDL 1.2
+# Add events to emulate SDL 1.2. These also need to be added in locals.
 ACTIVEEVENT = SDL_LASTEVENT - 1
 VIDEORESIZE = SDL_LASTEVENT - 2
 VIDEOEXPOSE = SDL_LASTEVENT - 3

@@ -5,6 +5,10 @@ include "event_list.pxi"
 include "keycode_list.pxi"
 include "glattr.pxi"
 
+ACTIVEEVENT = SDL_LASTEVENT - 1
+VIDEORESIZE = SDL_LASTEVENT - 2
+VIDEOEXPOSE = SDL_LASTEVENT - 3
+
 from rect import Rect
 from color import Color
 
