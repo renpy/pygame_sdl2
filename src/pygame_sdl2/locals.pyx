@@ -1,16 +1,17 @@
 from sdl2 cimport *
 cimport sdl2
 
-include "event_list.pxi"
-include "keycode_list.pxi"
-include "glattr.pxi"
+from rect import Rect
+from color import Color
 
+include "event_list.pxi"
 ACTIVEEVENT = SDL_LASTEVENT - 1
 VIDEORESIZE = SDL_LASTEVENT - 2
 VIDEOEXPOSE = SDL_LASTEVENT - 3
 
-from rect import Rect
-from color import Color
+include "keycode_list.pxi"
+
+include "glattr.pxi"
 
 RLEACCEL = SDL_RLEACCEL
 
@@ -24,6 +25,7 @@ FULLSCREEN = SDL_WINDOW_FULLSCREEN
 OPENGL = SDL_WINDOW_OPENGL
 NOFRAME = SDL_WINDOW_BORDERLESS
 RESIZABLE = SDL_WINDOW_RESIZABLE
+DOUBLEBUF = 0
 
 WINDOW_FULLSCREEN = SDL_WINDOW_FULLSCREEN
 WINDOW_SHOWN = SDL_WINDOW_SHOWN
