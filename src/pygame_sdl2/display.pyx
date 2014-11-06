@@ -22,7 +22,7 @@ from surface cimport *
 from rect cimport to_sdl_rect
 
 from libc.stdlib cimport calloc, free
-from pygame_sdl2.locals import SRCALPHA
+from pygame_sdl2.locals import SRCALPHA, GL_SWAP_CONTROL
 from pygame_sdl2.error import error
 
 import warnings
@@ -77,6 +77,9 @@ cdef class Window:
 
             if self.gl_context == NULL:
                 self.destroy()
+                raise error()
+
+            if SDL_GL_SetSwapInterval(default_swap_control) and SDL_GL_SetSwapInterval(-default_swap_control):
                 raise error()
 
             # For now, make this the size of the window so get_size() works.
@@ -228,6 +231,9 @@ default_icon = None
 # The title that's used for new windows.
 default_title = "pygame window"
 
+# The default gl_swap_control
+default_swap_control = 1
+
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
 
@@ -341,11 +347,25 @@ def gl_reset_attributes():
     SDL_GL_ResetAttributes()
 
 def gl_set_attribute(flag, value):
+
+    if flag == GL_SWAP_CONTROL:
+        # Try value. If value is -1, this may fail if late tearing is not
+        # supported, so we try 1 (vsync) instead.
+        if main_window:
+            if SDL_GL_SetSwapInterval(value) and SDL_GL_SetSwapInterval(-value):
+                raise error()
+
+        default_swap_control = value
+        return
+
     if SDL_GL_SetAttribute(flag, value):
         raise error()
 
 def gl_get_attribute(flag):
     cdef int rv
+
+    if flag == GL_SWAP_CONTROL:
+        return SDL_GL_GetSwapInterval()
 
     if SDL_GL_GetAttribute(flag, &rv):
         raise error()

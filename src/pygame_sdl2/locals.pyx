@@ -12,6 +12,7 @@ VIDEOEXPOSE = SDL_LASTEVENT - 3
 include "keycode_list.pxi"
 
 include "glattr.pxi"
+GL_SWAP_CONTROL = -1
 
 RLEACCEL = SDL_RLEACCEL
 
