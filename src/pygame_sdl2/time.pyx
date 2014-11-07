@@ -50,20 +50,23 @@ cdef Uint32 timer_callback(Uint32 interval, void *param):
     SDL_PushEvent(&e)
     return interval
 
+# A map from eventid to SDL_Timer_ID.
+cdef dict timer_by_event = { }
+
 def set_timer(eventid, milliseconds):
-    global timer_id
-    if milliseconds == 0:
-        if timer_id != 0:
-            SDL_RemoveTimer(timer_id)
-            timer_id = 0
-        return
+
+    cdef int timer_id = timer_by_event.get(eventid, 0)
 
     if timer_id != 0:
         SDL_RemoveTimer(timer_id)
         timer_id = 0
-    timer_id = SDL_AddTimer(milliseconds, <SDL_TimerCallback>timer_callback, <void*><int>eventid)
-    if timer_id == 0:
-        raise error()
+
+    if milliseconds > 0:
+        timer_id = SDL_AddTimer(milliseconds, <SDL_TimerCallback>timer_callback, <void*><int>eventid)
+        if timer_id == 0:
+            raise error()
+
+    timer_by_event[eventid] = timer_id
 
 class Clock:
     def __init__(self):
