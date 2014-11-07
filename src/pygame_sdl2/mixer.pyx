@@ -23,8 +23,10 @@ from rwobject cimport to_rwops
 import sys
 from error import error
 
+import pygame_sdl2.mixer_music as music
+
 cdef object preinit_args = None
-cdef double output_frequency = 0.0
+cdef object output_spec = None
 
 def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
     if get_init() is not None:
@@ -41,8 +43,8 @@ def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
     if Mix_OpenAudio(frequency, size, channels, buffer) != 0:
         raise error()
 
-    global output_frequency
-    output_frequency = frequency
+    global output_spec
+    output_spec = get_init()
 
 def pre_init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffersize=4096):
     global preinit_args
@@ -110,6 +112,8 @@ cdef class Sound:
 
     def __init__(self, fi):
         self.chunk = Mix_LoadWAV_RW(to_rwops(fi), 1)
+        if self.chunk == NULL:
+            raise error()
 
     def play(self, loops=0, maxtime=-1, fade_ms=0):
         cdef int cid = Mix_FadeInChannelTimed(-1, self.chunk, loops, fade_ms, maxtime)
@@ -161,7 +165,8 @@ cdef class Sound:
         return n
 
     def get_length(self):
-        return self.chunk.alen / output_frequency
+        # TODO: Adjust for actual format, rather than assuming 16-bit.
+        return <double>self.chunk.alen / output_spec[0] / 2 / output_spec[2]
 
     def get_raw(self):
         # return self.chunk.abuf
