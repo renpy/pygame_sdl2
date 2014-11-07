@@ -18,23 +18,21 @@
 
 from sdl2 cimport *
 from sdl2_mixer cimport *
+from rwobject cimport to_rwops
 
 from error import error
 
 cdef Mix_Music *current_music = NULL
-cdef str queued_music = None
+cdef object queued_music = None
 
-def load(fn):
-    if not isinstance(fn, str):
-        raise ValueError("load can only accept a filename.")
-
+def load(fi):
     global current_music
 
     # Free any previously loaded music.
     if current_music != NULL:
         Mix_FreeMusic(current_music)
 
-    current_music = Mix_LoadMUS(fn)
+    current_music = Mix_LoadMUS_RW(to_rwops(fi), 1)
     if current_music == NULL:
         raise error()
 
@@ -72,9 +70,10 @@ def get_pos():
     # TODO: Use a Mix_SetPostMix callback to track position.
     raise error("Not implemented.")
 
-def queue(str fn):
+def queue(fi):
+    # TODO: Use a callback.
     global queued_music
-    queued_music = fn
+    queued_music = fi
 
 def set_endevent(type=None):
     raise error("Not implemented.")
