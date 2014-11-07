@@ -19,25 +19,11 @@
 
 from sdl2 cimport *
 from display cimport Window, main_window
+import threading
 
 include "event_names.pxi"
 
-class EventQueue(list):
-    def has(self, t):
-        for e in self:
-            if e.type == t:
-                return True
-        return False
 
-    def flush(self, t):
-        to_remove = []
-        for e in self:
-            if e.type == t:
-                to_remove.append(e)
-        for e in to_remove:
-            self.remove(e)
-
-event_queue = EventQueue()
 
 # Add events to emulate SDL 1.2. These also need to be added in locals.
 ACTIVEEVENT = SDL_LASTEVENT - 1
@@ -48,7 +34,9 @@ event_names[ACTIVEEVENT] = "ACTIVEEVENT"
 event_names[VIDEORESIZE] = "VIDEORESIZE"
 event_names[VIDEOEXPOSE] = "VIDEOEXPOSE"
 
+
 class EventType(object):
+
     def __init__(self, type, dict=None, **kwargs):
         self._type = type
 
@@ -58,7 +46,7 @@ class EventType(object):
         self.__dict__.update(kwargs)
 
     def __repr__(self):
-        if SDL_USEREVENT < self.type < VIDEOEXPOSE:
+        if SDL_USEREVENT <= self.type < VIDEOEXPOSE:
             ename = "UserEvent%d" % (self.type - SDL_USEREVENT)
         else:
             try:
@@ -206,78 +194,136 @@ cdef make_event(SDL_Event *e):
     return EventType(e.type)
 
 
-def pump():
-    SDL_PumpEvents()
+# The event queue - a list of pending events from oldest to newest.
+cdef list event_queue = list()
 
-cdef get_bytype(Uint32 tmin, Uint32 tmax):
-    evts = []
-    for e in event_queue:
-        if tmin <= e.type <= tmax:
-            evts.append(e)
-    for e in evts:
-        event_queue.remove(e)
+# The lock that protects the event queue.
+lock = threading.RLock()
+
+# This is the object that is returned when no event exists.
+NOEVENT_EVENT = EventType(0)
+
+
+cdef bint has_event(kinds):
+    """
+    Returns true if at least one event in the queue has a type in `kinds`,
+    which must support the in operator.
+
+    The lock must be held when calling this function
+    """
+
+    for i in event_queue:
+        if i._type in kinds:
+            return True
+
+
+cdef object get_events(kinds):
+    """
+    Returns a list containing all events in the event queue with type `kinds`.
+    Removes those events from the event queue.
+
+    The lock must be held when calling this function.
+    """
+
+    global event_queue
+
+    cdef list rv = [ ]
+    cdef list new_queue = [ ]
+
+    for i in event_queue:
+        if i._type in kinds:
+            rv.append(i)
+        else:
+            new_queue.append(i)
+
+    event_queue = new_queue
+
+    return rv
+
+
+cdef void poll_sdl():
+    """
+    Polls SDL for pending events, and places those events onto the event q
+    queue.
+    """
 
     cdef SDL_Event evt
-    while SDL_PeepEvents(&evt, 1, SDL_GETEVENT, tmin, tmax) > 0:
-        evts.append(make_event(&evt))
-    return evts
+
+    with lock:
+        while SDL_PollEvent(&evt):
+            event_queue.append(make_event(&evt))
+
+
+def pump():
+    with lock:
+        poll_sdl()
+
 
 def get(t=None):
-    SDL_PumpEvents()
-    if t == None:
-        return get_bytype(SDL_FIRSTEVENT, SDL_LASTEVENT)
-    elif type(t) == int:
-        return get_bytype(t, t)
-    else:
-        evts = []
-        for et in t:
-            evts += get_bytype(et, et)
-        return evts
+
+    global event_queue
+
+    with lock:
+        poll_sdl()
+
+        if t is None:
+            rv = event_queue
+            event_queue = [ ]
+
+        elif isinstance(t, int):
+            rv = get_events(( t, ))
+
+        else:
+            rv = get_events(t)
+
+    return rv
+
 
 def poll():
-    cdef SDL_Event evt
 
-    if len(event_queue) > 0:
-        return event_queue.pop(0)
+    with lock:
+        poll_sdl()
 
-    if SDL_PollEvent(&evt) == 1:
-        return make_event(&evt)
-    else:
-        return EventType(0)
+        if event_queue:
+            return event_queue.pop(0)
+
+        return NOEVENT_EVENT
+
 
 def wait():
+
     cdef SDL_Event evt
 
-    if len(event_queue) > 0:
-        return event_queue.pop(0)
+    with lock:
+        poll_sdl()
+
+        if event_queue:
+            return event_queue.pop(0)
 
     if SDL_WaitEvent(&evt):
         return make_event(&evt)
     else:
-        return EventType(0) # NOEVENT
+        return NOEVENT_EVENT
+
 
 def peek(t=None):
-    if t == None:
-        return len(event_queue) > 0 or SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
-    elif type(t) == int:
-        return event_queue.has(t) or SDL_HasEvent(t)
-    else:
-        for et in t:
-            if event_queue.has(et) or SDL_HasEvent(et):
-                return True
-        return False
+
+    with lock:
+        poll_sdl()
+
+        if t is None:
+            return len(event_queue) != 0
+        elif isinstance(t, int):
+            return has_event(( t, ))
+        else:
+            return has_event(t)
+
 
 def clear(t=None):
-    if t == None:
-        SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT)
-        del event_queue[:]
-    elif type(t) == int:
-        event_queue.flush(t)
-        SDL_FlushEvent(t)
-    else:
-        for et in t:
-            event_queue.flush(et)
-            SDL_FlushEvent(et)
+
+    # Clear is implemented in terms of get.
+    get(t)
+
 
 def event_name(t):
     try:
@@ -314,10 +360,14 @@ def set_grab(on):
 def get_grab():
     return SDL_GetWindowGrab(main_window.window)
 
+
 def post(e):
     # TODO: display.quit() should clear the block list?? Based on unit test.
-    if not get_blocked(e.type):
-        event_queue.append(e)
+    with lock:
+        poll_sdl()
+
+        if not get_blocked(e.type):
+            event_queue.append(e)
 
 def init():
     SDL_Init(SDL_INIT_EVENTS)
