@@ -15,6 +15,7 @@ include "glattr.pxi"
 GL_SWAP_CONTROL = -1
 
 RLEACCEL = SDL_RLEACCEL
+SRCCOLORKEY = 0
 
 # Surface flags.
 SRCALPHA  = 0x80000000

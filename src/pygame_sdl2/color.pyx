@@ -30,9 +30,9 @@ cdef Uint32 map_color(SDL_Surface *surface, color) except? 0xaabbccdd:
 
     cdef Uint8 r, g, b, a
 
-    if isinstance(color, (tuple, Color)) and len(color) == 4:
+    if isinstance(color, (tuple, list, Color)) and len(color) == 4:
         r, g, b, a = color
-    elif isinstance(color, (tuple, Color)) and len(color) == 3:
+    elif isinstance(color, (tuple, list, Color)) and len(color) == 3:
         r, g, b = color
         a = 255
     elif isinstance(color, int):
