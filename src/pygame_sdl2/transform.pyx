@@ -26,7 +26,7 @@ cdef Surface render_copy(Surface surf_in, double degrees, SDL_RendererFlip rflip
     if degrees != 0.0:
         raise error("Don't use this function for rotation.")
 
-    cdef Surface surf_out = Surface((w, h))
+    cdef Surface surf_out = Surface((w, h), 0, surf_in)
     cdef SDL_Renderer *render = NULL
     cdef SDL_Texture *texture_in = NULL
 
@@ -58,17 +58,15 @@ def scale(Surface surface, size, Surface DestSurface=None):
     w, h = size
     cdef Surface surf_out
     if DestSurface == None:
-        surf_out = Surface(size)
+        surf_out = Surface(size, 0, surface)
     else:
         surf_out = DestSurface
 
-    cdef SDL_Rect dstrect
-    dstrect.x = 0
-    dstrect.y = 0
-    dstrect.w = w
-    dstrect.h = h
-    if SDL_UpperBlitScaled(surface.surface, NULL, surf_out.surface, &dstrect) != 0:
+    SDL_SetSurfaceBlendMode(surface.surface, SDL_BLENDMODE_NONE)
+
+    if SDL_UpperBlitScaled(surface.surface, NULL, surf_out.surface, NULL) != 0:
         raise error()
+
     return surf_out
 
 def rotate(Surface surface, angle):
@@ -178,6 +176,7 @@ def smoothscale(Surface surface, size, Surface DestSurface=None):
 
     # This is inefficient.
     if DestSurface:
-        DestSurface.blit(rv, (0,0))
+        SDL_SetSurfaceBlendMode(rv.surface, SDL_BLENDMODE_NONE)
+        SDL_UpperBlitSurface(rv.surface, NULL, DestSurface.surface, NULL)
 
     return rv
