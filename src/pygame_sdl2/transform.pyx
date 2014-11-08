@@ -177,6 +177,6 @@ def smoothscale(Surface surface, size, Surface DestSurface=None):
     # This is inefficient.
     if DestSurface:
         SDL_SetSurfaceBlendMode(rv.surface, SDL_BLENDMODE_NONE)
-        SDL_UpperBlitSurface(rv.surface, NULL, DestSurface.surface, NULL)
+        SDL_UpperBlit(rv.surface, NULL, DestSurface.surface, NULL)
 
     return rv
