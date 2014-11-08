@@ -24,13 +24,18 @@ cdef class KeyboardState:
     cdef object __weakref__
 
     cdef object data
+    cdef int numkeys
+
     def __init__(self, data):
         self.data = data
+        self.numkeys = len(data)
 
     def __repr__(self):
         return str(self.data)
 
     def __getitem__(self, key):
+        if key >= self.numkeys:
+            raise IndexError("Out of range.")
         return self.data[SDL_GetScancodeFromKey(key)]
 
 
