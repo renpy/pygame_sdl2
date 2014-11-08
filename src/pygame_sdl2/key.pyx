@@ -17,26 +17,44 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from libc.stdlib cimport malloc, free
+from libc.string cimport memcpy
+
 from error import error
 
 cdef class KeyboardState:
     # Allow weak references.
     cdef object __weakref__
 
-    cdef object data
+    cdef uint8_t *data
     cdef int numkeys
 
-    def __init__(self, data):
-        self.data = data
-        self.numkeys = len(data)
+    def __cinit__(self):
+        self.data = NULL
+
+    def __dealloc__(self):
+        if self.data != NULL:
+            free(self.data)
+
+    def __init__(self):
+        cdef uint8_t *state = SDL_GetKeyboardState(&self.numkeys)
+        if state == NULL:
+            raise error()
+        self.data = <uint8_t*>malloc(self.numkeys)
+        memcpy(self.data, state, self.numkeys)
 
     def __repr__(self):
         return str(self.data)
 
-    def __getitem__(self, key):
-        if key >= self.numkeys:
+    def __getitem__(self, int key):
+        if SDLK_DELETE < key < SDLK_CAPSLOCK:
             raise IndexError("Out of range.")
-        return self.data[SDL_GetScancodeFromKey(key)]
+
+        cdef int sc = <int>SDL_GetScancodeFromKey(key)
+        if sc > self.numkeys:
+            raise IndexError("Out of range.")
+
+        return self.data[sc]
 
 
 def init():
@@ -49,14 +67,10 @@ def get_focused():
     return SDL_GetKeyboardFocus() != NULL
 
 def get_pressed():
-    cdef int numkeys
-    cdef const Uint8 *state = SDL_GetKeyboardState(&numkeys)
+    """ No longer returns a tuple. Use the returned object to check for
+        individual keys, but don't loop through it. """
     # Take a snapshot of the current state, insetad of using pointer directly.
-    ret = [0] * numkeys
-    for n in range(numkeys):
-        if state[n]:
-            ret[n] = 1
-    return KeyboardState(tuple(ret))
+    return KeyboardState()
 
 def get_mods():
     return SDL_GetModState()
