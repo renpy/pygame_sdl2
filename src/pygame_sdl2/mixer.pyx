@@ -116,7 +116,12 @@ cdef class Sound:
             raise error()
 
     def play(self, loops=0, maxtime=-1, fade_ms=0):
-        cdef int cid = Mix_FadeInChannelTimed(-1, self.chunk, loops, fade_ms, maxtime)
+        cdef int cid
+        if fade_ms != 0:
+            cid = Mix_FadeInChannelTimed(-1, self.chunk, loops, fade_ms, maxtime)
+        else:
+            cid = Mix_PlayChannelTimed(-1, self.chunk, loops, maxtime)
+
         if cid == -1:
             raise error()
         return Channel(cid)
@@ -178,7 +183,13 @@ class Channel(object):
         self.cid = cid
 
     def play(self, Sound sound not None, loops=0, maxtime=-1, fade_ms=0):
-        Mix_FadeInChannelTimed(self.cid, sound.chunk, loops, fade_ms, maxtime)
+        if fade_ms != 0:
+            cid = Mix_FadeInChannelTimed(self.cid, sound.chunk, loops, fade_ms, maxtime)
+        else:
+            cid = Mix_PlayChannelTimed(self.cid, sound.chunk, loops, maxtime)
+
+        if cid == -1:
+            raise error()
 
     def stop(self):
         Mix_HaltChannel(self.cid)
@@ -208,7 +219,7 @@ class Channel(object):
     def get_queue(self):
         raise error("Not implemented.")
 
-    def set_endevent(self, type):
+    def set_endevent(self, type=None):
         # TODO: Use Mix_ChannelFinished callback.
         raise error("Not implemented.")
 
