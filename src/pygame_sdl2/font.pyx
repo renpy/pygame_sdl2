@@ -75,6 +75,9 @@ cdef class Font:
         rv.surface = surf
         rv.owns_surface = True
 
+        if rv.surface.format.BitsPerPixel != 32:
+            rv = rv.convert()
+
         if background is not None:
             bgsurf = rv.copy()
             bgsurf.fill(background)
