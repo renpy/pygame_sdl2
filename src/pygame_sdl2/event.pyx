@@ -20,6 +20,7 @@
 from sdl2 cimport *
 from display cimport Window, main_window
 import threading
+import pygame_sdl2
 
 include "event_names.pxi"
 
@@ -372,5 +373,6 @@ def post(e):
         if not get_blocked(e.type):
             event_queue.append(e)
 
+@pygame_sdl2.register_init
 def init():
     SDL_Init(SDL_INIT_EVENTS)

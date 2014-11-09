@@ -24,6 +24,7 @@ from rect cimport to_sdl_rect
 from libc.stdlib cimport calloc, free
 from pygame_sdl2.locals import SRCALPHA, GL_SWAP_CONTROL
 from pygame_sdl2.error import error
+import pygame_sdl2
 
 import warnings
 
@@ -33,12 +34,14 @@ init_done = False
 # The window that is used by the various module globals.
 main_window = None
 
+@pygame_sdl2.register_init
 def init():
     SDL_Init(SDL_INIT_VIDEO)
 
     global init_done
     init_done = True
 
+@pygame_sdl2.register_quit
 def quit(): # @ReservedAssignment
 
     global init_done

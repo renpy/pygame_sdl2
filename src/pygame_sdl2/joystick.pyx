@@ -18,11 +18,14 @@
 
 from sdl2 cimport *
 from error import error
+import pygame_sdl2
 
+@pygame_sdl2.register_init
 def init():
     SDL_InitSubSystem(SDL_INIT_JOYSTICK)
 
-def quit():
+@pygame_sdl2.register_quit
+def quit(): # @ReservedAssignment
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK)
 
 def get_init():
@@ -55,7 +58,7 @@ cdef class Joystick:
             if self.joystick == NULL:
                 raise error()
 
-    def quit(self):
+    def quit(self): # @ReservedAssignment
         if self.joystick and SDL_JoystickGetAttached(self.joystick):
             SDL_JoystickClose(self.joystick)
             self.joystick = NULL

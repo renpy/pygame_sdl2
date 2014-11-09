@@ -17,6 +17,63 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+
+import sys
+import importlib
+
+class MissingModule(object):
+
+    def __init__(self, reason):
+        self.reason = reason
+
+    def __getattr__(self, attr):
+        raise NotImplementedError(self.reason)
+
+def try_import(name):
+    full_name = "pygame_sdl2." + name
+
+    try:
+        module = importlib.import_module(full_name)
+    except (IOError, ImportError) as e:
+        module = MissingModule("Could not import {}: {}".format(full_name, str(e)))
+
+    globals()[name] = module
+    sys.modules[full_name] = module
+
+# Lists of functions that are called on init and quit.
+init_functions = [ ]
+quit_functions = [ ]
+
+def register_init(fn):
+    init_functions.append(fn)
+    return fn
+
+def register_quit(fn):
+    quit_functions.append(fn)
+    return fn
+
+def init():
+    numpass = 0
+    numfail = 0
+
+    for i in init_functions:
+        try:
+            i()
+            numpass += 1
+        except:
+            numfail += 1
+
+    return numpass, numfail
+
+def quit(): # @ReservedAssignment
+    for i in quit_functions:
+        try:
+            i()
+        except:
+            pass
+
+
+# Import core modules.
 from error import *
 
 from surface import Surface
@@ -25,34 +82,36 @@ from rect import Rect
 import display
 import draw
 import event
-import font
-import image
-import joystick
 import key
 import locals # @ReservedAssignment
-import mixer
-import mouse
 import time
-import transform
 import version
-
-import sprite
-import sysfont
-
 import locals as constants
+
+# Import optional modules.
+try_import("font")
+try_import("image")
+try_import("joystick")
+try_import("mixer")
+try_import("mouse")
+try_import("transform")
+try_import("sprite")
+try_import("sysfont")
+
+# Optional imports should be included in this function, so they show up
+# in packaging tools (like py2exe).
+def _optional_imports():
+    import font
+    import image
+    import joystick
+    import mixer
+    import mouse
+    import transform
+    import sprite
+    import sysfont
+
+# Fill this module with locals.
 from locals import *
-
-def init():
-    event.init()
-    display.init()
-    time.init()
-    image.init()
-    font.init()
-    joystick.init()
-    mixer.init()
-
-def quit():
-    display.quit()
 
 def import_as_pygame():
     """
@@ -60,7 +119,7 @@ def import_as_pygame():
     statement will import pygame_sdl2.whatever instead.
     """
 
-    import sys, os, warnings
+    import os, warnings
 
     if "PYGAME_SDL2_USE_PYGAME" in os.environ:
         return

@@ -24,11 +24,14 @@ from rwobject cimport to_rwops
 
 from sysfont import SysFont, match_font, get_fonts
 from error import error
+import pygame_sdl2
 
+@pygame_sdl2.register_init
 def init():
     TTF_Init()
 
-def quit():
+@pygame_sdl2.register_quit
+def quit(): # @ReservedAssignment
     TTF_Quit()
 
 def get_init():

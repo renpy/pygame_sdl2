@@ -18,13 +18,16 @@
 
 from sdl2 cimport *
 from error import error
+import pygame_sdl2
 
 cdef int timer_id = 0
 
+@pygame_sdl2.register_init
 def init():
     SDL_InitSubSystem(SDL_INIT_TIMER)
 
-def quit():
+@pygame_sdl2.register_quit
+def quit(): # @ReservedAssignment
     SDL_QuitSubSystem(SDL_INIT_TIMER)
 
 def get_ticks():

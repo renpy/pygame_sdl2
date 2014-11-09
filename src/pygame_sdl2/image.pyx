@@ -22,16 +22,19 @@ from surface cimport *
 from rwobject cimport to_rwops
 import os
 from error import error
+import pygame_sdl2
 
 cdef int image_formats = 0
 
+@pygame_sdl2.register_init
 def init():
     global image_formats
     image_formats = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP)
     if image_formats == 0:
         raise error()
 
-def quit():
+@pygame_sdl2.register_quit
+def quit(): # @ReservedAssignment
     IMG_Quit()
 
 cdef process_namehint(namehint):

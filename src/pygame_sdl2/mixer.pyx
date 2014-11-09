@@ -25,6 +25,7 @@ import sys
 from error import error
 
 import pygame_sdl2.mixer_music as music
+import pygame_sdl2
 
 cdef object preinit_args = None
 cdef object output_spec = None
@@ -52,7 +53,7 @@ cdef void channel_callback(int channel):
 
         Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
 
-
+@pygame_sdl2.register_init
 def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
     if get_init() is not None:
         return
@@ -77,7 +78,8 @@ def pre_init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffersize=40
     global preinit_args
     preinit_args = (frequency, size, channels, buffersize)
 
-def quit():
+@pygame_sdl2.register_quit
+def quit(): # @ReservedAssignment
     Mix_CloseAudio()
     Mix_Quit()
 
