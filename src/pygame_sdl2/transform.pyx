@@ -37,11 +37,9 @@ cdef Surface render_copy(Surface surf_in, double degrees, SDL_RendererFlip rflip
             texture_in = SDL_CreateTextureFromSurface(render, surf_in.surface)
             if texture_in:
                 err = SDL_RenderCopyEx(render, texture_in, NULL, NULL, degrees, NULL, rflip)
+                SDL_DestroyTexture(texture_in)
+            SDL_DestroyRenderer(render)
 
-    if texture_in:
-        SDL_DestroyTexture(texture_in)
-    if render:
-        SDL_DestroyRenderer(render)
     if err != 0:
         raise error()
     return surf_out
@@ -121,12 +119,12 @@ def scale2x(Surface surface, Surface DestSurface=None):
     cdef uint32_t a, b, c, d, e, f, g, h, i
     cdef uint32_t e0, e1, e2, e3
 
+    if surface.get_bytesize() != 4:
+        raise error("Surface has unsupported bytesize.")
+
     cdef Surface surf_out = DestSurface
     if surf_out == None:
         surf_out = Surface((surface.get_width()*2, surface.get_height()*2), 0, surface)
-
-    if surface.get_bytesize() != 4:
-        raise error("Surface has unsupported bytesize.")
 
     surface.lock()
     surf_out.lock()
