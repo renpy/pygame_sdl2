@@ -30,14 +30,15 @@ def quit():
 def get_ticks():
     return SDL_GetTicks()
 
-cpdef wait(milliseconds):
+def wait(int milliseconds):
     cdef int start
 
     start = SDL_GetTicks()
-    SDL_Delay(milliseconds)
+    with nogil:
+        SDL_Delay(milliseconds)
     return SDL_GetTicks() - start
 
-cpdef delay(milliseconds):
+def delay(milliseconds):
     # SDL_Delay() should be accurate enough.
     return wait(milliseconds)
 
