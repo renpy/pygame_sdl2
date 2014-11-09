@@ -33,7 +33,7 @@ img_45 = pygame.transform.rotate(img, 45)
 pygame.image.save(img_45, fn + "_45.png")
 
 img_scale = pygame.transform.scale(img, (w*2, h*2))
-pygame.image.save(img_scale, fn + "_scale.bmp")
+pygame.image.save(img_scale, fn + "_scale.png")
 
 img_smoothscale = pygame.transform.smoothscale(img, (w*2, h*2))
 pygame.image.save(img_smoothscale, fn + "_smoothscale.png")
