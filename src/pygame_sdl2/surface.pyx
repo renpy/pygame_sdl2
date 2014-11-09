@@ -31,7 +31,7 @@ import pygame_sdl2
 import warnings
 
 
-cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int dstpitch):
+cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int dstpitch) nogil:
     if src < dst:
         src += (h - 1) * srcpitch;
         dst += (h - 1) * dstpitch;
@@ -71,18 +71,21 @@ cdef class Surface:
         if size == ():
             return
 
+        cdef int w
+        cdef int h
+
         w, h = size
-        assert isinstance(w, int)
-        assert isinstance(h, int)
         assert w >= 0
         assert h >= 0
 
         cdef Uint32 Rmask, Gmask, Bmask, Amask
         cdef SDL_Surface *sample
         cdef Surface pysample
+        cdef int depth_int
 
         if masks is not None:
             Rmask, Gmask, Bmask, Amask = masks
+            depth_int = depth
 
         elif isinstance(depth, Surface):
 
@@ -92,7 +95,7 @@ cdef class Surface:
             Gmask = sample.format.Gmask
             Bmask = sample.format.Bmask
             Amask = sample.format.Amask
-            depth = sample.format.BitsPerPixel
+            depth_int = sample.format.BitsPerPixel
 
         else:
 
@@ -125,9 +128,14 @@ cdef class Surface:
             else:
                 Amask = 0
 
-            depth = 32
+            depth_int = 32
 
-        self.surface = SDL_CreateRGBSurface(0, w, h, depth, Rmask, Gmask, Bmask, Amask)
+        with nogil:
+            self.surface = SDL_CreateRGBSurface(0, w, h, depth_int, Rmask, Gmask, Bmask, Amask)
+
+        if not self.surface:
+            raise error()
+
         self.owns_surface = True
 
     def __repr__(self):
@@ -146,8 +154,14 @@ cdef class Surface:
             to_sdl_rect(area, &area_rect, "area")
             area_ptr = &area_rect
 
-        if SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect):
+        cdef int err
+
+        with nogil:
+            err = SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect)
+
+        if err:
             raise error()
+
         dirty = Rect(dest[0], dest[1], source.surface.w, source.surface.h)
         return dirty.clip(self.get_rect())
 
@@ -171,7 +185,9 @@ cdef class Surface:
         # If the sample surface has alpha, use it.
         if not sample_format.Amask:
             use_format = sample_format
-            new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
+
+            with nogil:
+                new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
 
         else:
 
@@ -181,7 +197,9 @@ cdef class Surface:
             amask = 0
 
             pixel_format = SDL_MasksToPixelFormatEnum(32, rmask, gmask, bmask, amask)
-            new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
+
+            with nogil:
+                new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
 
         cdef Surface rv = Surface(())
         rv.surface = new_surface
@@ -208,7 +226,9 @@ cdef class Surface:
         # If the sample surface has alpha, use it.
         if sample_format.Amask:
             use_format = sample_format
-            new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
+
+            with nogil:
+                new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
 
         else:
 
@@ -219,7 +239,9 @@ cdef class Surface:
                 amask = 0xffffffff & ~(rmask | gmask | bmask)
 
             pixel_format = SDL_MasksToPixelFormatEnum(32, rmask, gmask, bmask, amask)
-            new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
+
+            with nogil:
+                new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
 
         cdef Surface rv = Surface(())
         rv.surface = new_surface
@@ -236,6 +258,7 @@ cdef class Surface:
 
         cdef SDL_Rect sdl_rect
         cdef Uint32 pixel = map_color(self.surface, color)
+        cdef int err
 
         if rect is not None:
             to_sdl_rect(rect, &sdl_rect)
@@ -251,13 +274,19 @@ cdef class Surface:
             if sdl_rect.w <= 0 or sdl_rect.h <= 0:
                 return Rect(0, 0, 0, 0)
 
-            if SDL_FillRect(self.surface, &sdl_rect, pixel):
+            with nogil:
+                err = SDL_FillRect(self.surface, &sdl_rect, pixel)
+
+            if err:
                 raise error()
 
             return Rect(sdl_rect.x, sdl_rect.y, sdl_rect.w, sdl_rect.h)
 
         else:
-            if SDL_FillRect(self.surface, NULL, pixel):
+            with nogil:
+                err = SDL_FillRect(self.surface, NULL, pixel)
+
+            if err:
                 raise error()
 
             return Rect(0, 0, self.surface.w, self.surface.h)
@@ -298,13 +327,14 @@ cdef class Surface:
 
         self.lock()
 
-        move_pixels(
-            srcptr,
-            destptr,
-            move_height,
-            move_width * per_pixel,
-            self.surface.pitch,
-            self.surface.pitch)
+        with nogil:
+            move_pixels(
+                srcptr,
+                destptr,
+                move_height,
+                move_width * per_pixel,
+                self.surface.pitch,
+                self.surface.pitch)
 
         self.unlock()
 
@@ -622,21 +652,22 @@ cdef class Surface:
 
         cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
 
-        for 0 <= y < self.surface.h:
-            row = <Uint32*> (pixels + self.surface.pitch * y)
+        with nogil:
+            for 0 <= y < self.surface.h:
+                row = <Uint32*> (pixels + self.surface.pitch * y)
 
-            for 0 <= x < self.surface.w:
+                for 0 <= x < self.surface.w:
 
-                if (row[x] & amask) >= amin:
+                    if (row[x] & amask) >= amin:
 
-                    if minx > x:
-                        minx = x
-                    if miny > y:
-                        miny = y
-                    if maxx < x:
-                        maxx = x
-                    if maxy < y:
-                        maxy = y
+                        if minx > x:
+                            minx = x
+                        if miny > y:
+                            miny = y
+                        if maxx < x:
+                            maxx = x
+                        if maxy < y:
+                            maxy = y
 
         self.unlock()
 
