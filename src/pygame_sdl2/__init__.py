@@ -80,7 +80,6 @@ from surface import Surface
 from rect import Rect
 
 import display
-import draw
 import event
 import key
 import locals # @ReservedAssignment
@@ -89,6 +88,7 @@ import version
 import locals as constants
 
 # Import optional modules.
+try_import("draw")
 try_import("font")
 try_import("image")
 try_import("joystick")
@@ -101,6 +101,7 @@ try_import("sysfont")
 # Optional imports should be included in this function, so they show up
 # in packaging tools (like py2exe).
 def _optional_imports():
+    import draw
     import font
     import image
     import joystick
