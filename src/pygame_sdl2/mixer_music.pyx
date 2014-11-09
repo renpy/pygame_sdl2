@@ -19,11 +19,27 @@
 from sdl2 cimport *
 from sdl2_mixer cimport *
 from rwobject cimport to_rwops
+from libc.string cimport memset
 
 from error import error
 
 cdef Mix_Music *current_music = NULL
 cdef object queued_music = None
+cdef int endevent = 0
+
+cdef void music_finished():
+    global queued_music
+    if queued_music:
+        load(queued_music)
+        play()
+        queued_music = None
+
+    cdef SDL_Event e
+    if endevent != 0:
+        memset(&e, 0, sizeof(SDL_Event))
+        e.type = endevent
+        SDL_PushEvent(&e)
+
 
 def load(fi):
     global current_music
@@ -71,12 +87,18 @@ def get_pos():
     raise error("Not implemented.")
 
 def queue(fi):
-    # TODO: Use a callback.
-    global queued_music
-    queued_music = fi
+    Mix_HookMusicFinished(music_finished)
+    if get_busy():
+        global queued_music
+        queued_music = fi
+    else:
+        load(fi)
+        play()
 
 def set_endevent(type=None):
-    raise error("Not implemented.")
+    Mix_HookMusicFinished(music_finished)
+    global endevent
+    endevent = type or 0
 
 def get_endevent():
-    raise error("Not implemented.")
+    return endevent

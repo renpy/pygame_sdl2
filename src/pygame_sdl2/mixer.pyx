@@ -19,6 +19,7 @@
 from sdl2 cimport *
 from sdl2_mixer cimport *
 from rwobject cimport to_rwops
+from libc.string cimport memset
 
 import sys
 from error import error
@@ -27,6 +28,30 @@ import pygame_sdl2.mixer_music as music
 
 cdef object preinit_args = None
 cdef object output_spec = None
+
+cdef dict channel_events = {}
+cdef dict channel_queued = {}
+cdef dict current_sounds = {}
+
+cdef void channel_callback(int channel):
+    cdef int etype = 0
+    cdef SDL_Event e
+    cdef Sound next_sound
+
+    etype = channel_events.get(channel, 0)
+    if etype != 0:
+        memset(&e, 0, sizeof(SDL_Event))
+        e.type = etype
+        SDL_PushEvent(&e)
+
+    next_sound = channel_queued.get(channel)
+    if next_sound:
+        # Prevent garbage collection.
+        current_sounds[channel] = next_sound
+        channel_queued[channel] = None
+
+        Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
+
 
 def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
     if get_init() is not None:
@@ -45,6 +70,8 @@ def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
 
     global output_spec
     output_spec = get_init()
+
+    Mix_ChannelFinished(channel_callback)
 
 def pre_init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffersize=4096):
     global preinit_args
@@ -212,16 +239,23 @@ class Channel(object):
         cdef int vol = Mix_Volume(self.cid, -1)
         return vol / <double>MIX_MAX_VOLUME
 
-    def queue(self, sound):
-        # TODO: Use Mix_ChannelFinished callback.
-        raise error("Not implemented.")
+    def get_busy(self):
+        return Mix_Playing(self.cid) != 0
+
+    def get_sound(self):
+        return current_sounds.get(self.cid)
+
+    def queue(self, Sound sound):
+        if self.get_busy():
+            channel_queued[self.cid] = sound
+        else:
+            self.play(sound)
 
     def get_queue(self):
-        raise error("Not implemented.")
+        return channel_queued.get(self.cid)
 
     def set_endevent(self, type=None):
-        # TODO: Use Mix_ChannelFinished callback.
-        raise error("Not implemented.")
+        channel_events[self.cid] = type or 0
 
     def get_endevent(self):
-        raise error("Not implemented.")
+        return channel_events.get(self.cid, 0)

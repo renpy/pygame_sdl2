@@ -53,7 +53,10 @@ class EventType(object):
                 ename = event_names[self.type]
             except KeyError:
                 ename = "UNKNOWN"
-        return '<Event(%d-%s %s)>' % (self.type, ename, self.__dict__)
+
+        d = self.__dict__.copy()
+        del d['_type']
+        return '<Event(%d-%s %s)>' % (self.type, ename, d)
 
     @property
     def dict(self):

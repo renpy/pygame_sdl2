@@ -117,7 +117,7 @@ cdef class Color:
                     self.from_hex(c[2:])
                 else:
                     self.from_name(c)
-            elif isinstance(c, (tuple, Color)):
+            elif isinstance(c, (tuple, list, Color)):
                 if len(c) == 4:
                     self.from_rgba(c[0], c[1], c[2], c[3])
                 elif len(c) == 3:

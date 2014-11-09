@@ -40,11 +40,10 @@ cdef class KeyboardState:
         cdef uint8_t *state = SDL_GetKeyboardState(&self.numkeys)
         if state == NULL:
             raise error()
+
+        # Take a snapshot of the current state, rather than saving the pointer.
         self.data = <uint8_t*>malloc(self.numkeys)
         memcpy(self.data, state, self.numkeys)
-
-    def __repr__(self):
-        return str(self.data)
 
     def __getitem__(self, int key):
         if SDLK_DELETE < key < SDLK_CAPSLOCK:
@@ -57,19 +56,13 @@ cdef class KeyboardState:
         return self.data[sc]
 
 
-def init():
-    pass
-
-def quit():
-    pass
-
 def get_focused():
     return SDL_GetKeyboardFocus() != NULL
 
 def get_pressed():
     """ No longer returns a tuple. Use the returned object to check for
         individual keys, but don't loop through it. """
-    # Take a snapshot of the current state, insetad of using pointer directly.
+
     return KeyboardState()
 
 def get_mods():

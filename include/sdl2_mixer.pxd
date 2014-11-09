@@ -1,5 +1,12 @@
 from sdl2 cimport *
 
+# Acquire the GIL for callbacks.
+cdef extern from "SDL_mixer.h":
+    void Mix_ChannelFinished(void (*channel_finished)(int channel))
+    void Mix_HookMusicFinished(void (*music_finished)())
+    void Mix_SetPostMix(void (*mix_func)(void *udata, Uint8 *stream, int len), void *arg)
+    void Mix_HookMusic(void (*mix_func)(void *udata, Uint8 *stream, int len), void *arg)
+
 cdef extern from "SDL_mixer.h" nogil:
     cdef enum:
         SDL_MIXER_MAJOR_VERSION
@@ -69,11 +76,7 @@ cdef extern from "SDL_mixer.h" nogil:
     int Mix_GetNumMusicDecoders()
     const char * Mix_GetMusicDecoder(int index)
     Mix_MusicType Mix_GetMusicType(const Mix_Music *music)
-    void Mix_SetPostMix(void (*mix_func)(void *udata, Uint8 *stream, int len), void *arg)
-    void Mix_HookMusic(void (*mix_func)(void *udata, Uint8 *stream, int len), void *arg)
-    void Mix_HookMusicFinished(void (*music_finished)())
     void * Mix_GetMusicHookData()
-    void Mix_ChannelFinished(void (*channel_finished)(int channel))
 
     cdef enum:
         MIX_CHANNEL_POST
