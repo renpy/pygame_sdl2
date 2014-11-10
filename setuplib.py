@@ -58,7 +58,7 @@ def parse_cflags(command):
     and extra_compile_args.
     """
 
-    output = subprocess.check_output(command, shell=True)
+    output = subprocess.check_output(command)
 
     for i in output.split():
         if i.startswith("-I"):
@@ -72,7 +72,7 @@ def parse_libs(command):
     extra_link_args. Returns a list of libraries to link against.
     """
 
-    output = subprocess.check_output(command, shell=True)
+    output = subprocess.check_output(command)
 
     libs = [ ]
 
