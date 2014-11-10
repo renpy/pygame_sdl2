@@ -11,12 +11,12 @@ pygame.display.set_mode((800, 600))
 pygame.display.set_caption("SDL2 render test")
 r = pygame.render.Renderer()
 
-tex = r.load_texture(sys.argv[1])
-qty = int(sys.argv[2])
+atlas = r.load_atlas('rlplayer.json')
 
 clock = pygame.time.Clock()
 
 i = 0
+pos = (00,00)
 running = True
 while running:
     events = pygame.event.get()
@@ -27,12 +27,12 @@ while running:
             running = False
 
     r.clear((0,0,100))
-    for n in range(qty):
-        x = random.randint(0, 800)
-        y = random.randint(0, 600)
-        r.render(tex, (x, y))
+    pos = pos[0]+1, pos[1]+1
+    r.render(atlas["player/base/elf_m"], pos)
+    r.render(atlas["player/leg/pants_black"], pos)
+    r.render(atlas["player/body/bplate_green"], pos)
+    r.render(atlas["player/hair/elf_yellow"], pos)
+    r.render(atlas["player/hand1/broadsword"], pos)
     r.render_present()
-    clock.tick()
+    clock.tick(60)
     i += 1
-    if i % 60 == 0:
-        print "average fps = %d" % clock.get_fps()
