@@ -40,6 +40,18 @@ extensions = [ ]
 # A list of macros that are defined for all modules.
 global_macros = [ ]
 
+
+def system_path(path):
+    """
+    On windows/msys, converts a unix-style path returned from sdl2-config
+    to a windows path. Otherwise, returns path.
+    """
+
+    if "MSYSTEM" in os.environ:
+        path = subprocess.check_output([ "sh", "-c", "cmd //c echo " + path ]).strip()
+
+    return path
+
 def parse_cflags(command):
     """
     Runs `command`, and uses the command's output to set up include_dirs
@@ -50,7 +62,7 @@ def parse_cflags(command):
 
     for i in output.split():
         if i.startswith("-I"):
-            include_dirs.append(i[2:])
+            include_dirs.append(system_path(i[2:]))
         else:
             extra_compile_args.append(i)
 
@@ -66,7 +78,7 @@ def parse_libs(command):
 
     for i in output.split():
         if i.startswith("-L"):
-            include_dirs.append(i[2:])
+            library_dirs.append(system_path(i[2:]))
         elif i.startswith("-l"):
             libs.append(i[2:])
         else:

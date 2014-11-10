@@ -21,8 +21,8 @@
 from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
 import os
 
-parse_cflags("sdl2-config --cflags")
-sdl_libs = parse_libs("sdl2-config --libs")
+parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
+sdl_libs = parse_libs([ "sh", "-c", "sdl2-config --libs" ])
 
 pymodule("pygame_sdl2.__init__")
 pymodule("pygame_sdl2.compat")
@@ -44,14 +44,14 @@ cython("pygame_sdl2.key", libs=sdl_libs)
 cython("pygame_sdl2.mouse", libs=sdl_libs)
 cython("pygame_sdl2.joystick", libs=sdl_libs)
 cython("pygame_sdl2.time", libs=sdl_libs)
-cython("pygame_sdl2.image", libs=sdl_libs + ['SDL2_image'])
-cython("pygame_sdl2.transform", libs=sdl_libs + ['SDL2_gfx'])
-cython("pygame_sdl2.gfxdraw", libs=sdl_libs + ['SDL2_gfx'])
+cython("pygame_sdl2.image", libs=['SDL2_image'] + sdl_libs)
+cython("pygame_sdl2.transform", libs=['SDL2_gfx'] + sdl_libs)
+cython("pygame_sdl2.gfxdraw", libs=['SDL2_gfx'] + sdl_libs)
 cython("pygame_sdl2.draw", libs=sdl_libs)
-cython("pygame_sdl2.font", libs=sdl_libs + ['SDL2_ttf'])
-cython("pygame_sdl2.mixer", libs=sdl_libs + ['SDL2_mixer'])
-cython("pygame_sdl2.mixer_music", libs=sdl_libs + ['SDL2_mixer'])
-cython("pygame_sdl2.render", libs=sdl_libs + ['SDL2_image'])
+cython("pygame_sdl2.font", libs=['SDL2_ttf'] + sdl_libs)
+cython("pygame_sdl2.mixer", libs=['SDL2_mixer'] + sdl_libs)
+cython("pygame_sdl2.mixer_music", libs=['SDL2_mixer'] + sdl_libs)
+cython("pygame_sdl2.render", libs=['SDL2_image'] + sdl_libs)
 
 if "PYGAME_SDL2_INSTALL_HEADERS" in os.environ:
     headers = [
