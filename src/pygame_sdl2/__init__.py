@@ -23,7 +23,8 @@ import importlib
 
 class MissingModule(object):
 
-    def __init__(self, reason):
+    def __init__(self, name, reason):
+        self.__name__ = name
         self.reason = reason
 
     def __getattr__(self, attr):
@@ -35,7 +36,7 @@ def try_import(name):
     try:
         module = importlib.import_module(full_name)
     except (IOError, ImportError) as e:
-        module = MissingModule("Could not import {}: {}".format(full_name, str(e)))
+        module = MissingModule(full_name, "Could not import {}: {}".format(full_name, str(e)))
 
     globals()[name] = module
     sys.modules[full_name] = module
@@ -79,6 +80,7 @@ from error import *
 from surface import Surface
 from rect import Rect
 
+import color
 import display
 import event
 import key
@@ -101,6 +103,8 @@ try_import("sysfont")
 # Optional imports should be included in this function, so they show up
 # in packaging tools (like py2exe).
 def _optional_imports():
+    import rwobject
+    import gfxdraw
     import draw
     import font
     import image
