@@ -44,7 +44,9 @@ cdef class Renderer:
         cdef uint32_t flags = SDL_RENDERER_ACCELERATED
         self.renderer = SDL_CreateRenderer(window.window, -1, flags)
         if self.renderer == NULL:
-            raise error()
+            self.renderer = SDL_GetRenderer(window.window)
+            if self.renderer == NULL:
+                raise error()
 
     def load_texture(self, fi):
         cdef SDL_Texture *tex
