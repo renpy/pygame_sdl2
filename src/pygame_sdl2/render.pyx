@@ -91,6 +91,21 @@ cdef class Renderer:
     def render_present(self):
         SDL_RenderPresent(self.renderer)
 
+    def info(self):
+        cdef SDL_RendererInfo rinfo
+        if SDL_GetRendererInfo(self.renderer, &rinfo) != 0:
+            raise error()
+
+        # Ignore texture_formats for now.
+        return {
+            "name" : rinfo.name,
+            "accelerated" : rinfo.flags & SDL_RENDERER_ACCELERATED != 0,
+            "vsync" : rinfo.flags & SDL_RENDERER_PRESENTVSYNC != 0,
+            "rtt" : rinfo.flags & SDL_RENDERER_TARGETTEXTURE != 0,
+            "max_texture_width" : rinfo.max_texture_width,
+            "max_texture_height" : rinfo.max_texture_height,
+        }
+
 
 cdef class Texture:
     """ This is just for garbage-collecting SDL_Texture pointers. Users should

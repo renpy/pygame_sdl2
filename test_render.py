@@ -10,6 +10,7 @@ pygame.init()
 pygame.display.set_mode((800, 600))
 pygame.display.set_caption("SDL2 render test")
 r = pygame.render.Renderer()
+print r.info()
 
 atlas = r.load_atlas('rlplayer.json')
 
