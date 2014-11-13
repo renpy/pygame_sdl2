@@ -79,8 +79,21 @@ def load(fi, namehint=""):
     if img.format.BitsPerPixel == 32:
         return surf
 
+    cdef int n = 0
+    has_alpha = False
+
+    if img.format.Amask:
+        has_alpha = True
+    elif img.format.palette != NULL:
+        # Check for non-opaque palette colors.
+        while n < img.format.palette.ncolors:
+            if img.format.palette.colors[n].a != 255:
+                has_alpha = True
+                break
+            n += 1
+
     try:
-        if img.format.Amask:
+        if has_alpha:
             return surf.convert_alpha()
         else:
             return surf.convert()
