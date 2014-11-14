@@ -28,6 +28,8 @@ def get(type):
     cdef char *text = NULL
     if type == SCRAP_TEXT:
         text = SDL_GetClipboardText()
+        if text == NULL:
+            raise error()
         rv = str(text)
         SDL_free(text)
         return rv
