@@ -24,7 +24,10 @@ cdef int timer_id = 0
 
 @pygame_sdl2.register_init
 def init():
-    SDL_InitSubSystem(SDL_INIT_TIMER)
+    pygame_sdl2.display.sdl_main_init()
+
+    if SDL_InitSubSystem(SDL_INIT_TIMER):
+        raise error()
 
 @pygame_sdl2.register_quit
 def quit(): # @ReservedAssignment

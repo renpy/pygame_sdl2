@@ -28,18 +28,43 @@ import pygame_sdl2
 
 import warnings
 
+# This inits SDL proper, and should be called by the other init methods.
+
+main_done = False
+
+def sdl_main_init():
+    global main_done
+
+    if main_done:
+        return
+
+    SDL_SetMainReady()
+
+    if SDL_Init(0):
+        raise error()
+
+    main_done = True
+
 # True if init has been called without quit being called.
 init_done = False
 
-# The window that is used by the various module globals.
-main_window = None
-
 @pygame_sdl2.register_init
 def init():
-    SDL_Init(SDL_INIT_VIDEO)
+
+    if init_done:
+        return
+
+    sdl_main_init()
+
+    if SDL_InitSubSystem(SDL_INIT_VIDEO):
+        raise error()
+
+    pygame_sdl2.event.init()
 
     global init_done
     init_done = True
+
+
 
 @pygame_sdl2.register_quit
 def quit(): # @ReservedAssignment
@@ -56,6 +81,9 @@ def quit(): # @ReservedAssignment
 def get_init():
     return init_done
 
+
+# The window that is used by the various module globals.
+main_window = None
 
 cdef class Window:
     def __init__(self, title, resolution=(0, 0), flags=0, depth=0):

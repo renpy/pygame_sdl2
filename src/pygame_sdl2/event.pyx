@@ -24,8 +24,6 @@ import pygame_sdl2
 
 include "event_names.pxi"
 
-
-
 # Add events to emulate SDL 1.2. These also need to be added in locals.
 ACTIVEEVENT = SDL_LASTEVENT - 1
 VIDEORESIZE = SDL_LASTEVENT - 2
@@ -373,6 +371,11 @@ def post(e):
         if not get_blocked(e.type):
             event_queue.append(e)
 
-@pygame_sdl2.register_init
+# Usually called by display.init.
 def init():
-    SDL_Init(SDL_INIT_EVENTS)
+    if not SDL_WasInit(SDL_INIT_EVENTS):
+
+        pygame_sdl2.display.sdl_main_init()
+
+        if SDL_InitSubSystem(SDL_INIT_EVENTS):
+            raise pygame_sdl2.error.error()
