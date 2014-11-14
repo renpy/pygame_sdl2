@@ -129,3 +129,18 @@ cdef class Font:
 
     def get_descent(self):
         return TTF_FontDescent(self.font)
+
+    def metrics(self, text not None):
+        cdef int minx, maxx, miny, maxy, advance
+        cdef uint16_t chnum
+        rv = []
+
+        for ch in text:
+            chnum = ord(ch)
+
+            if TTF_GlyphMetrics(self.font, chnum, &minx, &maxx, &miny, &maxy, &advance) == 0:
+                rv.append((minx, maxx, miny, maxy, advance))
+            else:
+                rv.append(None)
+
+        return rv
