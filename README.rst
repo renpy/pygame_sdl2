@@ -24,7 +24,7 @@ Current Status
 
 Pygame_sdl2 builds and runs on Windows, Mac OS X, and Linux, with a useful
 subset of the pygame API working. The following modules have at least
-some implementation::
+some implementation:
 
 * pygame_sdl2.color
 * pygame_sdl2.display
@@ -44,7 +44,7 @@ some implementation::
 * pygame_sdl2.transform
 * pygame_sdl2.version
 
-Current omissions include::
+Current omissions include:
 
 * Modules not listed above.
 
