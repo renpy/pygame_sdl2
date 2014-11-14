@@ -97,6 +97,7 @@ try_import("joystick")
 try_import("mixer")
 try_import("mouse")
 try_import("transform")
+try_import("scrap")
 try_import("sprite")
 try_import("sysfont")
 
@@ -112,6 +113,7 @@ def _optional_imports():
     import mixer
     import mouse
     import transform
+    import scrap
     import sprite
     import sysfont
 

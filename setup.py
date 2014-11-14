@@ -51,6 +51,7 @@ cython("pygame_sdl2.draw", libs=sdl_libs)
 cython("pygame_sdl2.font", libs=['SDL2_ttf'] + sdl_libs)
 cython("pygame_sdl2.mixer", libs=['SDL2_mixer'] + sdl_libs)
 cython("pygame_sdl2.mixer_music", libs=['SDL2_mixer'] + sdl_libs)
+cython("pygame_sdl2.scrap", libs=sdl_libs)
 cython("pygame_sdl2.render", libs=['SDL2_image'] + sdl_libs)
 
 if "PYGAME_SDL2_INSTALL_HEADERS" in os.environ:
