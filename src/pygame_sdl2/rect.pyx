@@ -17,41 +17,39 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+import collections
+
+def flatten(seq):
+    for obj in seq:
+        if isinstance(obj, collections.Iterable):
+            for x in flatten(obj):
+                yield x
+        else:
+            yield obj
+
+
 cdef class Rect:
 
     def __init__(self, *args):
 
         cdef int x, y, w, h
 
-        len_args = len(args)
-
-        if len_args == 1:
-
-            if isinstance(args[0], Rect):
-                x = args[0].x
-                y = args[0].y
-                w = args[0].w
-                h = args[0].h
-
-            else:
-                if len(args[0]) == 4:
-                    x, y, w, h = args[0]
-                elif len(args[0]) == 2:
-                    x, y = args[0]
-                    w = 0
-                    h = 0
-                else:
-                    raise TypeError("Argument must be a rect style object.")
-
-        elif len_args == 2:
-            (x, y) = args[0]
-            (w, h) = args[1]
-
-        elif len_args == 4:
-            x, y, w, h = args
+        if len(args) == 1 and isinstance(args[0], Rect):
+            x, y, w, h = args[0]
 
         else:
-            raise TypeError("Argument must be a rect style object.")
+            flat_args = tuple(flatten(args))
+
+            if len(flat_args) == 2:
+                x, y = flat_args
+                w = 0
+                h = 0
+
+            elif len(flat_args) == 4:
+                x, y, w, h = flat_args
+
+            else:
+                raise TypeError("Argument must be a rect style object.")
 
         self.x = x
         self.y = y
@@ -193,21 +191,23 @@ cdef class Rect:
     def copy(self):
         return Rect(self)
 
-    def move(self, x, y):
+    def move(self, *args):
         r = self.copy()
-        r.move_ip(x, y)
+        r.move_ip(*args)
         return r
 
-    def move_ip(self, x, y):
+    def move_ip(self, *args):
+        x, y = flatten(args)
         self.x += x
         self.y += y
 
-    def inflate(self, x, y):
+    def inflate(self, *args):
         r = self.copy()
-        r.inflate_ip(x, y)
+        r.inflate_ip(*args)
         return r
 
-    def inflate_ip(self, x, y):
+    def inflate_ip(self, *args):
+        x, y = flatten(args)
         c = self.center
         self.w += x
         self.h += y
