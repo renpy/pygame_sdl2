@@ -28,6 +28,7 @@ from error import error
 from color import Color
 import json
 
+
 cdef class Renderer:
     cdef SDL_Renderer *renderer
 
@@ -38,10 +39,12 @@ cdef class Renderer:
         if self.renderer:
             SDL_DestroyRenderer(self.renderer)
 
-    def __init__(self, Window window=None):
+    def __init__(self, Window window=None, vsync=False):
         if window is None:
             window = main_window
         cdef uint32_t flags = SDL_RENDERER_ACCELERATED
+        if vsync:
+            flags |= SDL_RENDERER_PRESENTVSYNC
         self.renderer = SDL_CreateRenderer(window.window, -1, flags)
         if self.renderer == NULL:
             self.renderer = SDL_GetRenderer(window.window)
@@ -59,14 +62,14 @@ cdef class Renderer:
         if tex == NULL:
             raise error()
         t.set(tex)
-        return TextureInstance(t)
+        return TextureNode(t)
 
     def load_atlas(self, fn):
         """ Loads a file in the popular JSON (Hash) format exported by
             TexturePacker and other software. """
         jdata = json.load(open(fn,"r"))
         image = jdata["meta"]["image"]
-        cdef TextureInstance ti = self.load_texture(image)
+        cdef TextureNode ti = self.load_texture(image)
         return TextureAtlas(ti, jdata)
 
     def clear(self, color):
@@ -75,21 +78,28 @@ cdef class Renderer:
         SDL_SetRenderDrawColor(self.renderer, color.r, color.g, color.b, color.a)
         SDL_RenderClear(self.renderer)
 
-    def render(self, TextureInstance ti not None, dest):
+    def render(self, TextureNode ti not None, dest):
         cdef SDL_Rect dest_rect
         cdef SDL_Rect area_rect
         cdef SDL_Rect *area_ptr = NULL
 
         to_sdl_rect(dest, &dest_rect, "dest")
-        dest_rect.x += ti.trimmed_rect.x
-        dest_rect.y += ti.trimmed_rect.y
-        dest_rect.w = ti.trimmed_rect.w
-        dest_rect.h = ti.trimmed_rect.h
 
-        SDL_RenderCopy(self.renderer, ti.texture.texture, &ti.source_rect, &dest_rect)
+        with nogil:
+            dest_rect.x += <int>(ti._scalex * ti.trimmed_rect.x)
+            dest_rect.y += <int>(ti._scaley * ti.trimmed_rect.y)
+            dest_rect.w = <int>(ti._scalex * ti.trimmed_rect.w)
+            dest_rect.h = <int>(ti._scaley * ti.trimmed_rect.h)
+
+            SDL_SetTextureColorMod(ti.texture.texture, ti._color.r, ti._color.g, ti._color.b)
+            SDL_SetTextureAlphaMod(ti.texture.texture, ti._color.a)
+
+            SDL_RenderCopyEx(self.renderer, ti.texture.texture, &ti.source_rect,
+                &dest_rect, ti._rotation, NULL, <SDL_RendererFlip>ti._flip)
 
     def render_present(self):
-        SDL_RenderPresent(self.renderer)
+        with nogil:
+            SDL_RenderPresent(self.renderer)
 
     def info(self):
         cdef SDL_RendererInfo rinfo
@@ -105,6 +115,32 @@ cdef class Renderer:
             "max_texture_width" : rinfo.max_texture_width,
             "max_texture_height" : rinfo.max_texture_height,
         }
+
+    cdef set_drawcolor(self, col):
+        if not isinstance(col, Color):
+            col = Color(col)
+        SDL_SetRenderDrawColor(self.renderer, col.r, col.g, col.b, col.a)
+
+    def draw_line(self, color not None, x1, y1, x2, y2):
+        self.set_drawcolor(color)
+        if SDL_RenderDrawLine(self.renderer, x1, y1, x2, y2) != 0:
+            raise error()
+
+    def draw_point(self, color not None, x, y):
+        self.set_drawcolor(color)
+        SDL_RenderDrawPoint(self.renderer, x, y)
+
+    def draw_rect(self, color not None, rect):
+        cdef SDL_Rect r
+        to_sdl_rect(rect, &r)
+        self.set_drawcolor(color)
+        SDL_RenderDrawRect(self.renderer, &r)
+
+    def fill_rect(self, color not None, rect):
+        cdef SDL_Rect r
+        to_sdl_rect(rect, &r)
+        self.set_drawcolor(color)
+        SDL_RenderFillRect(self.renderer, &r)
 
 
 cdef class Texture:
@@ -134,7 +170,8 @@ cdef class Texture:
         self.h = h
 
 
-cdef class TextureInstance:
+# Partly modeled loosely on Futile by Matt Rix.
+cdef class TextureNode:
     """ Can be cropped, rotated, etc. """
 
     cdef Texture texture
@@ -143,24 +180,94 @@ cdef class TextureInstance:
     cdef int source_w
     cdef int source_h
 
+    # TODO: Move these to a Sprite class.
+    cdef double _rotation
+    cdef int _flip
+    cdef SDL_Color _color
+    cdef double _scalex
+    cdef double _scaley
+
     def __init__(self, tex):
+        self._color.r = 255
+        self._color.g = 255
+        self._color.b = 255
+        self._color.a = 255
+        self._scalex = 1.0
+        self._scaley = 1.0
+        self._flip = SDL_FLIP_NONE
+
         if isinstance(tex, Texture):
             self.texture = tex
-        elif isinstance(tex, TextureInstance):
-            self.texture = (<TextureInstance>tex).texture
+        elif isinstance(tex, TextureNode):
+            self.texture = (<TextureNode>tex).texture
         else:
             raise ValueError()
+
+    property color:
+        def __set__(self, val):
+            if not isinstance(val, Color):
+                val = Color(val)
+
+            self._color.r = val.r
+            self._color.g = val.g
+            self._color.b = val.b
+            self._color.a = val.a
+
+    property alpha:
+        def __get__(self):
+            return self._color.a
+
+        def __set__(self, val):
+            self._color.a = val
+
+    property rotation:
+        def __get__(self):
+            return self._rotation
+
+        def __set__(self, val):
+            self._rotation = val
+
+    property scale:
+        def __set__(self, arg):
+            if type(arg) == tuple:
+                x, y = arg
+            else:
+                x = y = arg
+
+            self._scalex = x
+            self._scaley = y
+
+    property hflip:
+        def __get__(self):
+            return self._flip & SDL_FLIP_HORIZONTAL
+
+        def __set__(self, val):
+            if val:
+                self._flip |= SDL_FLIP_HORIZONTAL
+            else:
+                self._flip &= ~SDL_FLIP_HORIZONTAL
+
+    property vflip:
+        def __get__(self):
+            return self._flip & SDL_FLIP_VERTICAL
+
+        def __set__(self, val):
+            if val:
+                self._flip |= SDL_FLIP_VERTICAL
+            else:
+                self._flip &= ~SDL_FLIP_VERTICAL
+
 
 cdef class TextureAtlas:
     cdef object frames
 
-    def __init__(self, TextureInstance ti, jdata):
+    def __init__(self, TextureNode ti, jdata):
         self.frames = {}
 
-        cdef TextureInstance itex
+        cdef TextureNode itex
         for itm in jdata["frames"].iteritems():
             iname, idict = itm
-            itex = TextureInstance(ti)
+            itex = TextureNode(ti)
             f = idict["frame"]
             to_sdl_rect((f['x'], f['y'], f['w'], f['h']), &itex.source_rect, "frame")
             f = idict["spriteSourceSize"]
@@ -174,3 +281,6 @@ cdef class TextureAtlas:
 
     def __getitem__(self, key):
         return self.frames[key]
+
+    def keys(self):
+        return self.frames.keys()
