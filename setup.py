@@ -59,6 +59,7 @@ if "PYGAME_SDL2_INSTALL_HEADERS" in os.environ:
         "src/pygame_sdl2/pygame_sdl2.h",
         "gen/pygame_sdl2.rwobject_api.h",
         "gen/pygame_sdl2.surface_api.h",
+        "gen/pygame_sdl2.display_api.h",
         ]
 else:
     headers = [ ]

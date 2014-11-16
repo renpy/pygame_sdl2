@@ -459,3 +459,19 @@ def set_caption(title, icontitle = None):
 
 def get_caption():
     return default_title
+
+
+cdef api SDL_Window *PyWindow_AsWindow(window):
+    """
+    Returns a pointer to the SDL_Window corresponding to `window`. If `window`
+    is None, a pointer to the main window is returned. NULL is returned if
+    there is no main window.
+    """
+
+    if window is None:
+        window = main_window
+
+    if window is None:
+        return NULL
+
+    return (<Window> window).window
