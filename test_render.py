@@ -9,12 +9,16 @@ SCREEN_WIDTH = 768
 SCREEN_HEIGHT = 640
 SPRITE_SCALE = 2
 
+import pprint
+pp = pprint.PrettyPrinter(indent=2)
+
 def main():
     pygame_sdl2.init()
-    pygame_sdl2.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pp.pprint(pygame_sdl2.render.get_drivers())
+    pygame_sdl2.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), OPENGL)
     pygame_sdl2.display.set_caption("SDL2 render test")
     r = pygame_sdl2.render.Renderer(vsync=False)
-    print r.info()
+    pp.pprint(r.info())
 
     bg = r.load_texture('paper.jpg')
 
@@ -54,6 +58,10 @@ def main():
     sprites[0].color = (255,0,0)
     sprites[1].color = (100,100,255)
 
+    con = pygame_sdl2.render.Container((-20,-20,32*8,32*8))
+    for s in sprites:
+        con.add(s)
+
     running = True
     while running:
         sprites[0].rotation += 1
@@ -64,6 +72,8 @@ def main():
 
         sprites[2].scale += 0.01
 
+        con.pos = con.pos[0] + 1, con.pos[1] + 1
+
         events = pygame_sdl2.event.get()
         for e in events:
             if e.type == QUIT:
@@ -73,8 +83,7 @@ def main():
 
         r.clear((0,0,0))
         bg.render()
-        for s in sprites:
-            s.render()
+        con.render()
         r.render_present()
         clock.tick()
 

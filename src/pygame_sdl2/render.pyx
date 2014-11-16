@@ -29,6 +29,37 @@ from color import Color
 import json
 import warnings
 
+BLENDMODE_NONE = SDL_BLENDMODE_NONE
+BLENDMODE_BLEND = SDL_BLENDMODE_BLEND
+BLENDMODE_ADD = SDL_BLENDMODE_ADD
+BLENDMODE_MOD = SDL_BLENDMODE_MOD
+
+cdef rinfo_to_dict(SDL_RendererInfo *rinfo):
+    # Ignore texture_formats for now.
+    return {
+            "name" : rinfo.name,
+            "software" : rinfo.flags & SDL_RENDERER_SOFTWARE != 0,
+            "accelerated" : rinfo.flags & SDL_RENDERER_ACCELERATED != 0,
+            "vsync" : rinfo.flags & SDL_RENDERER_PRESENTVSYNC != 0,
+            "rtt" : rinfo.flags & SDL_RENDERER_TARGETTEXTURE != 0,
+            "max_texture_width" : rinfo.max_texture_width,
+            "max_texture_height" : rinfo.max_texture_height,
+    }
+
+def get_drivers():
+    cdef SDL_RendererInfo rinfo
+    cdef int num_drivers
+    rv = []
+
+    num_drivers = SDL_GetNumRenderDrivers()
+    for n in range(num_drivers):
+        if SDL_GetRenderDriverInfo(n, &rinfo) != 0:
+            raise error()
+
+        rv.append(rinfo_to_dict(&rinfo))
+
+    return rv
+
 
 cdef class Renderer:
     cdef SDL_Renderer *renderer
@@ -41,7 +72,7 @@ cdef class Renderer:
         if self.renderer:
             SDL_DestroyRenderer(self.renderer)
 
-    def __init__(self, Window window=None, vsync=False):
+    def __init__(self, Window window=None, vsync=False, driver=-1):
         if window is None:
             window = main_window
 
@@ -49,7 +80,7 @@ cdef class Renderer:
         if vsync:
             flags |= SDL_RENDERER_PRESENTVSYNC
 
-        self.renderer = SDL_CreateRenderer(window.window, -1, flags)
+        self.renderer = SDL_CreateRenderer(window.window, driver, flags)
         if self.renderer == NULL:
             self.renderer = SDL_GetRenderer(window.window)
             if self.renderer == NULL:
@@ -59,15 +90,7 @@ cdef class Renderer:
         if SDL_GetRendererInfo(self.renderer, &rinfo) != 0:
             raise error()
 
-        # Ignore texture_formats for now.
-        self._info = {
-            "name" : rinfo.name,
-            "accelerated" : rinfo.flags & SDL_RENDERER_ACCELERATED != 0,
-            "vsync" : rinfo.flags & SDL_RENDERER_PRESENTVSYNC != 0,
-            "rtt" : rinfo.flags & SDL_RENDERER_TARGETTEXTURE != 0,
-            "max_texture_width" : rinfo.max_texture_width,
-            "max_texture_height" : rinfo.max_texture_height,
-        }
+        self._info = rinfo_to_dict(&rinfo)
 
         if not self.info()["accelerated"]:
             warnings.warn("Renderer is not accelerated.")
@@ -80,22 +103,18 @@ cdef class Renderer:
             tex = SDL_CreateTextureFromSurface(self.renderer, (<Surface>fi).surface)
         else:
             tex = IMG_LoadTexture_RW(self.renderer, to_rwops(fi), 1)
+
         if tex == NULL:
             raise error()
+
         t.set(self.renderer, tex)
         return TextureNode(t)
 
-    def load_atlas(self, fn):
+    def load_atlas(self, filename):
         """ Loads a file in the popular JSON (Hash) format exported by
             TexturePacker and other software. """
 
-        return TextureAtlas(self, fn)
-
-    def clear(self, color):
-        if not isinstance(color, Color):
-            color = Color(color)
-        SDL_SetRenderDrawColor(self.renderer, color.r, color.g, color.b, color.a)
-        SDL_RenderClear(self.renderer)
+        return TextureAtlas(self, filename)
 
     def render_present(self):
         with nogil:
@@ -108,6 +127,10 @@ cdef class Renderer:
         if not isinstance(col, Color):
             col = Color(col)
         SDL_SetRenderDrawColor(self.renderer, col.r, col.g, col.b, col.a)
+
+    def clear(self, color):
+        self.set_drawcolor(color)
+        SDL_RenderClear(self.renderer)
 
     def draw_line(self, color not None, x1, y1, x2, y2):
         self.set_drawcolor(color)
@@ -129,6 +152,18 @@ cdef class Renderer:
         to_sdl_rect(rect, &r)
         self.set_drawcolor(color)
         SDL_RenderFillRect(self.renderer, &r)
+
+    def set_viewport(self, rect=None):
+        cdef SDL_Rect vprect
+        if rect is None:
+            SDL_RenderSetViewport(self.renderer, NULL)
+        else:
+            to_sdl_rect(rect, &vprect)
+            SDL_RenderSetViewport(self.renderer, &vprect)
+
+    def create_texture(self, size):
+        if SDL_RenderTargetSupported(self.renderer) != SDL_TRUE:
+            raise error()
 
 
 cdef class Texture:
@@ -163,8 +198,14 @@ cdef class TextureNode:
     """ A specified area of a texture. """
 
     cdef Texture texture
+
+    # The absolute rect within the texture.
     cdef SDL_Rect source_rect
+
+    # The relative rect within the original tile.
     cdef SDL_Rect trimmed_rect
+
+    # The dimensions of the original tile.
     cdef int source_w
     cdef int source_h
 
@@ -232,7 +273,7 @@ cdef class TextureAtlas:
 
 
 cdef class Sprite:
-    """ One or more TextureNodes, with possible transformations. """
+    """ One or more TextureNodes, with possible transforms applied. """
 
     cdef list nodes
     cdef public object pos
@@ -354,3 +395,50 @@ cdef class Sprite:
                 self._flip |= SDL_FLIP_VERTICAL
             else:
                 self._flip &= ~SDL_FLIP_VERTICAL
+
+
+cdef class Container:
+    """ Multiple sprites, positioned relative to the container. """
+
+    cdef SDL_Rect _rect
+    cdef list sprites
+
+    def __init__(self, rect):
+        """ Parameter may be a position (no clipping) or a rect (clipped). """
+
+        self.sprites = []
+        to_sdl_rect(rect, &self._rect)
+        if len(rect) == 2:
+            self._rect.w = self._rect.h = 0
+
+    def add(self, Sprite sprite not None):
+        self.sprites.append(sprite)
+
+    def render(self, dest=None):
+        # TODO: Something other than this to get the SDL_Renderer.
+        cdef SDL_Renderer *ren = (<TextureNode>(<Sprite>self.sprites[0]).nodes[0]).texture.renderer
+
+        if self._rect.w != 0 and self._rect.h != 0:
+            SDL_RenderSetClipRect(ren, &self._rect)
+
+        for s in self.sprites:
+            s.render((s.pos[0] + self._rect.x, s.pos[1] + self._rect.y))
+
+        # TODO: Save and restore previous clip rect instead?
+        SDL_RenderSetClipRect(ren, NULL)
+
+    property pos:
+        def __get__(self):
+            return self._rect.x, self._rect.y
+
+        def __set__(self, val):
+            self._rect.x = val[0]
+            self._rect.y = val[1]
+
+    property rect:
+        def __get__(self):
+            return Rect(self._rect.x, self._rect.y, self._rect.w, self._rect.h)
+
+        def __set__(self, val):
+            to_sdl_rect(val, &self._rect)
+
