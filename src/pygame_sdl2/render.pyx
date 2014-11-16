@@ -18,6 +18,7 @@
 
 from sdl2 cimport *
 from sdl2_image cimport *
+from libc.string cimport memcpy, memset
 from display cimport *
 from surface cimport *
 from rwobject cimport to_rwops
@@ -33,6 +34,8 @@ BLENDMODE_NONE = SDL_BLENDMODE_NONE
 BLENDMODE_BLEND = SDL_BLENDMODE_BLEND
 BLENDMODE_ADD = SDL_BLENDMODE_ADD
 BLENDMODE_MOD = SDL_BLENDMODE_MOD
+
+cdef bint DEBUG_DRAW_BBOX = True
 
 cdef rinfo_to_dict(SDL_RendererInfo *rinfo):
     # Ignore texture_formats for now.
@@ -276,7 +279,8 @@ cdef class Sprite:
     """ One or more TextureNodes, with possible transforms applied. """
 
     cdef list nodes
-    cdef public object pos
+    cdef SDL_Rect _pos
+    cdef SDL_Rect bounding_box
 
     cdef double _rotation
     cdef int _flip
@@ -292,7 +296,9 @@ cdef class Sprite:
         self._scalex = 1.0
         self._scaley = 1.0
         self._flip = SDL_FLIP_NONE
-        self.pos = (0,0)
+
+        memset(&self._pos, 0, sizeof(SDL_Rect))
+        memset(&self.bounding_box, 0, sizeof(SDL_Rect))
 
         if isinstance(nodes, TextureNode):
             nodes = [nodes]
@@ -302,39 +308,67 @@ cdef class Sprite:
         for node in nodes:
             if not isinstance(node, TextureNode):
                 raise ValueError("Invalid argument: %s" % node)
+            SDL_UnionRect(&self.bounding_box, &(<TextureNode>node).trimmed_rect,
+                &self.bounding_box)
             self.nodes.append(node)
+
+    cdef void adjust_rect(Sprite self, const SDL_Rect *dest, const SDL_Rect *rin, SDL_Rect *rout) nogil:
+        rout.x = dest.x + <int>(self._scalex * rin.x)
+        rout.y = dest.y + <int>(self._scaley * rin.y)
+        rout.w = <int>(self._scalex * rin.w)
+        rout.h = <int>(self._scaley * rin.h)
 
     def render(self, dest=None):
         cdef Texture tex = (<TextureNode>self.nodes[0]).texture
         cdef SDL_Rect dest_rect
-        cdef SDL_Rect area_rect
-        cdef SDL_Rect *area_ptr = NULL
+        cdef SDL_Rect real_dest
         cdef SDL_Point pivot
 
         if dest is None:
-            dest = self.pos
+            memcpy(&dest_rect, &self._pos, sizeof(SDL_Rect))
+        else:
+            to_sdl_rect(dest, &dest_rect)
 
         with nogil:
             SDL_SetTextureColorMod(tex.texture, self._color.r, self._color.g, self._color.b)
             SDL_SetTextureAlphaMod(tex.texture, self._color.a)
 
+            if DEBUG_DRAW_BBOX:
+                # TODO: Adjust for rotation.
+                self.adjust_rect(&dest_rect, &self.bounding_box, &real_dest)
+
+                SDL_SetRenderDrawColor(tex.renderer, 0xFF, 0x00, 0xFF, 0xFF)
+                SDL_RenderDrawRect(tex.renderer, &real_dest)
+
         cdef TextureNode tn
         for x in self.nodes:
             tn = <TextureNode> x
-            to_sdl_rect(dest, &dest_rect, "dest")
 
             with nogil:
                 pivot.x = <int>(self._scalex * (tn.source_w / 2 - tn.trimmed_rect.x))
                 pivot.y = <int>(self._scaley * (tn.source_h / 2 - tn.trimmed_rect.y))
 
-                dest_rect.x += <int>(self._scalex * tn.trimmed_rect.x)
-                dest_rect.y += <int>(self._scaley * tn.trimmed_rect.y)
-                dest_rect.w = <int>(self._scalex * tn.trimmed_rect.w)
-                dest_rect.h = <int>(self._scaley * tn.trimmed_rect.h)
+                self.adjust_rect(&dest_rect, &tn.trimmed_rect, &real_dest)
 
                 SDL_RenderCopyEx(tex.renderer, tex.texture, &tn.source_rect,
-                    &dest_rect, self._rotation, &pivot,
+                    &real_dest, self._rotation, &pivot,
                     <SDL_RendererFlip>self._flip)
+
+    def collides(self, Sprite other not None):
+        cdef SDL_Rect r1, r2
+
+        self.adjust_rect(&self._pos, &self.bounding_box, &r1)
+        other.adjust_rect(&other._pos, &other.bounding_box, &r2)
+
+        return SDL_HasIntersection(&r1, &r2) == SDL_TRUE
+
+    property pos:
+        def __get__(self):
+            return self._pos.x, self._pos.y
+
+        def __set__(self, val):
+            self._pos.x = val[0]
+            self._pos.y = val[1]
 
     property color:
         def __set__(self, val):

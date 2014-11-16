@@ -58,7 +58,7 @@ def main():
     sprites[0].color = (255,0,0)
     sprites[1].color = (100,100,255)
 
-    con = pygame_sdl2.render.Container((-20,-20,32*8,32*8))
+    con = pygame_sdl2.render.Container((-64,-64,32*10,32*10))
     for s in sprites:
         con.add(s)
 
@@ -71,6 +71,8 @@ def main():
         sprites[1].rotation -=1
 
         sprites[2].scale += 0.01
+        if sprites[2].collides(sprites[4]):
+            print "COLLISION"
 
         con.pos = con.pos[0] + 1, con.pos[1] + 1
 
