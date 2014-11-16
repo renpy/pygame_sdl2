@@ -56,6 +56,7 @@ cython("pygame_sdl2.render", libs=['SDL2_image'] + sdl_libs)
 
 if "PYGAME_SDL2_INSTALL_HEADERS" in os.environ:
     headers = [
+        "src/pygame_sdl2/pygame_sdl2.h",
         "gen/pygame_sdl2.rwobject_api.h",
         "gen/pygame_sdl2.surface_api.h",
         ]
