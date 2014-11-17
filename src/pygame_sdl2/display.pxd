@@ -30,4 +30,7 @@ cdef class Window:
     # The OpenGL context corresponding to this window.
     cdef SDL_GLContext gl_context
 
+    # The flags the window was created with.
+    cdef Uint32 create_flags
+
 cdef Window main_window = None

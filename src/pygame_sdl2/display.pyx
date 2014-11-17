@@ -91,6 +91,8 @@ cdef class Window:
         if not isinstance(title, bytes):
             title = title.encode("utf-8")
 
+        self.create_flags = flags
+
         self.window = SDL_CreateWindow(
             title,
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -144,14 +146,43 @@ cdef class Window:
 
         SDL_DestroyWindow(self.window)
 
+    def resize(self, size):
+        """
+        Resizes the window to `size`, which must be a width, height tuple.
+        """
+
+        cdef int cur_width = 0
+        cdef int cur_height = 0
+
+        width, height = size
+
+        SDL_GetWindowSize(self.window, &cur_width, &cur_height)
+
+        if (cur_width != width) or (cur_height != height):
+            SDL_SetWindowSize(self.window, width, height)
+
+        if self.gl_context:
+
+            # Re-create the surface to reflect the new size.
+            # TODO: Make this a bit less wasteful of memory, even if it means
+            # we lie about the actual size of the pixel array.
+            self.surface = Surface((width, height), SRCALPHA, 32)
+
+        else:
+            self.surface.get_window_flags = None
+
+            self.surface = Surface(())
+            self.surface.surface = SDL_GetWindowSurface(self.window)
+            self.surface.owns_surface = False
+
     def get_window_flags(self):
         return SDL_GetWindowFlags(self.window)
 
     def flip(self):
         if self.gl_context != NULL:
             SDL_GL_SwapWindow(self.window)
-
-        SDL_UpdateWindowSurface(self.window)
+        else:
+            SDL_UpdateWindowSurface(self.window)
 
     def get_surface(self):
 
@@ -267,6 +298,15 @@ default_swap_control = 1
 
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
+
+    if main_window:
+
+        if flags == main_window.create_flags:
+            main_window.resize(resolution)
+            return main_window.surface
+
+        else:
+            main_window.destroy()
 
     main_window = Window(default_title, resolution, flags, depth)
 
