@@ -1,4 +1,5 @@
 # Copyright 2014 Patrick Dawson <pat@dw.is>
+#                Tom Rothamel <tom@rothamel.us>
 #
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -21,34 +22,45 @@ from sdl2_gfx cimport *
 from surface cimport *
 from error import error
 
-cdef Surface render_copy(Surface surf_in, double degrees, SDL_RendererFlip rflip):
-    w, h = surf_in.surface.w, surf_in.surface.h
-    if degrees != 0.0:
-        raise error("Don't use this function for rotation.")
 
-    cdef Surface surf_out = Surface((w, h), 0, surf_in)
-    cdef SDL_Renderer *render = NULL
-    cdef SDL_Texture *texture_in = NULL
-    cdef int err = -1
+def flip(Surface surface, bint xbool, bint ybool):
+
+    cdef Surface rv = Surface(surface.get_size(), surface.get_flags(), surface)
+    cdef SDL_Surface *src = surface.surface
+    cdef SDL_Surface *dest = rv.surface
+
+    cdef Uint32 *src_pixel
+    cdef Uint32 *src_end
+
+    cdef Uint32 *dest_pixel
+    cdef int dest_delta
+
+    cdef int y
 
     with nogil:
-        render = SDL_CreateSoftwareRenderer(surf_out.surface)
-        if render:
-            texture_in = SDL_CreateTextureFromSurface(render, surf_in.surface)
-            if texture_in:
-                err = SDL_RenderCopyEx(render, texture_in, NULL, NULL, degrees, NULL, rflip)
-                SDL_DestroyTexture(texture_in)
-            SDL_DestroyRenderer(render)
+        for 0 <= y < src.h:
 
-    if err != 0:
-        raise error()
-    return surf_out
+            src_pixel = <Uint32 *> ((<Uint8 *> src.pixels) + y * src.pitch)
+            src_end = src_pixel + src.w
 
-def flip(Surface surface, xbool, ybool):
-    cdef SDL_RendererFlip rflip = SDL_FLIP_HORIZONTAL if xbool else SDL_FLIP_NONE
-    if ybool:
-        rflip = <SDL_RendererFlip>(rflip | SDL_FLIP_VERTICAL)
-    return render_copy(surface, 0.0, rflip)
+            if ybool:
+                dest_pixel = <Uint32 *> ((<Uint8 *> dest.pixels) + (dest.h - y - 1) * dest.pitch)
+            else:
+                dest_pixel = <Uint32 *> ((<Uint8 *> dest.pixels) + y * dest.pitch)
+
+            if xbool:
+                dest_pixel += (src.w - 1)
+                dest_delta = -1
+            else:
+                dest_delta = 1
+
+            while src_pixel < src_end:
+                dest_pixel[0] = src_pixel[0]
+                src_pixel += 1
+                dest_pixel += dest_delta
+
+    return rv
+
 
 def scale(Surface surface, size, Surface DestSurface=None):
     cdef Surface surf_out
