@@ -188,6 +188,88 @@ cdef class Color:
     def __len__(self):
         return self.length
 
+    property cmy:
+        def __get__(self):
+            return 1 - (self.r / 255.0), 1 - (self.g / 255.0), 1 - (self.b / 255.0)
+
+        def __set__(self, val):
+            c, m, y = val
+            self.r = (1 - c) * 255
+            self.g = (1 - m) * 255
+            self.b = (1 - y) * 255
+
+    property hsva:
+        def __get__(self):
+            cdef double r = self.r / 255.0
+            cdef double g = self.g / 255.0
+            cdef double b = self.b / 255.0
+
+            cdef double cmax = max(r, g, b)
+            cdef double cmin = min(r, g, b)
+            cdef double delta = cmax - cmin
+
+            cdef double h, s, v, a
+
+            if r == g == b:
+                h = 0.0
+                s = 0.0
+            else:
+                if cmax == r:
+                    h = 60.0 * ((g - b) / delta % 6)
+                elif cmax == g:
+                    h = 60.0 * ((b - r) / delta + 2)
+                else:
+                    h = 60.0 * ((r - g) / delta + 4)
+
+                if cmax == 0.0:
+                    s = 0.0
+                else:
+                    s = delta / cmax * 100
+
+            v = cmax * 100
+            a = self.a / 255.0 * 100
+            return h, s, v, a
+
+        def __set__(self, val):
+            cdef double h, s, v, a
+            if len(val) == 3:
+                h, s, v = val
+                a = 0.0
+            else:
+                h, s, v, a = val
+
+            # These should be in a range of [0.0, 1.0]
+            s /= 100.0
+            v /= 100.0
+            a /= 100.0
+
+            cdef double c = v * s
+            cdef double x = c * (1 - abs((h / 60.0) % 2 - 1))
+            cdef double m = v - c
+
+            cdef double r, g, b
+
+            if 0 <= h < 60:
+                r, g, b = c, x, 0
+            elif 60 <= h < 120:
+                r, g, b = x, c, 0
+            elif 120 <= h < 180:
+                r, g, b = 0, c, x
+            elif 180 <= h < 240:
+                r, g, b = 0, x, c
+            elif 240 <= h < 300:
+                r, g, b = x, 0, c
+            elif 300 <= h < 360:
+                r, g, b = c, 0, x
+            else:
+                raise ValueError()
+
+            self.r = int(255 * (r + m))
+            self.g = int(255 * (g + m))
+            self.b = int(255 * (b + m))
+            self.a = int(255 * a)
+
+
     def normalize(self):
         return self.r / 255.0, self.g / 255.0, self.b / 255.0, self.a / 255.0
 
