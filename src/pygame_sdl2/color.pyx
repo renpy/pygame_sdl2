@@ -188,6 +188,57 @@ cdef class Color:
     def __len__(self):
         return self.length
 
+    def __mul__(self, Color rhs not None):
+        # Multiplying this way doesn't make much sense,
+        # but it's how pygame does it.
+
+        r = min(255, self.r * rhs.r)
+        g = min(255, self.g * rhs.g)
+        b = min(255, self.b * rhs.b)
+        a = min(255, self.a * rhs.a)
+
+        return Color(r, g, b, a)
+
+    def __add__(self, Color rhs not None):
+        r = min(255, self.r + rhs.r)
+        g = min(255, self.g + rhs.g)
+        b = min(255, self.b + rhs.b)
+        a = min(255, self.a + rhs.a)
+
+        return Color(r, g, b, a)
+
+    def __sub__(self, Color rhs not None):
+        r = max(0, self.r - rhs.r)
+        g = max(0, self.g - rhs.g)
+        b = max(0, self.b - rhs.b)
+        a = max(0, self.a - rhs.a)
+
+        return Color(r, g, b, a)
+
+    def __mod__(self, Color rhs not None):
+        r = self.r % rhs.r
+        g = self.g % rhs.g
+        b = self.b % rhs.b
+        a = self.a % rhs.a
+
+        return Color(r, g, b, a)
+
+    def __div__(self, Color rhs not None):
+        r = min(255, self.r / rhs.r)
+        g = min(255, self.g / rhs.g)
+        b = min(255, self.b / rhs.b)
+        a = min(255, self.a / rhs.a)
+
+        return Color(r, g, b, a)
+
+    def __floordiv__(self, Color rhs not None):
+        r = min(255, self.r // rhs.r)
+        g = min(255, self.g // rhs.g)
+        b = min(255, self.b // rhs.b)
+        a = min(255, self.a // rhs.a)
+
+        return Color(r, g, b, a)
+
     property cmy:
         def __get__(self):
             return 1 - (self.r / 255.0), 1 - (self.g / 255.0), 1 - (self.b / 255.0)
@@ -269,6 +320,107 @@ cdef class Color:
             self.b = int(255 * (b + m))
             self.a = int(255 * a)
 
+    property hsla:
+        def __get__(self):
+            cdef double h, s, l, a
+            cdef double r, g, b
+            cdef double cmin, cmax, delta
+
+            h = self.hsva[0]
+
+            r = self.r / 255.0
+            g = self.g / 255.0
+            b = self.b / 255.0
+
+            cmin = min(r, g, b)
+            cmax = max(r, g, b)
+            delta = cmax - cmin
+
+            l = (cmax + cmin) / 2.0
+
+            if delta == 0:
+                s = 0.0
+            else:
+                s = delta / (1 - abs(2 * l - 1))
+
+            a = self.a / 255.0 * 100
+
+            s = min(100.0, s * 100)
+            l = min(100.0, l * 100)
+
+            return h, s, l, a
+
+        def __set__(self, val):
+            cdef double h, s, l, a
+            if len(val) == 3:
+                h, s, l = val
+                a = 0.0
+            else:
+                h, s, l, a = val
+
+            s /= 100.0
+            l /= 100.0
+            a /= 100.0
+
+            cdef double c = (1 - abs(2*l - 1)) * s
+            cdef double x = c * (1 - abs((h / 60.0) % 2 - 1))
+            cdef double m = l - c / 2.0
+
+            cdef double r, g, b
+            if 0 <= h < 60:
+                r, g, b = c, x, 0
+            elif 60 <= h < 120:
+                r, g, b = x, c, 0
+            elif 120 <= h < 180:
+                r, g, b = 0, c, x
+            elif 180 <= h < 240:
+                r, g, b = 0, x, c
+            elif 240 <= h < 300:
+                r, g, b = x, 0, c
+            elif 300 <= h < 360:
+                r, g, b = c, 0, x
+            else:
+                raise ValueError()
+
+            self.r = int(255 * (r + m))
+            self.g = int(255 * (g + m))
+            self.b = int(255 * (b + m))
+            self.a = int(255 * a)
+
+    property i1i2i3:
+        def __get__(self):
+            # Take the dot product as described here:
+            # http://de.wikipedia.org/wiki/I1I2I3-Farbraum
+
+            cdef double i1, i2, i3
+            cdef double r, g, b
+
+            r = self.r / 255.0
+            g = self.g / 255.0
+            b = self.b / 255.0
+
+            i1 = (r + g + b) / 3.0
+            i2 = (r - b) / 2.0
+            i3 = (2*g - r - b) / 4.0
+
+            return i1, i2, i3
+
+        def __set__(self, val):
+            # Dot product with the inverted matrix.
+
+            cdef double i1, i2, i3
+            cdef double r, g, b
+
+            i1, i2, i3 = val
+
+            r = i1 + i2 - (2.0/3.0 * i3)
+            g = i1 + (4.0/3.0 * i3)
+            b = i1 - i2  - (2.0/3.0 * i3)
+
+            # Don't change alpha.
+            self.r = int(r * 255)
+            self.g = int(g * 255)
+            self.b = int(b * 255)
 
     def normalize(self):
         return self.r / 255.0, self.g / 255.0, self.b / 255.0, self.a / 255.0
