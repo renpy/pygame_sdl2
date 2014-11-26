@@ -70,7 +70,7 @@ end-users. Check out the pygame documentation at:
 
 There is one new api we should mention. Running the code::
 
-    import pygame_sdl
+    import pygame_sdl2
     pygame_sdl2.import_as_pygame()
 
 Will modify sys.modules so that pygame_sdl2 modules are used instead of
