@@ -40,6 +40,8 @@ extensions = [ ]
 # A list of macros that are defined for all modules.
 global_macros = [ ]
 
+# True if we're building on android.
+android = "PYGAME_SDL2_ANDROID" in os.environ
 
 def system_path(path):
     """
@@ -86,11 +88,18 @@ def parse_libs(command):
 
     return libs
 
+
+# A list of modules we do not wish to include.
+exclude = set(os.environ.get("PYGAME_SDL2_EXCLUDE", "").split())
+
 def cmodule(name, source, libs=[], define_macros=[]):
     """
     Compiles the python module `name` from the files given in
     `source`, and the libraries in `libs`.
     """
+
+    if name in exclude:
+        return
 
     extensions.append(distutils.core.Extension(
         name,
@@ -226,6 +235,9 @@ def pymodule(name):
     """
     Causes a python module to be included in the build.
     """
+
+    if name in exclude:
+        return
 
     py_modules.append(name)
 

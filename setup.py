@@ -18,11 +18,14 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+from setuplib import android, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
 import os
 
-parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
-sdl_libs = parse_libs([ "sh", "-c", "sdl2-config --libs" ])
+if android:
+    sdl_libs = [ 'SDL2' ]
+else:
+    parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
+    sdl_libs = parse_libs([ "sh", "-c", "sdl2-config --libs" ])
 
 pymodule("pygame_sdl2.__init__")
 pymodule("pygame_sdl2.compat")

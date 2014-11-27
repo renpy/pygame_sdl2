@@ -299,6 +299,14 @@ default_swap_control = 1
 def set_mode(resolution=(0, 0), flags=0, depth=0):
     global main_window
 
+    # If we're on android, we have to close the splash window before opening
+    # our window.
+    try:
+        import androidembed
+        androidembed.close_window()
+    except ImportError:
+        pass
+
     if main_window:
 
         if flags == main_window.create_flags:
