@@ -43,6 +43,10 @@ global_macros = [ ]
 # True if we're building on android.
 android = "PYGAME_SDL2_ANDROID" in os.environ
 
+# True if we're building on ios.
+ios = "PYGAME_SDL2_IOS" in os.environ
+
+
 def system_path(path):
     """
     On windows/msys, converts a unix-style path returned from sdl2-config

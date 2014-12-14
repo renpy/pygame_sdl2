@@ -18,10 +18,10 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-from setuplib import android, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+from setuplib import android, ios, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
 import os
 
-if android:
+if android or ios:
     sdl_libs = [ 'SDL2' ]
 else:
     parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
