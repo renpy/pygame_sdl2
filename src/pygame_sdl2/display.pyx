@@ -27,6 +27,10 @@ from pygame_sdl2.error import error
 import pygame_sdl2
 
 import warnings
+import os
+
+# True if we are on ios.
+ios = ("PYGAME_IOS" in os.environ)
 
 # This inits SDL proper, and should be called by the other init methods.
 
@@ -112,8 +116,9 @@ cdef class Window:
                 self.destroy()
                 raise error()
 
-            if SDL_GL_SetSwapInterval(default_swap_control) and SDL_GL_SetSwapInterval(-default_swap_control):
-                raise error()
+            if not ios:
+                if SDL_GL_SetSwapInterval(default_swap_control) and SDL_GL_SetSwapInterval(-default_swap_control):
+                    raise error()
 
             # For now, make this the size of the window so get_size() works.
             # TODO: Make this a bit less wasteful of memory, even if it means
@@ -428,6 +433,9 @@ def gl_reset_attributes():
 def gl_set_attribute(flag, value):
 
     if flag == GL_SWAP_CONTROL:
+        if ios:
+            return
+
         # Try value. If value is -1, this may fail if late tearing is not
         # supported, so we try 1 (vsync) instead.
         if main_window:
