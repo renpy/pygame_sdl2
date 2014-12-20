@@ -27,7 +27,7 @@ import distutils.core
 cython_command = "cython"
 
 # The include and library dirs that we compile against.
-include_dirs = [ "." ]
+include_dirs = [ ".", "src" ]
 library_dirs = [ ]
 
 # Extra arguments that will be given to the compiler.
@@ -61,10 +61,14 @@ def system_path(path):
 def parse_cflags(command):
     """
     Runs `command`, and uses the command's output to set up include_dirs
-    and extra_compile_args.
+    and extra_compile_args. if `command` is None, parses the cflags from
+    the environment.
     """
 
-    output = subprocess.check_output(command)
+    if command is not None:
+        output = subprocess.check_output(command)
+    else:
+        output = os.environ.get("CFLAGS", "")
 
     for i in output.split():
         if i.startswith("-I"):
@@ -72,10 +76,13 @@ def parse_cflags(command):
         else:
             extra_compile_args.append(i)
 
+parse_cflags(None)
+
 def parse_libs(command):
     """
     Runs `command`, and uses the command's output to set up library_dirs and
-    extra_link_args. Returns a list of libraries to link against.
+    extra_link_args. Returns a list of libraries to link against. If `command`
+    is None, parses LDFLAGS from the environment.
     """
 
     output = subprocess.check_output(command)

@@ -100,6 +100,9 @@ def load(fi, namehint=""):
     except error:
         return surf
 
+cdef extern from "write_jpeg.h":
+    int Pygame_SDL2_SaveJPEG(SDL_Surface *, char *) nogil
+
 def save(Surface surface not None, filename):
     ext = os.path.splitext(filename)[1]
     ext = ext.upper()
@@ -115,6 +118,9 @@ def save(Surface surface not None, filename):
         rwops = to_rwops(filename, "wb")
         with nogil:
             err = SDL_SaveBMP_RW(surface.surface, rwops, 1)
+    elif ext == ".JPG" or ext == ".JPEG":
+        with nogil:
+            err = Pygame_SDL2_SaveJPEG(surface.surface, fn)
     else:
         raise ValueError("Unsupported format: %s" % ext)
 
