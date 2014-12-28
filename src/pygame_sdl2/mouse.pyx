@@ -40,7 +40,8 @@ def get_rel():
     SDL_GetRelativeMouseState(&x, &y)
     return (x, y)
 
-def set_pos(x, y):
+def set_pos(pos):
+    (x, y) = pos
     SDL_WarpMouseInWindow(NULL, x, y)
 
 def set_visible(visible):

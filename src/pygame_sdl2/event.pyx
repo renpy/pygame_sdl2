@@ -227,6 +227,9 @@ cdef object get_events(kinds):
     The lock must be held when calling this function.
     """
 
+    if isinstance(kinds, (int, long)):
+        kinds = [ kinds ]
+
     global event_queue
 
     cdef list rv = [ ]
