@@ -143,6 +143,12 @@ cdef make_joyhat_event(SDL_JoyHatEvent *e):
 cdef make_joybtn_event(SDL_JoyButtonEvent *e):
     return EventType(e.type, joy=e.which, button=e.button)
 
+cdef make_textinput_event(SDL_TextInputEvent *e):
+    return EventType(e.type, text=e.text.decode("utf-8"))
+
+cdef make_textediting_event(SDL_TextEditingEvent *e):
+    return EventType(e.type, text=e.text.decode("utf-8"), start=e.start, length=e.length)
+
 cdef make_window_event(SDL_WindowEvent *e):
     # SDL_APPMOUSEFOCUS
     if e.event == SDL_WINDOWEVENT_ENTER:
@@ -189,6 +195,10 @@ cdef make_event(SDL_Event *e):
         return make_joybtn_event(<SDL_JoyButtonEvent*>e)
     elif e.type == SDL_WINDOWEVENT:
         return make_window_event(<SDL_WindowEvent*>e)
+    elif e.type == SDL_TEXTINPUT:
+        return make_textinput_event(<SDL_TextInputEvent *> e)
+    elif e.type == SDL_TEXTEDITING:
+        return make_textediting_event(<SDL_TextEditingEvent *> e)
     elif e.type >= SDL_USEREVENT:
         # Can't do anything useful with data1 and data2 here.
         return EventType(e.type, code=e.user.code)

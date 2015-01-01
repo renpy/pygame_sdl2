@@ -19,6 +19,7 @@
 from sdl2 cimport *
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
+from rect cimport to_sdl_rect
 
 from error import error
 
@@ -81,3 +82,19 @@ def get_repeat():
 
 def name(key):
     return SDL_GetKeyName(key)
+
+def start_text_input():
+    SDL_StartTextInput()
+
+def stop_text_input():
+    SDL_StopTextInput()
+
+def set_text_input_rect(rect):
+    cdef SDL_Rect sdl_rect;
+
+    if rect is not None:
+        to_sdl_rect(rect, &sdl_rect)
+        SDL_SetTextInputRect(&sdl_rect)
+    else:
+        SDL_SetTextInputRect(NULL)
+
