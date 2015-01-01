@@ -85,17 +85,20 @@ cdef get_textinput():
 cdef make_keyboard_event(SDL_KeyboardEvent *e):
     dargs = { 'scancode' : e.keysym.scancode,
               'key' : e.keysym.sym,
-              'mod' : e.keysym.mod }
-    if e.type == SDL_KEYDOWN:
-        # Be careful to only check for a TEXTINPUT event when you know that
-        # there will be one associated with this KEYDOWN event.
-        if e.keysym.sym < 0x20:
-            uchar = unichr(e.keysym.sym)
-        elif e.keysym.sym <= 0xFFFF:
-            uchar = get_textinput()
-        else:
-            uchar = u''
-        dargs['unicode'] = uchar
+              'mod' : e.keysym.mod,
+              'unicode' : '',
+               }
+
+    if not pygame_sdl2.key.text_input:
+
+        if e.type == SDL_KEYDOWN:
+            # Be careful to only check for a TEXTINPUT event when you know that
+            # there will be one associated with this KEYDOWN event.
+            if e.keysym.sym < 0x20:
+                dargs['unicode'] = unichr(e.keysym.sym)
+            elif e.keysym.sym <= 0xFFFF:
+                dargs['unicode'] = get_textinput()
+
     return EventType(e.type, dict=dargs, repeat=e.repeat)
 
 cdef make_mousemotion_event(SDL_MouseMotionEvent *e):
