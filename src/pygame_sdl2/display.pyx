@@ -356,7 +356,7 @@ class Info(object):
         cdef SDL_DisplayMode dm
         cdef SDL_PixelFormat *format
 
-        if SDL_GetDesktopDisplayMode(0, &dm):
+        if SDL_GetCurrentDisplayMode(0, &dm):
             raise error()
 
         format = SDL_AllocFormat(dm.format)
