@@ -166,12 +166,16 @@ cdef class Window:
         if (cur_width != width) or (cur_height != height):
             SDL_SetWindowSize(self.window, width, height)
 
+        cdef int w, h
+
         if self.gl_context:
+
+            SDL_GetWindowSize(self.window, &w, &h)
 
             # Re-create the surface to reflect the new size.
             # TODO: Make this a bit less wasteful of memory, even if it means
             # we lie about the actual size of the pixel array.
-            self.surface = Surface((width, height), SRCALPHA, 32)
+            self.surface = Surface((w, h), SRCALPHA, 32)
 
         else:
             self.surface.get_window_flags = None
