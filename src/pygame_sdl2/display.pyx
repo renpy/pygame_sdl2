@@ -316,6 +316,12 @@ def set_mode(resolution=(0, 0), flags=0, depth=0):
     except ImportError:
         pass
 
+    try:
+        import iosembed
+        iosembed.close_window()
+    except ImportError:
+        pass
+
     if main_window:
 
         if flags == main_window.create_flags:
