@@ -241,11 +241,11 @@ cdef class Window:
         return True
 
     def toggle_fullscreen(self):
-        if SDL_GetWindowFlags(self.window) & (SDL_WINDOW_FULLSCREEN):
+        if SDL_GetWindowFlags(self.window) & (SDL_WINDOW_FULLSCREEN_DESKTOP):
             if SDL_SetWindowFullscreen(self.window, 0):
                 raise error()
         else:
-            if SDL_SetWindowFullscreen(self.window, SDL_WINDOW_FULLSCREEN):
+            if SDL_SetWindowFullscreen(self.window, SDL_WINDOW_FULLSCREEN_DESKTOP):
                 raise error()
 
         return True
