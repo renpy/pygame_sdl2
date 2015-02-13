@@ -95,6 +95,7 @@ def stop_text_input():
     global text_input
 
     SDL_StopTextInput()
+    SDL_EventState(SDL_TEXTINPUT, SDL_ENABLE)
     text_input = False
 
 def set_text_input_rect(rect):
