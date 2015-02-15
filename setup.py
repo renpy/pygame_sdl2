@@ -27,6 +27,11 @@ else:
     parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
     sdl_libs = parse_libs([ "sh", "-c", "sdl2-config --libs" ])
 
+if android:
+    png = "png16"
+else:
+    png = "png"
+
 pymodule("pygame_sdl2.__init__")
 pymodule("pygame_sdl2.compat")
 pymodule("pygame_sdl2.threads.__init__")
@@ -48,7 +53,7 @@ cython("pygame_sdl2.key", libs=sdl_libs)
 cython("pygame_sdl2.mouse", libs=sdl_libs)
 cython("pygame_sdl2.joystick", libs=sdl_libs)
 cython("pygame_sdl2.pygame_time", libs=sdl_libs)
-cython("pygame_sdl2.image", source=[ "src/write_jpeg.c" ], libs=['SDL2_image', "jpeg", ] + sdl_libs)
+cython("pygame_sdl2.image", source=[ "src/write_jpeg.c", "src/write_png.c" ], libs=['SDL2_image', "jpeg", png ] + sdl_libs)
 cython("pygame_sdl2.transform", libs=['SDL2_gfx'] + sdl_libs)
 cython("pygame_sdl2.gfxdraw", libs=['SDL2_gfx'] + sdl_libs)
 cython("pygame_sdl2.draw", libs=sdl_libs)

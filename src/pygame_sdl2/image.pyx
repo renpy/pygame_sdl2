@@ -103,6 +103,9 @@ def load(fi, namehint=""):
 cdef extern from "write_jpeg.h":
     int Pygame_SDL2_SaveJPEG(SDL_Surface *, char *) nogil
 
+cdef extern from "write_png.h":
+    int Pygame_SDL2_SavePNG(const char *, SDL_Surface *, int) nogil
+
 def save(Surface surface not None, filename):
     ext = os.path.splitext(filename)[1]
     ext = ext.upper()
@@ -113,7 +116,7 @@ def save(Surface surface not None, filename):
 
     if ext == '.PNG':
         with nogil:
-            err = IMG_SavePNG(surface.surface, fn)
+            err = Pygame_SDL2_SavePNG(fn, surface.surface, 9)
     elif ext == '.BMP':
         rwops = to_rwops(filename, "wb")
         with nogil:
