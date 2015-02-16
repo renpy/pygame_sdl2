@@ -526,6 +526,8 @@ def set_caption(title, icontitle = None):
 def get_caption():
     return default_title
 
+def hint(hint, value):
+    SDL_SetHint(hint, value)
 
 cdef api SDL_Window *PyWindow_AsWindow(window):
     """
