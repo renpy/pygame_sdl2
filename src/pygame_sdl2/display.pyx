@@ -60,6 +60,8 @@ def init():
 
     sdl_main_init()
 
+    hint("SDL_VIDEO_MAC_FULLSCREEN_SPACES", "0")
+
     if SDL_InitSubSystem(SDL_INIT_VIDEO):
         raise error()
 
