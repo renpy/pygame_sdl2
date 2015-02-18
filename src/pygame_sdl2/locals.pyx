@@ -59,7 +59,6 @@ globals().update(dict(
     KMOD_RSHIFT = sdl2.KMOD_RSHIFT,
     KMOD_SHIFT = sdl2.KMOD_SHIFT,
 
-
     KMOD_LCTRL = sdl2.KMOD_LCTRL,
     KMOD_RCTRL = sdl2.KMOD_RCTRL,
     KMOD_CTRL = sdl2.KMOD_CTRL,
@@ -80,4 +79,30 @@ globals().update(dict(
     KMOD_CAPS = sdl2.KMOD_CAPS,
 
     KMOD_MODE = sdl2.KMOD_MODE,
+
+    K_BREAK = sdl2.K_PAUSE,
+    K_EURO = sdl2.K_CURRENCYUNIT,
+
+    K_FIRST = 0,
+    K_LAST = sdl2.SDLK_SLEEP,
+
+    K_KP0 = sdl2.SDLK_KP_0,
+    K_KP1 = sdl2.SDLK_KP_1,
+    K_KP2 = sdl2.SDLK_KP_2,
+    K_KP3 = sdl2.SDLK_KP_3,
+    K_KP4 = sdl2.SDLK_KP_4,
+    K_KP5 = sdl2.SDLK_KP_5,
+    K_KP6 = sdl2.SDLK_KP_6,
+    K_KP7 = sdl2.SDLK_KP_7,
+    K_KP8 = sdl2.SDLK_KP_8,
+    K_KP9 = sdl2.SDLK_KP_9,
+
+    K_LMETA = sdl2.SDLK_LGUI,
+    K_LSUPER = sdl2.SDLK_LGUI,
+    K_RMETA = sdl2.SDLK_RGUI,
+    K_RSUPER = sdl2.SDLK_RGUI,
+
+    K_NUMLOCK = sdl2.SDLK_NUMLOCKCLEAR,
+    K_SCROLLOCK = sdl2.SDLK_SCROLLLOCK,
+    K_PRINT = sdl2.SDLK_PRINTSCREEN,
 ))
