@@ -80,11 +80,11 @@ globals().update(dict(
 
     KMOD_MODE = sdl2.KMOD_MODE,
 
-    K_BREAK = sdl2.K_PAUSE,
-    K_EURO = sdl2.K_CURRENCYUNIT,
-
     K_FIRST = 0,
     K_LAST = sdl2.SDLK_SLEEP,
+
+    K_BREAK = sdl2.SDLK_PAUSE,
+    K_EURO = sdl2.SDLK_CURRENCYUNIT,
 
     K_KP0 = sdl2.SDLK_KP_0,
     K_KP1 = sdl2.SDLK_KP_1,
