@@ -20,7 +20,7 @@ from sdl2 cimport *
 from sdl2_gfx cimport *
 from libc.stdlib cimport malloc, free
 from surface cimport Surface
-from color cimport Color
+from color cimport map_color
 
 from error import error
 from rect import Rect
@@ -38,13 +38,12 @@ cdef class DrawArgs:
             SDL_DestroyRenderer(self.renderer)
 
     def __init__(self, Surface surf, c):
-        if surf == None:
+        if surf is None:
             raise error("Surface is None.")
 
-        if c != None:
-            if not isinstance(c, Color):
-                c = Color(c)
-            self.color = SDL_MapRGBA(surf.surface.format, c.r, c.g, c.b, c.a)
+        if c is not None:
+            self.color = map_color(surf.surface, c)
+            print "Mapped color is %x" % self.color
 
         self.renderer = SDL_CreateSoftwareRenderer(surf.surface)
         if self.renderer == NULL:
