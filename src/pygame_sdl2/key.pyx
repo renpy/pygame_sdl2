@@ -89,16 +89,17 @@ text_input = False
 
 def start_text_input():
     global text_input
-
-    SDL_StartTextInput()
     text_input = True
+
+    if SDL_HasScreenKeyboardSupport():
+        SDL_StartTextInput()
 
 def stop_text_input():
     global text_input
-
-    SDL_StopTextInput()
-    SDL_EventState(SDL_TEXTINPUT, SDL_ENABLE)
     text_input = False
+
+    if SDL_HasScreenKeyboardSupport():
+        SDL_StopTextInput()
 
 def set_text_input_rect(rect):
     cdef SDL_Rect sdl_rect;
