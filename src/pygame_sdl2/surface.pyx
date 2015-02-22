@@ -55,6 +55,12 @@ cdef class Surface:
         if self.surface and self.owns_surface:
             SDL_FreeSurface(self.surface)
 
+    def __sizeof__(self):
+        if self.surface and self.owns_surface:
+            return self.surface.w * self.surface.h * self.surface.format.BytesPerPixel
+        else:
+            return 0
+
     def __init__(self, size, flags=0, depth=32, masks=None):
 
         self.locklist = None
