@@ -19,9 +19,11 @@
 from sdl2 cimport *
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
+from display cimport Window, main_window
 from rect cimport to_sdl_rect
 
 from error import error
+
 
 cdef class KeyboardState:
     # Allow weak references.
@@ -107,3 +109,11 @@ def set_text_input_rect(rect):
     else:
         SDL_SetTextInputRect(NULL)
 
+def has_screen_keyboard_support():
+    return SDL_HasScreenKeyboardSupport()
+
+def is_screen_keyboard_shown(Window window=None):
+    if window is None:
+        window = main_window
+
+    return SDL_IsScreenKeyboardShown(window.window)
