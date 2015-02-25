@@ -44,6 +44,8 @@ cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int
         src += srcpitch;
         dst += dstpitch;
 
+# The total size of all allocated surfaces
+total_size = 0
 
 cdef class Surface:
 
@@ -52,12 +54,19 @@ cdef class Surface:
         self.owns_surface = False
 
     def __dealloc__(self):
+        global total_size
+
         if self.surface and self.owns_surface:
+            if total_size:
+                total_size -= self.surface.pitch * self.surface.h
+
             SDL_FreeSurface(self.surface)
+        elif self.parent is None:
+            print "Memory leak via Surface (did you forget to set owns_surface?)."
 
     def __sizeof__(self):
         if self.surface and self.owns_surface:
-            return self.surface.w * self.surface.h * self.surface.format.BytesPerPixel
+            return self.surface.pitch * self.surface.h
         else:
             return 0
 
@@ -65,7 +74,6 @@ cdef class Surface:
 
         self.locklist = None
         self.parent = None
-        self.root = self
 
         self.offset_x = 0
         self.offset_y = 0
@@ -136,13 +144,23 @@ cdef class Surface:
 
             depth_int = 32
 
-        with nogil:
-            self.surface = SDL_CreateRGBSurface(0, w, h, depth_int, Rmask, Gmask, Bmask, Amask)
+        cdef SDL_Surface *surface
 
-        if not self.surface:
+        with nogil:
+            surface = SDL_CreateRGBSurface(0, w, h, depth_int, Rmask, Gmask, Bmask, Amask)
+
+        if not surface:
             raise error()
 
+        self.take_surface(surface)
+
+    cdef void take_surface(self, SDL_Surface *surface):
+        self.surface = surface
         self.owns_surface = True
+
+        global total_size
+
+        total_size += self.surface.pitch * self.surface.h
 
     def __repr__(self):
         return "<Surface({}x{}x{})>".format(self.surface.w, self.surface.h, self.surface.format.BitsPerPixel)
@@ -208,7 +226,7 @@ cdef class Surface:
                 new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
 
         cdef Surface rv = Surface(())
-        rv.surface = new_surface
+        rv.take_surface(new_surface)
 
         return rv
 
@@ -250,7 +268,7 @@ cdef class Surface:
                 new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
 
         cdef Surface rv = Surface(())
-        rv.surface = new_surface
+        rv.take_surface(new_surface)
 
         return rv
 
@@ -376,7 +394,10 @@ cdef class Surface:
         return rv
 
     def lock(self, lock=None):
-        cdef Surface root = self.root
+        cdef Surface root = self
+
+        while root.parent:
+            root = root.parent
 
         if lock is None:
             lock = self
@@ -389,7 +410,10 @@ cdef class Surface:
         SDL_LockSurface(root.surface)
 
     def unlock(self, lock=None):
-        cdef Surface root = self.root
+        cdef Surface root = self
+
+        while root.parent:
+            root = root.parent
 
         if lock is None:
             lock = self
@@ -402,14 +426,22 @@ cdef class Surface:
         SDL_UnlockSurface(root.surface)
 
     def mustlock(self):
-        return SDL_MUSTLOCK(self.root.surface)
+        cdef Surface root = self
+
+        while root.parent:
+            root = root.parent
+
+        return SDL_MUSTLOCK(root.surface)
 
     def get_locked(self):
         if self.locklist:
             return True
 
     def get_locks(self):
-        cdef Surface root = self.root
+        cdef Surface root = self
+
+        while root.parent:
+            root = root.parent
 
         if root.locklist is None:
             root.locklist = [ ]
@@ -548,7 +580,6 @@ cdef class Surface:
 
         rv.surface = new_surface
         rv.parent = self
-        rv.root = self.root
         rv.offset_x = sdl_rect.x
         rv.offset_y = sdl_rect.y
 
@@ -558,7 +589,12 @@ cdef class Surface:
         return self.parent
 
     def get_abs_parent(self):
-        return self.root
+        rv = self
+
+        while rv.parent:
+            rv = rv.parent
+
+        return rv
 
     def get_offset(self):
         return (self.offset_x, self.offset_y)

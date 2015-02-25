@@ -75,8 +75,7 @@ cdef class Font:
             raise error()
 
         cdef Surface rv = Surface(())
-        rv.surface = surf
-        rv.owns_surface = True
+        rv.take_surface(surf)
 
         if rv.surface.format.BitsPerPixel != 32:
             rv = rv.convert()

@@ -72,9 +72,9 @@ def load(fi, namehint=""):
 
     if img == NULL:
         raise error()
+
     cdef Surface surf = Surface(())
-    surf.surface = img
-    surf.owns_surface = True
+    surf.take_surface(img)
 
     if img.format.BitsPerPixel == 32:
         return surf

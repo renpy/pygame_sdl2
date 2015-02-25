@@ -100,8 +100,8 @@ def rotozoom(Surface surface, double angle, double scale, int smooth=1):
         raise error()
 
     rv = Surface(())
-    rv.surface = rsurf
-    rv.owns_surface = True
+    rv.take_surface(rsurf)
+
     return rv
 
 cdef uint32_t get_at(SDL_Surface *surf, int x, int y) nogil:
@@ -193,8 +193,7 @@ def smoothscale(Surface surface, size, Surface DestSurface=None):
         raise error()
 
     rv = Surface(())
-    rv.surface = rsurf
-    rv.owns_surface = True
+    rv.take_surface(rsurf)
 
     # This is inefficient.
     if DestSurface:
