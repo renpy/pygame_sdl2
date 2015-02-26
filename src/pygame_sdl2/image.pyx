@@ -84,6 +84,8 @@ def load(fi, namehint=""):
 
     if img.format.Amask:
         has_alpha = True
+    elif (img.format.format >> 24) & SDL_PIXELTYPE_INDEX1:
+        has_alpha = True
     elif img.format.palette != NULL:
         # Check for non-opaque palette colors.
         while n < img.format.palette.ncolors:
