@@ -342,6 +342,12 @@ def clear(t=None):
     # Clear is implemented in terms of get.
     get(t)
 
+def get_standard_events():
+    """
+    Returns a list of standard events that pygame_sdl2 knows about.
+    """
+
+    return list(event_names.keys())
 
 def event_name(t):
     try:
