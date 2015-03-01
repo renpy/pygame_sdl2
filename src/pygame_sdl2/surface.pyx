@@ -52,6 +52,7 @@ cdef class Surface:
     def __cinit__(self):
         self.surface = NULL
         self.owns_surface = False
+        self.window_surface = False
 
     def __dealloc__(self):
         global total_size
@@ -61,8 +62,13 @@ cdef class Surface:
                 total_size -= self.surface.pitch * self.surface.h
 
             SDL_FreeSurface(self.surface)
-        elif self.parent is None:
-            print "Memory leak via Surface (did you forget to set owns_surface?)."
+            return
+        elif self.window_surface:
+            return
+        elif self.parent:
+            return
+
+        warnings.warn("Memory leak via Surface in pygame_sdl2.")
 
     def __sizeof__(self):
         if self.surface and self.owns_surface:

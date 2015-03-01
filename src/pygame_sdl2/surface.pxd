@@ -31,6 +31,9 @@ cdef class Surface:
     # surface.
     cdef bint owns_surface
 
+    # True if this surface is owned by a window.
+    cdef bint window_surface
+
     # A list of locks involving the surface.
     cdef object locklist
 

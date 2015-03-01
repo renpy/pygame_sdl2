@@ -102,7 +102,7 @@ cdef class Window:
         self.window = SDL_CreateWindow(
             title,
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            resolution[0], resolution[1], flags)
+            resolution[0], resolution[1], flags | SDL_WINDOW_OPENGL)
 
         if not self.window:
             raise error()
@@ -132,6 +132,7 @@ cdef class Window:
             self.surface = Surface(())
             self.surface.surface = SDL_GetWindowSurface(self.window)
             self.surface.owns_surface = False
+            self.surface.window_surface = True
 
         self.surface.get_window_flags = self.get_window_flags
 
@@ -144,6 +145,7 @@ cdef class Window:
             SDL_GL_DeleteContext(self.gl_context)
 
         if self.surface:
+
             # Break the cycle that prevents refcounting from collecting this
             # object.
             self.surface.get_window_flags = None
@@ -153,10 +155,19 @@ cdef class Window:
 
         SDL_DestroyWindow(self.window)
 
-    def resize(self, size):
+    def resize(self, size, opengl=False):
         """
-        Resizes the window to `size`, which must be a width, height tuple.
+        Resizes the window to `size`, which must be a width, height tuple. If opengl
+        is true, adds an OpenGL context, if it's missing. Otherwise, removes the
+        opengl context if present.
         """
+
+        # Prevents a loop between the surface and this object.
+        self.surface.get_window_flags = None
+
+        if self.gl_context and not opengl:
+            SDL_GL_DeleteContext(self.gl_context)
+            self.gl_context = NULL
 
         cdef int cur_width = 0
         cdef int cur_height = 0
@@ -170,6 +181,14 @@ cdef class Window:
 
         cdef int w, h
 
+        # Create a missing GL context.
+        if opengl and not self.gl_context:
+            self.gl_context = SDL_GL_CreateContext(self.window)
+
+            if self.gl_context == NULL:
+                raise error()
+
+        # If the GL context is present, create a surface to match.
         if self.gl_context:
 
             SDL_GetWindowSize(self.window, &w, &h)
@@ -178,16 +197,27 @@ cdef class Window:
             # TODO: Make this a bit less wasteful of memory, even if it means
             # we lie about the actual size of the pixel array.
             self.surface = Surface((w, h), SRCALPHA, 32)
+            self.surface.get_window_flags = self.get_window_flags
 
         else:
-            self.surface.get_window_flags = None
 
             self.surface = Surface(())
             self.surface.surface = SDL_GetWindowSurface(self.window)
             self.surface.owns_surface = False
+            self.surface.window_surface = True
+
+        self.surface.get_window_flags = self.get_window_flags
 
     def get_window_flags(self):
-        return SDL_GetWindowFlags(self.window)
+        rv = SDL_GetWindowFlags(self.window)
+
+        if self.gl_context:
+            rv |= SDL_WINDOW_OPENGL
+        else:
+            rv &= ~SDL_WINDOW_OPENGL
+
+        return rv
+
 
     def flip(self):
         if self.gl_context != NULL:
@@ -326,8 +356,8 @@ def set_mode(resolution=(0, 0), flags=0, depth=0):
 
     if main_window:
 
-        if flags == main_window.create_flags:
-            main_window.resize(resolution)
+        if (flags & ~SDL_WINDOW_OPENGL) == (main_window.create_flags & ~SDL_WINDOW_OPENGL):
+            main_window.resize(resolution, flags & SDL_WINDOW_OPENGL)
             return main_window.surface
 
         else:
