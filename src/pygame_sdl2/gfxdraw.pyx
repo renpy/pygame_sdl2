@@ -43,7 +43,6 @@ cdef class DrawArgs:
 
         if c is not None:
             self.color = map_color(surf.surface, c)
-            print "Mapped color is %x" % self.color
 
         self.renderer = SDL_CreateSoftwareRenderer(surf.surface)
         if self.renderer == NULL:
