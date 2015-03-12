@@ -91,6 +91,7 @@ cdef int python_close(SDL_RWops *context) with gil:
         return -1
 
     Py_DECREF(f)
+    SDL_FreeRW(context)
     return 0
 
 cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
