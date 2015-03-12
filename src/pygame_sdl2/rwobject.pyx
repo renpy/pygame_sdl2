@@ -97,6 +97,9 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
 
     cdef SDL_RWops *rv
 
+    if isinstance(filelike, file):
+        filelike = filelike.name
+
     # Try to open as a file.
     if isinstance(filelike, str):
         name = filelike
@@ -112,6 +115,7 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
             raise IOError("Could not open {!r}: {}".format(filelike, SDL_GetError()))
 
         return rv
+
 
     if not (hasattr(filelike, "read") or hasattr(filelike, "write")):
         raise IOError("{!r} is not a filename or file-like object.".format(filelike))
@@ -131,4 +135,3 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
 
 cdef api SDL_RWops *RWopsFromPython(filelike):
     return to_rwops(filelike)
-
