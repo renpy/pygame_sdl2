@@ -19,6 +19,8 @@
 from sdl2 cimport *
 from cpython.ref cimport Py_INCREF, Py_DECREF
 from libc.string cimport memcpy
+from libc.stdio cimport FILE, fopen, fclose, fseek, ftell, fread, SEEK_SET, SEEK_CUR, SEEK_END
+from libc.stdlib cimport calloc, free
 
 import sys
 
@@ -94,11 +96,54 @@ cdef int python_close(SDL_RWops *context) with gil:
     SDL_FreeRW(context)
     return 0
 
+cdef struct SubFile:
+    FILE *f
+    Sint64 base
+    Sint64 length
+
+cdef Sint64 subfile_size(SDL_RWops *context) nogil:
+    cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
+    return sf.length
+
+cdef Sint64 subfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
+    cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
+
+    if whence == RW_SEEK_SET:
+        fseek(sf.f, seek + sf.base, SEEK_SET)
+    elif whence == RW_SEEK_CUR:
+        fseek(sf.f, seek, SEEK_CUR)
+    elif whence == RW_SEEK_END:
+        fseek(sf.f, sf.base + sf.base + sf.length, SEEK_END)
+
+    return ftell(sf.f)
+
+cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) nogil:
+    cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
+
+    cdef Sint64 tell = ftell(sf.f) - sf.base
+    cdef Sint64 left = sf.length - tell
+
+    if size * maxnum > left:
+        maxnum = left / size
+
+    if maxnum == 0:
+        return 0
+
+    return fread(ptr, size, maxnum, sf.f)
+
+cdef int subfile_close(SDL_RWops *context):
+    cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
+
+    fclose(sf.f)
+    free(sf)
+    SDL_FreeRW(context)
+
+
 cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
 
     cdef SDL_RWops *rv
 
-    if isinstance(filelike, file):
+    if isinstance(filelike, file) and mode == "rb":
         filelike = filelike.name
 
     # Try to open as a file.
@@ -116,6 +161,45 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
             raise IOError("Could not open {!r}: {}".format(filelike, SDL_GetError()))
 
         return rv
+
+    cdef FILE *f
+    cdef SubFile *sf
+
+    if mode == "rb":
+        try:
+
+            # If we have these properties, we're either an APK asset or a Ren'Py-style
+            # subfile, so use an optimized path.
+            name = filelike.name
+            base = filelike.base
+            length = filelike.length
+
+            if name is not None:
+
+                f = fopen(name, "rb")
+                if not f:
+                    raise IOError("Could not open {}.".format(name))
+
+                fseek(f, base, SEEK_SET)
+
+                sf = <SubFile *> calloc(sizeof(SubFile), 1)
+                sf.f = f
+                sf.base = base
+                sf.length = length
+
+                rv = SDL_AllocRW()
+                rv.size = subfile_size
+                rv.seek = subfile_seek
+                rv.read = subfile_read
+                rv.write = NULL
+                rv.close = subfile_close
+                rv.type = 0
+                rv.hidden.unknown.data1 = <void *> sf
+
+                return rv
+
+        except AttributeError:
+            pass
 
 
     if not (hasattr(filelike, "read") or hasattr(filelike, "write")):
