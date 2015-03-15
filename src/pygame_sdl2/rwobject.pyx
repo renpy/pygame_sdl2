@@ -164,7 +164,6 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     cdef SDL_RWops *rw
 
     if isinstance(filelike, file) and mode == "rb":
-        print "Opening file with name", repr(filelike.name)
         filelike = filelike.name
 
     # Try to open as a file.
