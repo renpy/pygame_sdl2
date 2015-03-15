@@ -11,9 +11,9 @@ functionality in a pythonic manner.
 License
 -------
 
-New code written for pygame_sdl2, including all compiled code, is licensed
-under the Zlib license. A number of pure-python modules are taken wholesale
-from Pygame, and are licensed under the LGPL2. Please check each module to
+New code written for pygame_sdl2 is licensed under the Zlib license. Some
+code - including compiled code - is taken wholesale from Pygame, and is
+licensed under the LGPL2. Please check each module to
 determine its licensing status.
 
 See the COPYING.ZLIB and COPYING.LGPL21 files for details - you'll need
