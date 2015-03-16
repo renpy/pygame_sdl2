@@ -128,11 +128,11 @@ cdef Sint64 subfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
 
     if whence == RW_SEEK_SET:
-        return SDL_RWseek(sf.rw, seek + sf.base, RW_SEEK_SET)
+        return SDL_RWseek(sf.rw, seek + sf.base, RW_SEEK_SET) - sf.base
     elif whence == RW_SEEK_CUR:
-        return SDL_RWseek(sf.rw, seek, RW_SEEK_CUR)
+        return SDL_RWseek(sf.rw, seek, RW_SEEK_CUR) - sf.base
     elif whence == RW_SEEK_END:
-        return SDL_RWseek(sf.rw, sf.base + sf.length + seek, SEEK_END)
+        return SDL_RWseek(sf.rw, sf.base + sf.length + seek, SEEK_END) - sf.base
 
 cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
