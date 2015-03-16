@@ -87,6 +87,7 @@ cdef make_keyboard_event(SDL_KeyboardEvent *e):
               'key' : e.keysym.sym,
               'mod' : e.keysym.mod,
               'unicode' : '',
+              'repeat' : e.repeat,
                }
 
     if not pygame_sdl2.key.text_input:
