@@ -107,34 +107,46 @@ cdef class Window:
         if not self.window:
             raise error()
 
+        # From here on, the window exists. So we have to call self.destroy if
+        # an exception occurs.
+
         cdef int w, h
-        SDL_GetWindowSize(self.window, &w, &h)
 
-        if flags & SDL_WINDOW_OPENGL:
+        try:
 
-            self.gl_context = SDL_GL_CreateContext(self.window)
+            SDL_GetWindowSize(self.window, &w, &h)
 
-            if self.gl_context == NULL:
-                self.destroy()
-                raise error()
+            if flags & SDL_WINDOW_OPENGL:
 
-            if not ios:
-                if SDL_GL_SetSwapInterval(default_swap_control) and SDL_GL_SetSwapInterval(-default_swap_control):
+                self.gl_context = SDL_GL_CreateContext(self.window)
+
+                if self.gl_context == NULL:
                     raise error()
 
-            # For now, make this the size of the window so get_size() works.
-            # TODO: Make this a bit less wasteful of memory, even if it means
-            # we lie about the actual size of the pixel array.
-            self.surface = Surface((w, h), SRCALPHA, 32)
+                if not ios:
+                    # Try setting the swap interval - first positive, then negated
+                    # to deal with the case where the negative interval isn't
+                    # supported. Then give up and carry on.
+                    if SDL_GL_SetSwapInterval(default_swap_control):
+                        SDL_GL_SetSwapInterval(-default_swap_control)
 
-        else:
+                # For now, make this the size of the window so get_size() works.
+                # TODO: Make this a bit less wasteful of memory, even if it means
+                # we lie about the actual size of the pixel array.
+                self.surface = Surface((w, h), SRCALPHA, 32)
 
-            self.surface = Surface(())
-            self.surface.surface = SDL_GetWindowSurface(self.window)
-            self.surface.owns_surface = False
-            self.surface.window_surface = True
+            else:
 
-        self.surface.get_window_flags = self.get_window_flags
+                self.surface = Surface(())
+                self.surface.surface = SDL_GetWindowSurface(self.window)
+                self.surface.owns_surface = False
+                self.surface.window_surface = True
+
+            self.surface.get_window_flags = self.get_window_flags
+
+        except:
+            self.destroy()
+            raise
 
     def destroy(self):
         """
