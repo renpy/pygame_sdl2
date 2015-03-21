@@ -63,15 +63,12 @@ cython("pygame_sdl2.mixer_music", libs=['SDL2_mixer'] + sdl_libs)
 cython("pygame_sdl2.scrap", libs=sdl_libs)
 cython("pygame_sdl2.render", libs=['SDL2_image'] + sdl_libs)
 
-if "PYGAME_SDL2_INSTALL_HEADERS" in os.environ:
-    headers = [
-        "src/pygame_sdl2/pygame_sdl2.h",
-        "gen/pygame_sdl2.rwobject_api.h",
-        "gen/pygame_sdl2.surface_api.h",
-        "gen/pygame_sdl2.display_api.h",
-        ]
-else:
-    headers = [ ]
+headers = [
+    "src/pygame_sdl2/pygame_sdl2.h",
+    "gen/pygame_sdl2.rwobject_api.h",
+    "gen/pygame_sdl2.surface_api.h",
+    "gen/pygame_sdl2.display_api.h",
+    ]
 
 setup("pygame_sdl2", "0.1", headers=headers)
 

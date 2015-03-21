@@ -101,8 +101,12 @@ Open a new shell to ensure virtualenvwrapper is running, then run::
     mkvirtualenv pygame_sdl2
     pip install cython
 
-Finally, build and install pygame_sdl2 by entering a checkout of this project
-and running::
+Change into a clone of this project, and run the following command to modify
+the virtualenv so pygame_sdl2 header files can be installed in it::
+
+    python fix_virtualenv.py $VIRTUAL_ENV
+
+Finally, build and install pygame_sdl2 by running::
 
     python setup.py install
 
@@ -122,5 +126,5 @@ Pygame_sdl2 is written by:
 * Patrick Dawson <pat@dw.is>
 * Tom Rothamel <tom@rothamel.us>
 
-It includes some code from Pygame, and is inspired by the dozens of contributors
-to the Pygame, Python, and SDL2 projects.
+It includes some code from Pygame, and is inspired by the hundreds of
+contributors to the Pygame, Python, and SDL2 projects.
