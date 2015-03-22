@@ -119,6 +119,7 @@ cdef struct SubFile:
     SDL_RWops *rw
     Sint64 base
     Sint64 length
+    Sint64 tell
 
 cdef Sint64 subfile_size(SDL_RWops *context) nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
@@ -128,17 +129,19 @@ cdef Sint64 subfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
 
     if whence == RW_SEEK_SET:
-        return SDL_RWseek(sf.rw, seek + sf.base, RW_SEEK_SET) - sf.base
+        sf.tell = SDL_RWseek(sf.rw, seek + sf.base, RW_SEEK_SET) - sf.base
     elif whence == RW_SEEK_CUR:
-        return SDL_RWseek(sf.rw, seek, RW_SEEK_CUR) - sf.base
+        sf.tell = SDL_RWseek(sf.rw, seek, RW_SEEK_CUR) - sf.base
     elif whence == RW_SEEK_END:
-        return SDL_RWseek(sf.rw, sf.base + sf.length + seek, SEEK_END) - sf.base
+        sf.tell = SDL_RWseek(sf.rw, sf.base + sf.length + seek, SEEK_END) - sf.base
+
+    return sf.tell
 
 cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
 
-    cdef Sint64 tell = SDL_RWtell(sf.rw) - sf.base
-    cdef Sint64 left = sf.length - tell
+    cdef Sint64 left = sf.length - sf.tell
+    cdef size_t rv;
 
     if size * maxnum > left:
         maxnum = left / size
@@ -146,9 +149,14 @@ cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxn
     if maxnum == 0:
         return 0
 
-    return SDL_RWread(sf.rw, ptr, size, maxnum)
+    rv = SDL_RWread(sf.rw, ptr, size, maxnum)
 
-cdef int subfile_close(SDL_RWops *context):
+    if rv > 0:
+        sf.tell += size * rv
+
+    return rv
+
+cdef int subfile_close(SDL_RWops *context) nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
 
     SDL_RWclose(sf.rw)
@@ -207,6 +215,7 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
                 sf.rw = rw
                 sf.base = base
                 sf.length = length
+                sf.tell = 0;
 
                 rv = SDL_AllocRW()
                 rv.size = subfile_size
