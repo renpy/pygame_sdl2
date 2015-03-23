@@ -3,7 +3,7 @@ from __future__ import unicode_literals, print_function
 import os
 import argparse
 import sys
-
+import shutil
 
 def main():
     ap = argparse.ArgumentParser()
@@ -19,7 +19,7 @@ def main():
         print(target, "is not a symlink. Perhaps this script has already been run.")
         sys.exit(1)
 
-    tmp = "target" + ".tmp"
+    tmp = target + ".tmp"
 
     if os.path.exists(tmp):
         shutil.rmtree(tmp)
