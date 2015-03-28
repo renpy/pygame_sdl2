@@ -25,6 +25,7 @@ cdef class Window:
     cdef object __weakref__
 
     cdef SDL_Window *window
+    cdef SDL_Surface *window_surface
     cdef public Surface surface
 
     # The OpenGL context corresponding to this window.

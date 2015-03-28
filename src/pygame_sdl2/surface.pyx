@@ -124,7 +124,7 @@ cdef class Surface:
 
             pysample = pygame_sdl2.display.get_surface()
 
-            if pysample:
+            if pysample and pysample.surface.format.BitsPerPixel == 32:
                 sample = pysample.surface
                 Rmask = sample.format.Rmask
                 Gmask = sample.format.Gmask

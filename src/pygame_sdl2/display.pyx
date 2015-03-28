@@ -110,11 +110,7 @@ cdef class Window:
         # From here on, the window exists. So we have to call self.destroy if
         # an exception occurs.
 
-        cdef int w, h
-
         try:
-
-            SDL_GetWindowSize(self.window, &w, &h)
 
             if flags & SDL_WINDOW_OPENGL:
 
@@ -130,23 +126,46 @@ cdef class Window:
                     if SDL_GL_SetSwapInterval(default_swap_control):
                         SDL_GL_SetSwapInterval(-default_swap_control)
 
-                # For now, make this the size of the window so get_size() works.
-                # TODO: Make this a bit less wasteful of memory, even if it means
-                # we lie about the actual size of the pixel array.
-                self.surface = Surface((w, h), SRCALPHA, 32)
 
-            else:
-
-                self.surface = Surface(())
-                self.surface.surface = SDL_GetWindowSurface(self.window)
-                self.surface.owns_surface = False
-                self.surface.window_surface = True
-
-            self.surface.get_window_flags = self.get_window_flags
+            self.create_surface()
 
         except:
             self.destroy()
             raise
+
+    def create_surface(self):
+        """
+        Creates the surface associated with this window.
+        """
+
+        cdef int w, h
+        SDL_GetWindowSize(self.window, &w, &h)
+
+        if self.gl_context:
+
+            # For now, make this the size of the window so get_size() works.
+            # TODO: Make this a bit less wasteful of memory, even if it means
+            # we lie about the actual size of the pixel array.
+            self.surface = Surface((w, h), SRCALPHA, 32)
+
+        else:
+
+            self.window_surface = SDL_GetWindowSurface(self.window)
+
+            # If the surface is 32-bit, we can use it directly. Otherwise,
+            # we need to create a 32-bit proxy surface.
+            if self.window_surface.format.BitsPerPixel == 32:
+
+                self.surface = Surface(())
+                self.surface.surface = self.window_surface
+                self.surface.owns_surface = False
+                self.surface.window_surface = True
+
+            else:
+                self.surface = Surface((w, h), 0, 32)
+
+        self.surface.get_window_flags = self.get_window_flags
+
 
     def destroy(self):
         """
@@ -200,25 +219,7 @@ cdef class Window:
             if self.gl_context == NULL:
                 raise error()
 
-        # If the GL context is present, create a surface to match.
-        if self.gl_context:
-
-            SDL_GetWindowSize(self.window, &w, &h)
-
-            # Re-create the surface to reflect the new size.
-            # TODO: Make this a bit less wasteful of memory, even if it means
-            # we lie about the actual size of the pixel array.
-            self.surface = Surface((w, h), SRCALPHA, 32)
-            self.surface.get_window_flags = self.get_window_flags
-
-        else:
-
-            self.surface = Surface(())
-            self.surface.surface = SDL_GetWindowSurface(self.window)
-            self.surface.owns_surface = False
-            self.surface.window_surface = True
-
-        self.surface.get_window_flags = self.get_window_flags
+        self.create_surface()
 
     def get_window_flags(self):
         rv = SDL_GetWindowFlags(self.window)
@@ -230,15 +231,20 @@ cdef class Window:
 
         return rv
 
+    def proxy_window_surface(self):
+        SDL_UpperBlit(self.surface.surface, NULL, self.window_surface, NULL)
 
     def flip(self):
         if self.gl_context != NULL:
             SDL_GL_SwapWindow(self.window)
         else:
+
+            if self.surface.surface != self.window_surface:
+                self.proxy_window_surface()
+
             SDL_UpdateWindowSurface(self.window)
 
     def get_surface(self):
-
         return self.surface
 
     def update(self, rectangles=None):
@@ -249,6 +255,9 @@ cdef class Window:
         if rectangles is None:
             self.flip()
             return
+
+        if self.surface.surface != self.window_surface:
+            self.proxy_window_surface()
 
         if not isinstance(rectangles, list):
             rectangles = [ rectangles ]
