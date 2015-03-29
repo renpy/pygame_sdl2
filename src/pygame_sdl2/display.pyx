@@ -499,11 +499,11 @@ def gl_set_attribute(flag, value):
         if ios:
             return
 
-        # Try value. If value is -1, this may fail if late tearing is not
-        # supported, so we try 1 (vsync) instead.
-        if main_window:
-            if SDL_GL_SetSwapInterval(value) and SDL_GL_SetSwapInterval(-value):
-                raise error()
+        # Try setting the swap interval - first positive, then negated
+        # to deal with the case where the negative interval isn't
+        # supported. Then give up and carry on.
+        if SDL_GL_SetSwapInterval(default_swap_control):
+            SDL_GL_SetSwapInterval(-default_swap_control)
 
         default_swap_control = value
         return
