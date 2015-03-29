@@ -502,8 +502,8 @@ def gl_set_attribute(flag, value):
         # Try setting the swap interval - first positive, then negated
         # to deal with the case where the negative interval isn't
         # supported. Then give up and carry on.
-        if SDL_GL_SetSwapInterval(default_swap_control):
-            SDL_GL_SetSwapInterval(-default_swap_control)
+        if SDL_GL_SetSwapInterval(value):
+            SDL_GL_SetSwapInterval(-value)
 
         default_swap_control = value
         return
