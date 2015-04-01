@@ -64,7 +64,7 @@ def load(fi, namehint=""):
             img = IMG_Load_RW(rwops, 1)
 
     else:
-        namehit = process_namehint(namehint)
+        namehint = process_namehint(namehint)
         ftype = namehint
 
         with nogil:
