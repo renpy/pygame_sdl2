@@ -415,10 +415,13 @@ def initsysfonts_darwin():
     # if the X11 binary exists... try and use that.
     #  Not likely to be there on pre 10.4.x ...
     #    so still need to do other OSX specific method below.
-    if os.path.exists("/usr/X11/bin/fc-list"):
-        fonts = initsysfonts_unix("/usr/X11/bin/fc-list")
-    else:
-        fonts = {}
+#     if os.path.exists("/usr/X11/bin/fc-list"):
+#         fonts = initsysfonts_unix("/usr/X11/bin/fc-list")
+#     else:
+
+    # On recent OSX, the above code will ask the user to install X11. Since
+    # that's crazy, we disable it, and use the default font list.
+    fonts = {}
 
     # we look for the default paths.
     _search_osx_font_paths(fonts)
