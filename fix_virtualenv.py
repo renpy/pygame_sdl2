@@ -4,14 +4,10 @@ import os
 import argparse
 import sys
 import shutil
+import sysconfig
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("virtualenv", help="The path to the virtual environment.")
-    args = ap.parse_args()
-
-    target = "{}/include/python{}.{}".format(args.virtualenv, sys.version_info.major, sys.version_info.minor)
-
+    target = os.path.dirname(sysconfig.get_config_h_filename())
 
     try:
         source = os.readlink(target)
