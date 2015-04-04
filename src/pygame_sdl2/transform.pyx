@@ -19,8 +19,8 @@
 
 from sdl2 cimport *
 from sdl2_gfx cimport *
-from surface cimport *
-from error import error
+from pygame_sdl2.surface cimport *
+from pygame_sdl2.error import error
 
 
 def flip(Surface surface, bint xbool, bint ybool):

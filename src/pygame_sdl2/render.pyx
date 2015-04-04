@@ -19,14 +19,14 @@
 from sdl2 cimport *
 from sdl2_image cimport *
 from libc.string cimport memcpy, memset
-from display cimport *
-from surface cimport *
-from rwobject cimport to_rwops
-from rect cimport to_sdl_rect
+from pygame_sdl2.display cimport *
+from pygame_sdl2.surface cimport *
+from pygame_sdl2.rwobject cimport to_rwops
+from pygame_sdl2.rect cimport to_sdl_rect
 
-from rect import Rect
-from error import error
-from color import Color
+from pygame_sdl2.rect import Rect
+from pygame_sdl2.error import error
+from pygame_sdl2.color import Color
 import json
 import warnings
 

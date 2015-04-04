@@ -17,7 +17,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
-from error import error
+from pygame_sdl2.error import error
 import pygame_sdl2
 
 cdef int timer_id = 0

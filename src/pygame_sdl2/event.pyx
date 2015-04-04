@@ -18,9 +18,13 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
-from display cimport Window, main_window
+from pygame_sdl2.display cimport Window, main_window
 import threading
 import pygame_sdl2
+import sys
+
+if sys.version_info[0] >= 3:
+    unichr = chr
 
 include "event_names.pxi"
 

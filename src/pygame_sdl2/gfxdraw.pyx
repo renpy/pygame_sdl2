@@ -19,11 +19,11 @@
 from sdl2 cimport *
 from sdl2_gfx cimport *
 from libc.stdlib cimport malloc, free
-from surface cimport Surface
-from color cimport map_color
+from pygame_sdl2.surface cimport Surface
+from pygame_sdl2.color cimport map_color
 
-from error import error
-from rect import Rect
+from pygame_sdl2.error import error
+from pygame_sdl2.rect import Rect
 
 cdef class DrawArgs:
     cdef SDL_Renderer *renderer

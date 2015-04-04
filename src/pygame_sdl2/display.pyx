@@ -18,8 +18,8 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
-from surface cimport *
-from rect cimport to_sdl_rect
+from pygame_sdl2.surface cimport *
+from pygame_sdl2.rect cimport to_sdl_rect
 
 from libc.stdlib cimport calloc, free
 from pygame_sdl2.locals import SRCALPHA, GL_SWAP_CONTROL

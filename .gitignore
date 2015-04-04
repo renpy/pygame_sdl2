@@ -5,3 +5,5 @@ build
 .project
 .pydevproject
 sdl2.i
+dist/
+gen3/

@@ -17,11 +17,11 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
-from surface cimport Surface
+from pygame_sdl2.surface cimport Surface
 
 import gfxdraw
-from rect import Rect
-from error import error
+from pygame_sdl2.rect import Rect
+from pygame_sdl2.error import error
 
 def rect(Surface surface, color, rect, width=0):
     if not isinstance(rect, Rect):

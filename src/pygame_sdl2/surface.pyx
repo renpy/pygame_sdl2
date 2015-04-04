@@ -20,9 +20,9 @@
 from libc.string cimport memmove
 from sdl2 cimport *
 
-from color cimport map_color, get_color
-from rect cimport to_sdl_rect
-from rect import Rect
+from pygame_sdl2.color cimport map_color, get_color
+from pygame_sdl2.rect cimport to_sdl_rect
+from pygame_sdl2.rect import Rect
 
 from pygame_sdl2.error import error
 from pygame_sdl2.locals import SRCALPHA

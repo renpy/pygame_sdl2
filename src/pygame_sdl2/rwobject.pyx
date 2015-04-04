@@ -22,6 +22,8 @@ from libc.string cimport memcpy
 from libc.stdio cimport FILE, fopen, fclose, fseek, ftell, fread, SEEK_SET, SEEK_CUR, SEEK_END
 from libc.stdlib cimport calloc, free
 
+from pygame_sdl2.compat import file_type, bytes_, unicode_
+
 import sys
 
 # The fsencoding.
@@ -171,13 +173,13 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     cdef SDL_RWops *rv
     cdef SDL_RWops *rw
 
-    if isinstance(filelike, file) and mode == "rb":
+    if isinstance(filelike, file_type) and mode == "rb":
         filelike = filelike.name
 
     # Try to open as a file.
-    if isinstance(filelike, str):
+    if isinstance(filelike, bytes_):
         name = filelike.decode(fsencoding)
-    elif isinstance(filelike, unicode):
+    elif isinstance(filelike, unicode_):
         name = filelike
     else:
         name = None

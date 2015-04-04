@@ -18,10 +18,10 @@
 
 from sdl2 cimport *
 from sdl2_image cimport *
-from surface cimport *
-from rwobject cimport to_rwops
+from pygame_sdl2.surface cimport *
+from pygame_sdl2.rwobject cimport to_rwops
 import os
-from error import error
+from pygame_sdl2.error import error
 import pygame_sdl2
 
 cdef int image_formats = 0

@@ -1,8 +1,8 @@
 from sdl2 cimport *
 cimport sdl2
 
-from rect import Rect
-from color import Color
+from pygame_sdl2.rect import Rect
+from pygame_sdl2.color import Color
 
 include "event_list.pxi"
 ACTIVEEVENT = SDL_LASTEVENT - 1

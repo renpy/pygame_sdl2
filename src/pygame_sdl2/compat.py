@@ -3,7 +3,15 @@
 import sys
 
 __all__ = ['geterror', 'long_', 'xrange_', 'ord_', 'unichr_',
-           'unicode_', 'raw_input_', 'as_bytes', 'as_unicode']
+           'unicode_', 'raw_input_', 'as_bytes', 'as_unicode',
+           'file_type'
+           ]
+
+if sys.version_info[0] >= 3:
+    import io
+    file_type = io.FileIO
+else:
+    file_type = file
 
 def geterror ():
     return sys.exc_info()[1]
@@ -64,7 +72,7 @@ elif sys.version_info >= (3, 0, 0):
     filesystem_errors = "surrogateescape"
 else:
     filesystem_errors = "strict"
-    
+
 def filesystem_encode(u):
     return u.encode(sys.getfilesystemencoding(), filesystem_errors)
 
@@ -81,7 +89,7 @@ try:
     def as_bytes(string):
         """ '<binary literal>' => '<binary literal>' """
         return string
-        
+
     def as_unicode(rstring):
         """ r'<Unicode literal>' => u'<Unicode literal>' """
         return rstring.decode('unicode_escape', 'strict')
@@ -89,7 +97,7 @@ except NameError:
     def as_bytes(string):
         """ '<binary literal>' => b'<binary literal>' """
         return string.encode('latin-1', 'strict')
-        
+
     def as_unicode(rstring):
         """ r'<Unicode literal>' => '<Unicode literal>' """
         return rstring.encode('ascii', 'strict').decode('unicode_escape',

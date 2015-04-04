@@ -18,10 +18,10 @@
 
 from sdl2 cimport *
 from sdl2_mixer cimport *
-from rwobject cimport to_rwops
+from pygame_sdl2.rwobject cimport to_rwops
 from libc.string cimport memset
 
-from error import error
+from pygame_sdl2.error import error
 
 cdef Mix_Music *current_music = NULL
 cdef object queued_music = None

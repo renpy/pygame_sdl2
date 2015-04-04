@@ -20,7 +20,7 @@
 
 from __future__ import division, absolute_import, print_function
 
-from setuplib import android, ios, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen
+from setuplib import android, ios, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen, gen
 import os
 
 if android or ios:
@@ -67,9 +67,9 @@ cython("pygame_sdl2.render", libs=['SDL2_image'] + sdl_libs)
 
 headers = [
     "src/pygame_sdl2/pygame_sdl2.h",
-    "gen/pygame_sdl2.rwobject_api.h",
-    "gen/pygame_sdl2.surface_api.h",
-    "gen/pygame_sdl2.display_api.h",
+    gen + "/pygame_sdl2.rwobject_api.h",
+    gen + "/pygame_sdl2.surface_api.h",
+    gen + "/pygame_sdl2.display_api.h",
     ]
 
 setup("pygame_sdl2", "0.1", headers=headers)

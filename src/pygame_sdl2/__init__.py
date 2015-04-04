@@ -17,6 +17,7 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+from __future__ import division, print_function, absolute_import
 
 import sys
 import importlib
@@ -75,19 +76,19 @@ def quit(): # @ReservedAssignment
 
 
 # Import core modules.
-from error import *
+from pygame_sdl2.error import *
 
-from surface import Surface
-from rect import Rect
+from pygame_sdl2.surface import Surface
+from pygame_sdl2.rect import Rect
 
-import color
-import display
-import event
-import key
-import locals # @ReservedAssignment
-import time
-import version
-import locals as constants
+import pygame_sdl2.color
+import pygame_sdl2.display
+import pygame_sdl2.event
+import pygame_sdl2.key
+import pygame_sdl2.locals # @ReservedAssignment
+import pygame_sdl2.time
+import pygame_sdl2.version
+import pygame_sdl2.locals as constants
 
 # Import optional modules.
 try_import("draw")
@@ -104,21 +105,21 @@ try_import("sysfont")
 # Optional imports should be included in this function, so they show up
 # in packaging tools (like py2exe).
 def _optional_imports():
-    import rwobject
-    import gfxdraw
-    import draw
-    import font
-    import image
-    import joystick
-    import mixer
-    import mouse
-    import transform
-    import scrap
-    import sprite
-    import sysfont
+    import pygame_sdl2.rwobject
+    import pygame_sdl2.gfxdraw
+    import pygame_sdl2.draw
+    import pygame_sdl2.font
+    import pygame_sdl2.image
+    import pygame_sdl2.joystick
+    import pygame_sdl2.mixer
+    import pygame_sdl2.mouse
+    import pygame_sdl2.transform
+    import pygame_sdl2.scrap
+    import pygame_sdl2.sprite
+    import pygame_sdl2.sysfont
 
 # Fill this module with locals.
-from locals import *
+from pygame_sdl2.locals import *
 
 def import_as_pygame():
     """

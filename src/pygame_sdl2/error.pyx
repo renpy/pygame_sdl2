@@ -22,7 +22,7 @@ class error(RuntimeError):
 
     def __init__(self, message=None):
         if message is None:
-            message = SDL_GetError()
+            message = str(SDL_GetError())
 
         RuntimeError.__init__(self, message)
 
@@ -30,7 +30,7 @@ def get_error():
     cdef const char *message = SDL_GetError()
 
     if message:
-        return message
+        return str(message)
     else:
         return ''
 

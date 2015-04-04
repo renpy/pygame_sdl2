@@ -1,3 +1,5 @@
+from __future__ import division, print_function, absolute_import
+
 import pygame_sdl2 as pygame
 from pygame_sdl2.locals import *
 
@@ -16,4 +18,4 @@ while True:
     if ev.type == KEYDOWN and ev.key == K_ESCAPE:
         break
 
-    print ev
+    print(ev)

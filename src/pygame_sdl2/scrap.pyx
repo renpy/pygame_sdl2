@@ -18,8 +18,10 @@
 
 from sdl2 cimport *
 
-from error import error
-from locals import SCRAP_TEXT
+from pygame_sdl2.error import error
+from pygame_sdl2.locals import SCRAP_TEXT
+
+from pygame_sdl2.compat import bytes_
 
 def init():
     pass
@@ -30,7 +32,7 @@ def get(type):
         text = SDL_GetClipboardText()
         if text == NULL:
             raise error()
-        rv = str(text)
+        rv = bytes_(text)
         SDL_free(text)
         return rv
     else:
@@ -42,6 +44,8 @@ def get_types():
 def put(type, data):
     if type != SCRAP_TEXT:
         raise error("Not implemented.")
+
+    data = bytes_(data)
 
     if SDL_SetClipboardText(data) != 0:
         raise error()

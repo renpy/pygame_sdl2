@@ -48,6 +48,14 @@ android = "PYGAME_SDL2_ANDROID" in os.environ
 # True if we're building on ios.
 ios = "PYGAME_SDL2_IOS" in os.environ
 
+if sys.version_info[0] >= 3:
+    version_flag = "-3"
+    gen = "gen3"
+else:
+    version_flag = "-2"
+    gen = "gen"
+
+
 
 def system_path(path):
     """
@@ -171,7 +179,7 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
     deps = [ i for i in deps if (not i.startswith("cpython/")) and (not i.startswith("libc/")) ]
 
     # Determine if any of the dependencies are newer than the c file.
-    c_fn = os.path.join("gen", name + ".c")
+    c_fn = os.path.join(gen, name + ".c")
     necessary_gen.append(name + ".c")
 
     if os.path.exists(c_fn):
@@ -185,14 +193,12 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
 
     for dep_fn in deps:
 
-        if os.path.exists(os.path.join(module_dir, dep_fn)):
-            dep_fn = os.path.join(module_dir, dep_fn)
-        elif os.path.exists(os.path.join("..", dep_fn)):
-            dep_fn = os.path.join("..", dep_fn)
+        if os.path.exists(os.path.join("src", dep_fn)):
+            dep_fn = os.path.join("src", dep_fn)
         elif os.path.exists(os.path.join("include", dep_fn)):
             dep_fn = os.path.join("include", dep_fn)
-        elif os.path.exists(os.path.join("gen", dep_fn)):
-            dep_fn = os.path.join("gen", dep_fn)
+        elif os.path.exists(os.path.join(gen, dep_fn)):
+            dep_fn = os.path.join(gen, dep_fn)
         elif os.path.exists(dep_fn):
             pass
         else:
@@ -213,8 +219,9 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
         try:
             subprocess.check_call([
                 cython_command,
+                version_flag,
                 "-Iinclude",
-                "-Igen",
+                "-I" + gen,
                 "-a",
                 fn,
                 "-o",
@@ -232,14 +239,14 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
 
 def find_unnecessary_gen():
 
-    for i in os.listdir("gen"):
+    for i in os.listdir(gen):
         if not i.endswith(".c"):
             continue
 
         if i in necessary_gen:
             continue
 
-        print("Unnecessary file", os.path.join("gen", i))
+        print("Unnecessary file", os.path.join(gen, i))
 
 
 py_modules = [ ]
@@ -272,5 +279,5 @@ def setup(name, version, **kwargs):
 os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
 
 # Ensure the gen directory exists.
-if not os.path.exists("gen"):
-    os.mkdir("gen")
+if not os.path.exists(gen):
+    os.mkdir(gen)
