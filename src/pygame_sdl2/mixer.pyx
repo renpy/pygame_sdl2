@@ -53,6 +53,9 @@ cdef void channel_callback(int channel):
 
         Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
 
+# A list of errors that occured during mixer initialization.
+errors = [ ]
+
 @pygame_sdl2.register_init
 def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
     if get_init() is not None:
@@ -60,8 +63,9 @@ def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
 
     for flag in (MIX_INIT_FLAC, MIX_INIT_MOD, MIX_INIT_MODPLUG,
                  MIX_INIT_MP3, MIX_INIT_OGG, MIX_INIT_FLUIDSYNTH):
+
         if Mix_Init(flag) != flag:
-            sys.stderr.write("{}\n".format(SDL_GetError()))
+            errors.append("{}\n".format(SDL_GetError()))
 
     if preinit_args:
         frequency, size, channels, buffer = preinit_args
