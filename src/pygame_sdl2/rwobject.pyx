@@ -173,7 +173,10 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     cdef SDL_RWops *rv
     cdef SDL_RWops *rw
 
-    if isinstance(filelike, file_type) and mode == "rb":
+    if not isinstance(mode, bytes_):
+        mode = mode.encode("ascii")
+
+    if isinstance(filelike, file_type) and mode == b"rb":
         filelike = filelike.name
 
     # Try to open as a file.
@@ -192,7 +195,7 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
 
         return rv
 
-    if mode == "rb":
+    if mode == b"rb":
         try:
 
             # If we have these properties, we're either an APK asset or a Ren'Py-style
@@ -206,7 +209,7 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
                 if not isinstance(name, unicode):
                     name = name.decode(fsencoding)
 
-                rw = SDL_RWFromFile(name.encode("utf-8"), "rb")
+                rw = SDL_RWFromFile(name.encode("utf-8"), b"rb")
 
                 if not rw:
                     raise IOError("Could not open {!r}.".format(name))

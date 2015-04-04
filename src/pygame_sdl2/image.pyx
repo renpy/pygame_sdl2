@@ -20,9 +20,13 @@ from sdl2 cimport *
 from sdl2_image cimport *
 from pygame_sdl2.surface cimport *
 from pygame_sdl2.rwobject cimport to_rwops
-import os
+
 from pygame_sdl2.error import error
+from pygame_sdl2.compat import unicode_, filesystem_encode
+
+import os
 import pygame_sdl2
+
 
 cdef int image_formats = 0
 
@@ -109,21 +113,26 @@ cdef extern from "write_png.h":
     int Pygame_SDL2_SavePNG(const char *, SDL_Surface *, int) nogil
 
 def save(Surface surface not None, filename):
+
+    if isinstance(filename, unicode_):
+        filename = filesystem_encode(filename)
+
     ext = os.path.splitext(filename)[1]
     ext = ext.upper()
     err = 0
 
+
     cdef char *fn = filename
     cdef SDL_RWops *rwops
 
-    if ext == '.PNG':
+    if ext == b'.PNG':
         with nogil:
             err = Pygame_SDL2_SavePNG(fn, surface.surface, 9)
-    elif ext == '.BMP':
+    elif ext == b'.BMP':
         rwops = to_rwops(filename, "wb")
         with nogil:
             err = SDL_SaveBMP_RW(surface.surface, rwops, 1)
-    elif ext == ".JPG" or ext == ".JPEG":
+    elif ext == b".JPG" or ext == b".JPEG":
         with nogil:
             err = Pygame_SDL2_SaveJPEG(surface.surface, fn)
     else:

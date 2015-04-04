@@ -1,13 +1,13 @@
 # coding=utf-8
 
-#from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 import pygame_sdl2; pygame_sdl2.import_as_pygame()
 import sys, os
 import pygame
 
 if len(sys.argv) < 2:
-    print "Usage: %s <filename>" % sys.argv[0]
+    print("Usage: %s <filename>" % sys.argv[0])
     sys.exit(0)
 
 pygame.init()
@@ -17,7 +17,7 @@ img = pygame.image.load(fn)
 fn = os.path.split(fn)[1]
 fn = os.path.splitext(fn)[0]
 
-print pygame.image.get_extended()
+print(pygame.image.get_extended())
 
 pygame.image.save(img, fn + "_new.png")
 
@@ -59,6 +59,6 @@ pygame.gfxdraw.pixel(img_draw, 0, 0, (255,0,0))
 pygame.gfxdraw.rectangle(img_draw, (20, 20, 20, 20), (0,255,0))
 pygame.gfxdraw.box(img_draw, (20, 0, 20, 20), (255,0,255))
 pygame.gfxdraw.polygon(img_draw, [(0,0), (100,100), (100,150), (0,150), (20,20)], pygame.Color("blue"))
-print pygame.draw.line(img_draw, (0,255,255), (20, 20), (30, 100), 4)
-print pygame.draw.lines(img_draw, (255,0,0), False, [(10, 10), (100, 10), (50, 50)], 3)
+pygame.draw.line(img_draw, (0,255,255), (20, 20), (30, 100), 4)
+pygame.draw.lines(img_draw, (255,0,0), False, [(10, 10), (100, 10), (50, 50)], 3)
 pygame.image.save(img_draw, fn + "_draw.png")

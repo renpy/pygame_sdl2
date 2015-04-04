@@ -19,7 +19,7 @@
 from sdl2 cimport *
 from pygame_sdl2.surface cimport Surface
 
-import gfxdraw
+import pygame_sdl2.gfxdraw as gfxdraw
 from pygame_sdl2.rect import Rect
 from pygame_sdl2.error import error
 
