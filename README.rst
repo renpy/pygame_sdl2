@@ -104,7 +104,7 @@ Open a new shell to ensure virtualenvwrapper is running, then run::
 Change into a clone of this project, and run the following command to modify
 the virtualenv so pygame_sdl2 header files can be installed in it::
 
-    python fix_virtualenv.py $VIRTUAL_ENV
+    python fix_virtualenv.py
 
 Finally, build and install pygame_sdl2 by running::
 

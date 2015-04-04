@@ -16,6 +16,8 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+from __future__ import division, absolute_import, print_function
+
 import os
 import sys
 import re
@@ -66,7 +68,7 @@ def parse_cflags(command):
     """
 
     if command is not None:
-        output = subprocess.check_output(command)
+        output = subprocess.check_output(command, universal_newlines=True)
     else:
         output = os.environ.get("CFLAGS", "")
 
@@ -85,7 +87,7 @@ def parse_libs(command):
     is None, parses LDFLAGS from the environment.
     """
 
-    output = subprocess.check_output(command)
+    output = subprocess.check_output(command, universal_newlines=True)
 
     libs = [ ]
 
@@ -138,7 +140,7 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
     fn = "src/" + "/".join(split_name) + ".pyx"
 
     if not os.path.exists(fn):
-        print "Could not find {0}.".format(fn)
+        print("Could not find {0}.".format(fn))
         sys.exit(-1)
 
     module_dir = os.path.dirname(fn)
@@ -146,7 +148,7 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
     # Figure out what it depends on.
     deps = [ fn ]
 
-    f = file(fn)
+    f = open(fn, "r")
     for l in f:
 
         m = re.search(r'from\s*([\w.]+)\s*cimport', l)
@@ -194,19 +196,19 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
         elif os.path.exists(dep_fn):
             pass
         else:
-            print "{0} depends on {1}, which can't be found.".format(fn, dep_fn)
+            print("{0} depends on {1}, which can't be found.".format(fn, dep_fn))
             sys.exit(-1)
 
         if os.path.getmtime(dep_fn) > c_mtime:
             out_of_date = True
 
     if out_of_date and not cython_command:
-        print "WARNING:", name, "is out of date, but RENPY_CYTHON isn't set."
+        print("WARNING:", name, "is out of date, but RENPY_CYTHON isn't set.")
         out_of_date = False
 
     # If the file is out of date, regenerate it.
     if out_of_date:
-        print name, "is out of date."
+        print(name, "is out of date.")
 
         try:
             subprocess.check_call([
@@ -218,10 +220,10 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
                 "-o",
                 c_fn])
 
-        except subprocess.CalledProcessError, e:
-            print
-            print str(e)
-            print
+        except subprocess.CalledProcessError as e:
+            print()
+            print(str(e))
+            print()
             sys.exit(-1)
 
     # Build the module normally once we have the c file.
@@ -237,7 +239,7 @@ def find_unnecessary_gen():
         if i in necessary_gen:
             continue
 
-        print "Unnecessary file", os.path.join("gen", i)
+        print("Unnecessary file", os.path.join("gen", i))
 
 
 py_modules = [ ]
