@@ -53,7 +53,7 @@ cdef process_namehint(namehint):
     if ext[0] == '.':
         ext = ext[1:]
 
-    return ext.replace()
+    return ext.upper()
 
 def load(fi, namehint=""):
     cdef SDL_Surface *img
