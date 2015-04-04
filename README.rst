@@ -36,19 +36,23 @@ some implementation:
 * pygame_sdl2.joystick
 * pygame_sdl2.key
 * pygame_sdl2.locals
-* pygame_sdl2.mixer (inc. mixer.music)
+* pygame_sdl2.mixer (including mixer.music)
 * pygame_sdl2.mouse
+* pygame_sdl2.scrap
 * pygame_sdl2.sprite
+* pygame_sdl2.surface
 * pygame_sdl2.sysfont
 * pygame_sdl2.time
 * pygame_sdl2.transform
 * pygame_sdl2.version
 
+Experimental new modules include:
+
+* pygame_sdl2.render
+
 Current omissions include:
 
 * Modules not listed above.
-
-* Blend modes other than the default (OVER) mode are not implemented.
 
 * APIs that expose pygame data as buffers or arrays.
 
