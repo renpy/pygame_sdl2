@@ -110,7 +110,7 @@ cdef class Color:
         self.length = 4
         if len(args) == 1:
             c = args[0]
-            if isinstance(c, str):
+            if isinstance(c, basestring):
                 if c.startswith('#'):
                     self.from_hex(c[1:])
                 elif c.startswith('0x'):

@@ -22,7 +22,7 @@ from pygame_sdl2.surface cimport *
 from pygame_sdl2.rwobject cimport to_rwops
 
 from pygame_sdl2.error import error
-from pygame_sdl2.compat import unicode_, filesystem_encode
+from pygame_sdl2.compat import bytes_, unicode_, filesystem_encode
 
 import os
 import pygame_sdl2
@@ -43,12 +43,17 @@ def quit(): # @ReservedAssignment
 
 cdef process_namehint(namehint):
     # Accepts "foo.png", ".png", or "png"
+
+    if not isinstance(namehint, bytes_):
+        namehint = namehint.encode("ascii", "replace")
+
     ext = os.path.splitext(namehint)[1]
     if ext == '':
         ext = namehint
     if ext[0] == '.':
         ext = ext[1:]
-    return ext.upper()
+
+    return ext.replace()
 
 def load(fi, namehint=""):
     cdef SDL_Surface *img

@@ -206,7 +206,7 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
 
             if name is not None:
 
-                if not isinstance(name, unicode):
+                if not isinstance(name, unicode_):
                     name = name.decode(fsencoding)
 
                 rw = SDL_RWFromFile(name.encode("utf-8"), b"rb")
