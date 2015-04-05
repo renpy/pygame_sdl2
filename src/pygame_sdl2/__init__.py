@@ -105,6 +105,7 @@ try_import("sysfont")
 # Optional imports should be included in this function, so they show up
 # in packaging tools (like py2exe).
 def _optional_imports():
+    import pygame_sdl2.compat
     import pygame_sdl2.rwobject
     import pygame_sdl2.gfxdraw
     import pygame_sdl2.draw
