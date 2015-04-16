@@ -98,7 +98,7 @@ To build pygame_sdl2 on Ubuntu, install the build dependencies using the
 command::
 
     sudo apt-get install build-essential python-dev libsdl2-dev libsdl2-image-dev \
-        libsdl2-gfx-dev libsdl2-mixer-dev libsdl2-ttf-dev virtualenvwrapper
+        libsdl2-mixer-dev libsdl2-ttf-dev virtualenvwrapper
 
 Open a new shell to ensure virtualenvwrapper is running, then run::
 
