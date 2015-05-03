@@ -316,6 +316,7 @@ def poll():
 def wait():
 
     cdef SDL_Event evt
+    cdef int result
 
     with lock:
         poll_sdl()
@@ -323,7 +324,10 @@ def wait():
         if event_queue:
             return event_queue.pop(0)
 
-    if SDL_WaitEvent(&evt):
+    with nogil:
+        result = SDL_WaitEvent(&evt)
+
+    if result:
         return make_event(&evt)
     else:
         return NOEVENT_EVENT
