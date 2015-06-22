@@ -97,8 +97,9 @@ and SDL2_ttf libraries; and the ability to compile cython code.
 To build pygame_sdl2 on Ubuntu, install the build dependencies using the
 command::
 
-    sudo apt-get install build-essential python-dev libsdl2-dev libsdl2-image-dev \
-        libsdl2-mixer-dev libsdl2-ttf-dev virtualenvwrapper
+    sudo apt-get install build-essential python-dev libsdl2-dev \
+        libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+        libjpeg-dev libpng12-dev virtualenvwrapper
 
 Open a new shell to ensure virtualenvwrapper is running, then run::
 
