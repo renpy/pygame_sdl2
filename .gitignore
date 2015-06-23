@@ -7,3 +7,4 @@ build
 sdl2.i
 dist/
 gen3/
+.idea/
