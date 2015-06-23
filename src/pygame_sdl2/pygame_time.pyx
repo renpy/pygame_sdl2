@@ -16,6 +16,8 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+import cython
+import math
 from sdl2 cimport *
 from pygame_sdl2.error import error
 import pygame_sdl2
@@ -109,8 +111,9 @@ class Clock:
     def get_rawtime(self):
         return self.raw_frametime
 
+    @cython.cdivision(True)
     def get_fps(self):
         cdef int total_time = sum(self.last_frames)
         cdef float average_time = total_time / 1000.0 / len(self.last_frames)
         cdef float average_fps = 1.0 / average_time
-        return average_fps
+        return 0 if math.isnan(average_fps) else average_fps
