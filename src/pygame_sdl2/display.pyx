@@ -92,7 +92,7 @@ def get_init():
 main_window = None
 
 cdef class Window:
-    def __init__(self, title, resolution=(0, 0), flags=0, depth=0):
+    def __init__(self, title, resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
 
         if not isinstance(title, bytes):
             title = title.encode("utf-8")
@@ -101,7 +101,7 @@ cdef class Window:
 
         self.window = SDL_CreateWindow(
             title,
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+            pos[0], pos[1],
             resolution[0], resolution[1], flags | SDL_WINDOW_OPENGL)
 
         if not self.window:
