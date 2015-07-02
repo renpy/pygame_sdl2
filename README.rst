@@ -102,7 +102,7 @@ To build pygame_sdl2, install the build dependencies:
         libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
         libjpeg-dev libpng12-dev virtualenvwrapper
 
-**Mac OS X with `brew <http://brew.sh>`_** (Get brew from http://brew.sh)::
+**Mac OS X** (with `brew <http://brew.sh>`_)::
 
     brew install sdl2 sdl2_gfx sdl2_image sdl2_mixer sdl2_ttf
     sudo pip install virtualenvwrapper
