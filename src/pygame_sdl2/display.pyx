@@ -348,6 +348,11 @@ cdef class Window:
 
         SDL_SetWindowTitle(self.window, title)
 
+    def get_drawable_size(self):
+        cdef int w, h
+
+        SDL_GL_GetDrawableSize(self.window, &w, &h)
+        return w, h
 
 # The icon that's used for new windows.
 default_icon = None
@@ -572,6 +577,11 @@ def set_caption(title, icontitle = None):
 
 def get_caption():
     return default_title
+
+def get_drawable_size():
+    if main_window:
+        return main_window.get_drawable_size()
+    return None
 
 def hint(hint, value):
     SDL_SetHint(hint, value)
