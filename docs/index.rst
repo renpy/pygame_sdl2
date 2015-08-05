@@ -11,6 +11,10 @@ The list of what has been implemented can be found in the README:
 
     https://github.com/renpy/pygame_sdl2
 
+An Android packaging example can be found at:
+
+    https://github.com/renpytom/rapt-pygame-example
+
 There have been a few additions to the Pygame API, documented below.
 
 Importing as pygame

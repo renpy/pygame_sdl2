@@ -72,6 +72,10 @@ The latest documentation can be found at:
 
     http://pygame-sdl2.readthedocs.org/
 
+An Android packaging example can be found at:
+
+    https://github.com/renpytom/rapt-pygame-example
+
 Building
 --------
 
