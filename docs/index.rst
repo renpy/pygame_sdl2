@@ -67,7 +67,7 @@ Several functions have been added to allow more complex text input.
 
     Starts text input. If an on-screen keyboard is supported, it is shown.
 
-.. function:: pygame_sdl2.key.def stop_text_input()
+.. function:: pygame_sdl2.key.stop_text_input()
 
     Stops text input and hides the on-screen keyboard.
 
