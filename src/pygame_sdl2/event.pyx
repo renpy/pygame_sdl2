@@ -45,6 +45,10 @@ event_names[VIDEOEXPOSE] = "VIDEOEXPOSE"
 cdef int POSTEDEVENT
 POSTEDEVENT = SDL_LASTEVENT - 4
 
+# The maximum number of a user-defined event.
+USEREVENT_MAX = SDL_LASTEVENT - 5
+
+
 class EventType(object):
 
     def __init__(self, type, dict=None, **kwargs):
@@ -369,7 +373,7 @@ def get_standard_events():
     Returns a list of standard events that pygame_sdl2 knows about.
     """
 
-    return list(event_names.keys())
+    return [ i for i in event_names.keys() if (i < SDL_USEREVENT) or (i > USEREVENT_MAX) ]
 
 def event_name(t):
     try:
@@ -406,7 +410,6 @@ def set_grab(on):
 def get_grab():
     return SDL_GetWindowGrab(main_window.window)
 
-
 def post(e):
     """
     Posts event object `e` to the event queue.
@@ -427,6 +430,19 @@ def post(e):
 
     SDL_PushEvent(&event)
 
+def register(name):
+    """
+    Registers a unique event number and returns that number.
+
+    `name`
+        A string name for the event. This is used when calling `repr` on
+        the event.
+    """
+
+    rv = SDL_RegisterEvents(1)
+
+    event_names[rv] = name
+    return rv
 
 # Usually called by display.init.
 def init():
