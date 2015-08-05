@@ -125,3 +125,5 @@ globals().update(dict(
     K_SCROLLOCK = sdl2.SDLK_SCROLLLOCK,
     K_PRINT = sdl2.SDLK_PRINTSCREEN,
 ))
+
+TOUCH_MOUSEID = -1

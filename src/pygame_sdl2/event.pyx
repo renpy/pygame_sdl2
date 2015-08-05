@@ -124,7 +124,7 @@ cdef make_mousemotion_event(SDL_MouseMotionEvent *e):
     buttons = (1 if e.state & SDL_BUTTON_LMASK else 0,
                1 if e.state & SDL_BUTTON_MMASK else 0,
                1 if e.state & SDL_BUTTON_RMASK else 0)
-    return EventType(e.type, pos=(e.x, e.y), rel=(e.xrel, e.yrel), buttons=buttons)
+    return EventType(e.type, pos=(e.x, e.y), rel=(e.xrel, e.yrel), which=e.which, buttons=buttons)
 
 cdef make_mousebtn_event(SDL_MouseButtonEvent *e):
     btn = e.button
@@ -133,7 +133,7 @@ cdef make_mousebtn_event(SDL_MouseButtonEvent *e):
     if mousewheel_buttons and btn >= 4:
         btn += 2
 
-    return EventType(e.type, button=btn, pos=(e.x, e.y))
+    return EventType(e.type, button=btn, pos=(e.x, e.y), which=e.which)
 
 cdef make_mousewheel_event(SDL_MouseWheelEvent *e):
 
