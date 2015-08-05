@@ -48,6 +48,9 @@ POSTEDEVENT = SDL_LASTEVENT - 4
 # The maximum number of a user-defined event.
 USEREVENT_MAX = SDL_LASTEVENT - 5
 
+# If true, the mousewheel is mapped to buttons 4 and 5. Otherwise, a
+# MOUSEWHEEL event is created.
+cdef bint mousewheel_buttons = 1
 
 class EventType(object):
 
@@ -124,23 +127,38 @@ cdef make_mousemotion_event(SDL_MouseMotionEvent *e):
     return EventType(e.type, pos=(e.x, e.y), rel=(e.xrel, e.yrel), buttons=buttons)
 
 cdef make_mousebtn_event(SDL_MouseButtonEvent *e):
-    # SDL 1.x maps wheel to buttons 4/5
     btn = e.button
-    if btn >= 4:
+
+    # SDL 1.x maps wheel to buttons 4/5
+    if mousewheel_buttons and btn >= 4:
         btn += 2
+
     return EventType(e.type, button=btn, pos=(e.x, e.y))
 
 cdef make_mousewheel_event(SDL_MouseWheelEvent *e):
-    btn = 0
-    if e.y > 0:
+
+    cdef int x, y
+
+    # SDL2-style, if the user has opted-in.
+    if not mousewheel_buttons:
+        return EventType(e.type, which=e.which, x=e.x, y=e.y)
+
+    # Otherwise, follow the SDL1 approach.
+
+    y = e.y
+
+# TODO: Implement when 2.0.4 becomes widespread.
+#     if e.direction == SDL_MOUSEWHEEL_FLIPPED:
+#         y = -y
+
+    if y > 0:
         btn = 4
-    elif e.y < 0:
+    elif y < 0:
         btn = 5
     else:
         return EventType(0) # x axis scrolling produces no event in pygame
 
     # This is not the mouse position at the time of the event
-    cdef int x, y
     SDL_GetMouseState(&x, &y)
 
     # MOUSEBUTTONUP event should follow immediately after
@@ -409,6 +427,25 @@ def set_grab(on):
 
 def get_grab():
     return SDL_GetWindowGrab(main_window.window)
+
+def set_mousewheel_buttons(flag):
+    """
+    If true (the default), the mousewheel will generate events involving
+    mouse buttons 4 and 5, and mousebuttons 4 and higher will be mapped to 6 and higher.
+
+    If false, MOUSEWHEEL events are generated, and the mousebuttons are
+    not remapped.
+    """
+
+    global mousewheel_buttons
+    mousewheel_buttons = flag
+
+def get_mousewheel_buttons():
+    """
+    Returns the value set by mousehweel buttons,.
+    """
+
+    return mousewheel_buttons
 
 def post(e):
     """

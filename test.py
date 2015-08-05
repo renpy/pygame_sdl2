@@ -9,6 +9,8 @@ surf = pygame.display.set_mode((400, 400))
 surf.fill((255, 0, 0, 255))
 pygame.display.update()
 
+pygame.event.set_mousewheel_buttons(False)
+
 while True:
     ev = pygame.event.wait()
 
