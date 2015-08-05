@@ -17,6 +17,8 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+from cpython.ref cimport Py_INCREF, Py_DECREF
+
 from sdl2 cimport *
 from pygame_sdl2.display cimport Window, main_window
 import threading
@@ -37,6 +39,11 @@ event_names[ACTIVEEVENT] = "ACTIVEEVENT"
 event_names[VIDEORESIZE] = "VIDEORESIZE"
 event_names[VIDEOEXPOSE] = "VIDEOEXPOSE"
 
+# This is used for events posted to the event queue. This won't be returned
+# to the user - it's just used internally, with the event object itself
+# giving the type.
+cdef int POSTEDEVENT
+POSTEDEVENT = SDL_LASTEVENT - 4
 
 class EventType(object):
 
@@ -185,6 +192,8 @@ cdef make_window_event(SDL_WindowEvent *e):
     return EventType(SDL_WINDOWEVENT, event=e.event, data1=e.data1, data2=e.data2)
 
 cdef make_event(SDL_Event *e):
+    cdef object o
+
     if e.type in (SDL_KEYDOWN, SDL_KEYUP):
         return make_keyboard_event(<SDL_KeyboardEvent*>e)
     elif e.type == SDL_MOUSEMOTION:
@@ -207,6 +216,10 @@ cdef make_event(SDL_Event *e):
         return make_textinput_event(<SDL_TextInputEvent *> e)
     elif e.type == SDL_TEXTEDITING:
         return make_textediting_event(<SDL_TextEditingEvent *> e)
+    elif e.type == POSTEDEVENT:
+        o = <object> e.user.data1
+        Py_DECREF(o)
+        return o
     elif e.type >= SDL_USEREVENT:
         # Can't do anything useful with data1 and data2 here.
         return EventType(e.type, code=e.user.code)
@@ -395,12 +408,25 @@ def get_grab():
 
 
 def post(e):
-    # TODO: display.quit() should clear the block list?? Based on unit test.
-    with lock:
-        poll_sdl()
+    """
+    Posts event object `e` to the event queue.
+    """
 
-        if not get_blocked(e.type):
-            event_queue.append(e)
+    cdef SDL_Event event;
+
+    if not isinstance(e, EventType):
+        raise pygame_sdl2.error("event.post must be called with an Event.")
+
+    if get_blocked(e.type):
+        return
+
+    Py_INCREF(e)
+
+    event.type = POSTEDEVENT
+    event.user.data1 = <void *> e
+
+    SDL_PushEvent(&event)
+
 
 # Usually called by display.init.
 def init():
