@@ -7,7 +7,7 @@ is the pygame documentation:
 
     http://www.pygame.org/docs/
 
-The list of what has been inplemented can be found in the README:
+The list of what has been implemented can be found in the README:
 
     https://github.com/renpy/pygame_sdl2
 
