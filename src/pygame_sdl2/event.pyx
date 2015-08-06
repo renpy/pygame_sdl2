@@ -216,14 +216,15 @@ cdef make_window_event(SDL_WindowEvent *e):
 cdef make_event(SDL_Event *e):
     cdef object o
 
-    if e.type in (SDL_KEYDOWN, SDL_KEYUP):
-        return make_keyboard_event(<SDL_KeyboardEvent*>e)
-    elif e.type == SDL_MOUSEMOTION:
+    if e.type == SDL_MOUSEMOTION:
         return make_mousemotion_event(<SDL_MouseMotionEvent*>e)
     elif e.type in (SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP):
         return make_mousebtn_event(<SDL_MouseButtonEvent*>e)
+
     elif e.type == SDL_MOUSEWHEEL:
         return make_mousewheel_event(<SDL_MouseWheelEvent*>e)
+    elif e.type in (SDL_KEYDOWN, SDL_KEYUP):
+        return make_keyboard_event(<SDL_KeyboardEvent*>e)
     elif e.type == SDL_JOYAXISMOTION:
         return make_joyaxis_event(<SDL_JoyAxisEvent*>e)
     elif e.type == SDL_JOYBALLMOTION:
@@ -238,6 +239,12 @@ cdef make_event(SDL_Event *e):
         return make_textinput_event(<SDL_TextInputEvent *> e)
     elif e.type == SDL_TEXTEDITING:
         return make_textediting_event(<SDL_TextEditingEvent *> e)
+    elif e.type == SDL_CONTROLLERAXISMOTION:
+        return EventType(e.type, which=e.caxis.which, axis=e.caxis.axis, value=e.caxis.value)
+    elif e.type in (SDL_CONTROLLERBUTTONDOWN, SDL_CONTROLLERBUTTONUP):
+        return EventType(e.type, which=e.cbutton.which, button=e.cbutton.button, state=e.cbutton.state)
+    elif e.type in (SDL_CONTROLLERDEVICEADDED, SDL_CONTROLLERDEVICEREMOVED, SDL_CONTROLLERDEVICEREMAPPED):
+        return EventType(e.type, which=e.cdevice.which)
     elif e.type == POSTEDEVENT:
         o = <object> e.user.data1
         Py_DECREF(o)
