@@ -48,10 +48,6 @@ cdef class Joystick:
     def __cinit__(self):
         self.joystick = NULL
 
-    def __dealloc(self):
-        if self.joystick and SDL_JoystickGetAttached(self.joystick):
-            SDL_JoystickClose(self.joystick)
-
     def __init__(self, id):
         self.joyid = id
 
