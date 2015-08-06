@@ -11,6 +11,15 @@ pygame.display.update()
 
 pygame.event.set_mousewheel_buttons(False)
 
+controllers = [ ]
+
+for i in range(pygame.controller.get_count()):
+    c = pygame.controller.Controller(i)
+    print(c.get_name(), c.is_controller())
+
+    if c.is_controller():
+        c.init()
+
 while True:
     ev = pygame.event.wait()
 

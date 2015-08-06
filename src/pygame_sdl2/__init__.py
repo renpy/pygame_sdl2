@@ -91,6 +91,7 @@ import pygame_sdl2.version
 import pygame_sdl2.locals as constants
 
 # Import optional modules.
+try_import("controller")
 try_import("draw")
 try_import("font")
 try_import("image")
@@ -106,6 +107,7 @@ try_import("sysfont")
 # in packaging tools (like py2exe).
 def _optional_imports():
     import pygame_sdl2.compat
+    import pygame_sdl2.controller
     import pygame_sdl2.rwobject
     import pygame_sdl2.gfxdraw
     import pygame_sdl2.draw

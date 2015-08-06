@@ -45,6 +45,7 @@ pymodule("pygame_sdl2.version")
 
 cython("pygame_sdl2.error", libs=sdl_libs)
 cython("pygame_sdl2.color", libs=sdl_libs)
+cython("pygame_sdl2.controller", libs=sdl_libs)
 cython("pygame_sdl2.rect", libs=sdl_libs)
 cython("pygame_sdl2.rwobject", libs=sdl_libs)
 cython("pygame_sdl2.surface", source=[ "src/alphablit.c" ], libs=sdl_libs)
