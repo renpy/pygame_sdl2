@@ -127,3 +127,5 @@ globals().update(dict(
 ))
 
 TOUCH_MOUSEID = -1
+
+include "controller.pxi"
