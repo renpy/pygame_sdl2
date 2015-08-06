@@ -67,40 +67,81 @@ cdef class Joystick:
             self.joystick = NULL
 
     def get_init(self):
-        return True
+        if self.joystick:
+            return True
+        else:
+            return False
 
     def get_id(self):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         return SDL_JoystickInstanceID(self.joystick)
 
     def get_name(self):
-        return SDL_JoystickName(self.joystick)
+        cdef char *rv
+
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
+        rv = SDL_JoystickName(self.joystick)
+
+        if rv:
+            return rv
+        else:
+            return None
 
     def get_numaxes(self):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         return SDL_JoystickNumAxes(self.joystick)
 
     def get_numballs(self):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         return SDL_JoystickNumBalls(self.joystick)
 
     def get_numbuttons(self):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         return SDL_JoystickNumButtons(self.joystick)
 
     def get_numhats(self):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         return SDL_JoystickNumHats(self.joystick)
 
     def get_axis(self, axis_number):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         return SDL_JoystickGetAxis(self.joystick, axis_number) / 32768.0
 
     def get_ball(self, ball_number):
         cdef int dx, dy
+
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         if SDL_JoystickGetBall(self.joystick, ball_number, &dx, &dy) == 0:
             return (dx, dy)
         else:
             raise error()
 
     def get_button(self, button):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         return SDL_JoystickGetButton(self.joystick, button) == 1
 
     def get_hat(self, hat_number):
+        if self.joystick == NULL:
+            raise error("joystick not initialized")
+
         state = SDL_JoystickGetHat(self.joystick, hat_number)
         hx = hy = 0
         if state & SDL_HAT_LEFT:
@@ -114,4 +155,3 @@ cdef class Joystick:
             hy = -1
 
         return (hx, hy)
-
