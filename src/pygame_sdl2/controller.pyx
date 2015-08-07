@@ -88,6 +88,48 @@ def add_mappings(mapping_file):
     if SDL_GameControllerAddMappingsFromRW(rwops, 1) == -1:
         raise error()
 
+def get_axis_from_string(name):
+    """
+    Returns the axis number of the controller axis with `name`, or
+    pygame.CONTROLLER_AXIS_INVALID if `name` is not known.
+    """
+
+    return SDL_GameControllerGetAxisFromString(name)
+
+def get_button_from_string(name):
+    """
+    Returns the button number of the controller button with `name`, or
+    pygame.CONTROLLER_BUTTON_INVALID if `name` is not known.
+    """
+
+    return SDL_GameControllerGetButtonFromString(name)
+
+def get_string_for_axis(axis):
+    """
+    Returns a string describing the controller axis `axis`, which must be
+    an integer. Returns None if the axis is not known.
+    """
+
+    cdef char *rv = SDL_GameControllerGetStringForAxis(axis)
+
+    if rv != NULL:
+        return rv
+    else:
+        return None
+
+def get_string_for_button(button):
+    """
+    Returns a string describing the controller button `button`, which must be
+    an integer. Returns None if the button is not known.
+    """
+
+    cdef char *rv = SDL_GameControllerGetStringForButton(button)
+
+    if rv != NULL:
+        return rv
+    else:
+        return None
+
 
 cdef class Controller:
     # Allow weak references.

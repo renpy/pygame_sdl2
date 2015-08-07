@@ -29,4 +29,10 @@ while True:
     if ev.type == KEYDOWN and ev.key == K_ESCAPE:
         break
 
+    if ev.type == CONTROLLERAXISMOTION:
+        print(pygame.controller.get_string_for_axis(ev.axis))
+
+    if ev.type in (CONTROLLERBUTTONDOWN, CONTROLLERBUTTONUP):
+        print(pygame.controller.get_string_for_button(ev.button))
+
     print(ev)
