@@ -110,7 +110,7 @@ def get_string_for_axis(axis):
     an integer. Returns None if the axis is not known.
     """
 
-    cdef char *rv = SDL_GameControllerGetStringForAxis(axis)
+    cdef const char *rv = SDL_GameControllerGetStringForAxis(axis)
 
     if rv != NULL:
         return rv
@@ -123,7 +123,7 @@ def get_string_for_button(button):
     an integer. Returns None if the button is not known.
     """
 
-    cdef char *rv = SDL_GameControllerGetStringForButton(button)
+    cdef const char *rv = SDL_GameControllerGetStringForButton(button)
 
     if rv != NULL:
         return rv
@@ -212,7 +212,7 @@ cdef class Controller:
         or None if no name could be found.
         """
 
-        cdef char *rv = SDL_GameControllerNameForIndex(self.index)
+        cdef const char *rv = SDL_GameControllerNameForIndex(self.index)
 
         if rv == NULL:
             return None
