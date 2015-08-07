@@ -233,6 +233,8 @@ cdef make_event(SDL_Event *e):
         return make_joyhat_event(<SDL_JoyHatEvent*>e)
     elif e.type in (SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP):
         return make_joybtn_event(<SDL_JoyButtonEvent*>e)
+    elif e.type in (SDL_JOYDEVICEADDED, SDL_JOYDEVICEREMOVED):
+        return EventType(e.type, which=e.jdevice.which)
     elif e.type == SDL_WINDOWEVENT:
         return make_window_event(<SDL_WindowEvent*>e)
     elif e.type == SDL_TEXTINPUT:
