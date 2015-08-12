@@ -115,13 +115,13 @@ cdef uint32_t get_at(SDL_Surface *surf, int x, int y) nogil:
         y = surf.h - 1
 
     cdef uint32_t *p = <uint32_t*>surf.pixels
-    p += y * (surf.pitch / sizeof(uint32_t))
+    p += y * (surf.pitch // sizeof(uint32_t))
     p += x
     return p[0]
 
 cdef void set_at(SDL_Surface *surf, int x, int y, uint32_t color) nogil:
     cdef uint32_t *p = <uint32_t*>surf.pixels
-    p += y * (surf.pitch / sizeof(uint32_t))
+    p += y * (surf.pitch // sizeof(uint32_t))
     p += x
     p[0] = color
 

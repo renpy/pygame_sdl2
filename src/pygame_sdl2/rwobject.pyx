@@ -146,7 +146,7 @@ cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxn
     cdef size_t rv;
 
     if size * maxnum > left:
-        maxnum = left / size
+        maxnum = left // size
 
     if maxnum == 0:
         return 0
