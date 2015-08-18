@@ -247,6 +247,10 @@ cdef make_event(SDL_Event *e):
         return EventType(e.type, which=e.cbutton.which, button=e.cbutton.button, state=e.cbutton.state)
     elif e.type in (SDL_CONTROLLERDEVICEADDED, SDL_CONTROLLERDEVICEREMOVED, SDL_CONTROLLERDEVICEREMAPPED):
         return EventType(e.type, which=e.cdevice.which)
+    elif e.type in (SDL_FINGERMOTION, SDL_FINGERDOWN, SDL_FINGERUP):
+        return EventType(e.type, touchId=e.tfinger.touchId, fingerId=e.tfinger.fingerId, x=e.tfinger.x, y=e.tfinger.y, dx=e.tfinger.dx, dy=e.tfinger.dy, pressure=e.tfinger.pressure)
+    elif e.type == SDL_MULTIGESTURE:
+        return EventType(e.type, touchId=e.mgesture.touchId, dTheta=e.mgesture.dTheta, dDist=e.mgesture.dDist, x=e.mgesture.x, y=e.mgesture.y, numFingers=e.mgesture.numFingers)
     elif e.type == POSTEDEVENT:
         o = <object> e.user.data1
         Py_DECREF(o)
