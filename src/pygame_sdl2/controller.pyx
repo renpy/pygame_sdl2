@@ -227,3 +227,16 @@ cdef class Controller:
 
         return SDL_IsGameController(self.index)
 
+    def get_guid_string(self):
+        """
+        Returns the guid string corresponding to this controller.
+        """
+
+        cdef SDL_JoystickGUID guid
+        cdef char s[33]
+
+        guid = SDL_JoystickGetDeviceGUID(self.index)
+        SDL_JoystickGetGUIDString(guid, s, 33)
+
+        return s
+
