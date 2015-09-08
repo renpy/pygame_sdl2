@@ -75,7 +75,9 @@ def parse_cflags(command):
     the environment.
     """
 
-    if command is not None:
+    if "PYGAME_SDL2_CFLAGS" in os.environ:
+        output = os.environ["PYGAME_SDL2_CFLAGS"]
+    elif command is not None:
         output = subprocess.check_output(command, universal_newlines=True)
     else:
         output = os.environ.get("CFLAGS", "")
@@ -95,7 +97,10 @@ def parse_libs(command):
     is None, parses LDFLAGS from the environment.
     """
 
-    output = subprocess.check_output(command, universal_newlines=True)
+    if "PYGAME_SDL2_LDFLAGS" in os.environ:
+        output = os.environ["PYGAME_SDL2_LDFLAGS"]
+    else:
+        output = subprocess.check_output(command, universal_newlines=True)
 
     libs = [ ]
 
