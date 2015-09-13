@@ -72,6 +72,11 @@ def aaline(Surface surface, x1, y1, x2, y2, color):
 
 def thick_line(Surface surface, x1, y1, x2, y2, width, color):
     cdef Color c = Color(color)
+
+    # This locks up in c code when trying to draw a zero-length line.
+    if x1 == x2 and y1 == y2:
+        return
+
     thickLineRGBA(surface.surface, x1, y1, x2, y2, width, c.r, c.g, c.b, c.a)
 
 def circle(Surface surface, x, y, r, color):
