@@ -156,5 +156,7 @@ def get_sdl_byteorder():
 def get_sdl_version():
     return SDL_VERSION_TUPLE
 
+get_platform = pygame_sdl2.display.get_platform
+
 # We have new-style buffers, but not the pygame.newbuffer module.
 HAVE_NEWBUF = False

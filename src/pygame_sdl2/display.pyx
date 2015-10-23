@@ -586,6 +586,9 @@ def get_drawable_size():
 def hint(hint, value):
     SDL_SetHint(hint, value)
 
+def get_platform():
+    return SDL_GetPlatform()
+
 cdef api SDL_Window *PyWindow_AsWindow(window):
     """
     Returns a pointer to the SDL_Window corresponding to `window`. If `window`
