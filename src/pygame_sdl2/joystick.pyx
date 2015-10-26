@@ -58,7 +58,7 @@ cdef class Joystick:
                 raise error()
 
     def quit(self): # @ReservedAssignment
-        if self.joystick and SDL_JoystickGetAttached(self.joystick):
+        if self.joystick != NULL:
             SDL_JoystickClose(self.joystick)
             self.joystick = NULL
 
