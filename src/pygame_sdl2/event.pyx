@@ -416,7 +416,7 @@ def set_blocked(t=None):
     if t == None:
         for et in event_names.keys():
             SDL_EventState(et, SDL_ENABLE)
-    elif type(t) == int:
+    elif isinstance(t, (int, long)):
         SDL_EventState(t, SDL_IGNORE)
     else:
         for et in t:
@@ -426,7 +426,7 @@ def set_allowed(t=None):
     if t == None:
         for et in event_names.keys():
             SDL_EventState(et, SDL_IGNORE)
-    elif type(t) == int:
+    elif isinstance(t, (int, long)):
         SDL_EventState(t, SDL_ENABLE)
     else:
         for et in t:
