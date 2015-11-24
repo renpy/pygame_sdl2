@@ -363,7 +363,7 @@ default_title = "pygame window"
 # The default gl_swap_control
 default_swap_control = 1
 
-def set_mode(resolution=(0, 0), flags=0, depth=0):
+def set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
     global main_window
 
     # If we're on android, we have to close the splash window before opening
@@ -383,7 +383,7 @@ def set_mode(resolution=(0, 0), flags=0, depth=0):
         else:
             main_window.destroy()
 
-    main_window = Window(default_title, resolution, flags, depth)
+    main_window = Window(default_title, resolution, flags, depth, pos=pos)
 
     if default_icon is not None:
         main_window.set_icon(default_icon)
