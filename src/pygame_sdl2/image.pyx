@@ -47,10 +47,13 @@ cdef process_namehint(namehint):
     if not isinstance(namehint, bytes_):
         namehint = namehint.encode("ascii", "replace")
 
+    if not namehint:
+        return b''
+
     ext = os.path.splitext(namehint)[1]
-    if ext == '':
+    if not ext:
         ext = namehint
-    if ext[0] == '.':
+    if ext[0] == b'.':
         ext = ext[1:]
 
     return ext.upper()
