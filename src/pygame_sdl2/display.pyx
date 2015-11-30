@@ -583,6 +583,19 @@ def get_drawable_size():
         return main_window.get_drawable_size()
     return None
 
+def get_num_video_displays():
+    rv = SDL_GetNumVideoDisplays()
+    if rv < 0:
+        raise error()
+
+    return rv
+
+def get_display_bounds(index):
+    cdef SDL_Rect rect
+    rv = SDL_GetDisplayBounds(index, &rect)
+
+    return (rect.x, rect.y, rect.w, rect.h)
+
 def hint(hint, value):
     SDL_SetHint(hint, value)
 
