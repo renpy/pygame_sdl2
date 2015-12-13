@@ -22,11 +22,9 @@ import os
 import sys
 import re
 import subprocess
+import platform
 
 import distutils.core
-
-# The cython command.
-cython_command = "cython"
 
 # The include and library dirs that we compile against.
 include_dirs = [ ".", "src" ]
@@ -48,13 +46,21 @@ android = "PYGAME_SDL2_ANDROID" in os.environ
 # True if we're building on ios.
 ios = "PYGAME_SDL2_IOS" in os.environ
 
+windows = platform.win32_ver()[0]
+
+# The cython command.
+if windows:
+    cython_command = os.path.join(os.path.dirname(sys.executable), "Scripts", "cython.exe")
+else:
+    cython_command = "cython"
+
+
 if sys.version_info[0] >= 3:
     version_flag = "-3"
     gen = "gen3"
 else:
     version_flag = "-2"
     gen = "gen"
-
 
 
 def system_path(path):

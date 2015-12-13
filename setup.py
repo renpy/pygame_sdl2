@@ -20,14 +20,36 @@
 
 from __future__ import division, absolute_import, print_function
 
-from setuplib import android, ios, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen, gen
+from setuplib import android, ios, windows, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen, gen
+import setuplib
+
 import os
+import platform
 
 if android or ios:
     sdl_libs = [ 'SDL2' ]
 else:
-    parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
-    sdl_libs = parse_libs([ "sh", "-c", "sdl2-config --libs" ])
+
+    try:
+        parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
+        sdl_libs = parse_libs([ "sh", "-c", "sdl2-config --libs" ])
+    except:
+
+        if not windows:
+            raise
+
+        windeps = os.path.join(os.path.dirname(__file__), "pygame_sdl2_windeps")
+
+        if not os.path.isdir(windeps):
+            raise
+
+        sdl_libs = [ 'SDL2' ]
+        setuplib.include_dirs.append(os.path.join(windeps, "include"))
+
+        if platform.architecture()[0] == "32bit":
+            setuplib.library_dirs.append(os.path.join(windeps, "lib/x86"))
+        else:
+            setuplib.library_dirs.append(os.path.join(windeps, "lib/x64"))
 
 if android:
     png = "png16"
