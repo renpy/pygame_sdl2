@@ -597,6 +597,13 @@ def get_display_bounds(index):
     return (rect.x, rect.y, rect.w, rect.h)
 
 def hint(hint, value):
+
+    if not isinstance(hint, bytes):
+        hint = hint.encode("utf-8")
+
+    if not isinstance(value, bytes):
+        value = value.encode("utf-8")
+
     SDL_SetHint(hint, value)
 
 def get_platform():
