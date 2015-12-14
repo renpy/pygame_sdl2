@@ -24,7 +24,7 @@ import re
 import subprocess
 import platform
 
-import distutils.core
+import setuptools
 
 # The include and library dirs that we compile against.
 include_dirs = [ ".", "src" ]
@@ -33,6 +33,9 @@ library_dirs = [ ]
 # Extra arguments that will be given to the compiler.
 extra_compile_args = [ ]
 extra_link_args = [ ]
+
+# Data files (including DLLs) to include with the package.
+package_data = [ ]
 
 # A list of extension objects that we use.
 extensions = [ ]
@@ -133,7 +136,7 @@ def cmodule(name, source, libs=[], define_macros=[]):
     if name in exclude:
         return
 
-    extensions.append(distutils.core.Extension(
+    extensions.append(setuptools.Extension(
         name,
         source,
         include_dirs=include_dirs,
@@ -277,12 +280,14 @@ def setup(name, version, **kwargs):
     Calls the distutils setup function.
     """
 
-    distutils.core.setup(
+    setuptools.setup(
         name = name,
         version = version,
         ext_modules = extensions,
         py_modules = py_modules,
-        package_dir = { '' : 'src' },
+        packages = [ name ],
+        package_dir = { name : 'src/' + name },
+        package_data = { name : package_data },
         **kwargs
         )
 

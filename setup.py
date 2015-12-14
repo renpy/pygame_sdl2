@@ -25,6 +25,7 @@ import setuplib
 
 import os
 import platform
+import shutil
 
 if android or ios:
     sdl_libs = [ 'SDL2' ]
@@ -47,9 +48,20 @@ else:
         setuplib.include_dirs.append(os.path.join(windeps, "include"))
 
         if platform.architecture()[0] == "32bit":
-            setuplib.library_dirs.append(os.path.join(windeps, "lib/x86"))
+            libdir = os.path.join(windeps, "lib/x86")
         else:
-            setuplib.library_dirs.append(os.path.join(windeps, "lib/x64"))
+            libdir = os.path.join(windeps, "lib/x64")
+
+        setuplib.library_dirs.append(libdir)
+
+        for i in os.listdir(libdir):
+            if i.lower().endswith(".dll"):
+                shutil.copy(
+                    os.path.join(libdir, i),
+                    os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i),
+                    )
+
+                setuplib.package_data.append(i)
 
 if android:
     png = "png16"
@@ -95,6 +107,11 @@ headers = [
     gen + "/pygame_sdl2.display_api.h",
     ]
 
-setup("pygame_sdl2", "0.1", headers=headers)
+setup("pygame_sdl2", "2.0.0", headers=headers)
 
 find_unnecessary_gen()
+
+for i in setuplib.package_data:
+    os.unlink(os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i))
+
+
