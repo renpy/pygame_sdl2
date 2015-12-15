@@ -26,6 +26,7 @@ import setuplib
 import os
 import platform
 import shutil
+import sys
 
 if android or ios:
     sdl_libs = [ 'SDL2' ]
@@ -46,6 +47,9 @@ else:
 
         sdl_libs = [ 'SDL2' ]
         setuplib.include_dirs.append(os.path.join(windeps, "include"))
+
+        if sys.version_info[0] < 3:
+            setuplib.include_dirs.append(os.path.join(windeps, "include27"))
 
         if platform.architecture()[0] == "32bit":
             libdir = os.path.join(windeps, "lib/x86")
