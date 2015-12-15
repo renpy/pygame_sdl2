@@ -59,13 +59,13 @@ int Pygame_SDL2_SavePNG_RW(SDL_RWops *src, SDL_Surface *surf,int compression){
 	SDL_PixelFormat *fmt=NULL;
 	SDL_Surface *tempsurf=NULL;
 	int ret,funky_format;
-	unsigned int i;
+	int i;
 	png_colorp palette;
 	Uint8 *palette_alpha=NULL;
 	png_byte **row_pointers=NULL;
-	png_ptr=NULL;info_ptr=NULL;palette=NULL;ret=-1;
+	unsigned int target_format;
 
-	Uint32 target_format;
+	png_ptr=NULL;info_ptr=NULL;palette=NULL;ret=-1;
 
 	if( !src || !surf) {
 		goto savedone2; /* Nothing to do. */
