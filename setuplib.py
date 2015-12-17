@@ -24,7 +24,10 @@ import re
 import subprocess
 import platform
 
-import setuptools
+try:
+    import setuptools
+except:
+    import distutils.core as setuptools
 
 # The include and library dirs that we compile against.
 include_dirs = [ ".", "src" ]
