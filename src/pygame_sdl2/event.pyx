@@ -263,7 +263,7 @@ cdef make_event(SDL_Event *e):
 
 
 # The event queue - a list of pending events from oldest to newest.
-cdef list event_queue = list()
+cdef public event_queue = list()
 
 # The lock that protects the event queue.
 lock = threading.RLock()
@@ -493,6 +493,14 @@ def register(name):
 
     event_names[rv] = name
     return rv
+
+def copy_event_queue():
+    """
+    Returns a copy of the event queue. The copy cannot be used for modifying
+    the event queue.
+    """
+
+    return event_queue[:]
 
 # Usually called by display.init.
 def init():
