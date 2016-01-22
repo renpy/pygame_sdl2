@@ -56,6 +56,7 @@ cdef class Surface:
         self.surface = NULL
         self.owns_surface = False
         self.window_surface = False
+        self.has_colorkey = False
 
     def __dealloc__(self):
         global total_size
@@ -179,7 +180,10 @@ cdef class Surface:
         cdef SDL_Rect area_rect
         cdef SDL_Rect *area_ptr = NULL
 
-        SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_BLEND)
+        print(source.has_colorkey, source.get_masks(), self.get_masks())
+
+        if source.has_colorkey:
+            SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE)
 
         to_sdl_rect(dest, &dest_rect, "dest")
 
@@ -190,8 +194,11 @@ cdef class Surface:
         cdef int err
 
         with nogil:
-#             err = SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect)
-            err = pygame_Blit(source.surface, area_ptr, self.surface, &dest_rect, special_flags)
+
+            if source.has_colorkey:
+                err = SDL_UpperBlit(source.surface, area_ptr, self.surface, &dest_rect)
+            else:
+                err = pygame_Blit(source.surface, area_ptr, self.surface, &dest_rect, special_flags)
 
         if err:
             raise error()
@@ -373,12 +380,19 @@ cdef class Surface:
         self.unlock()
 
     def set_colorkey(self, color, flags=0):
+        print color
+
         if color is None:
             if SDL_SetColorKey(self.surface, SDL_FALSE, 0):
                 raise error()
+
+            self.has_colorkey = False
+
         else:
             if SDL_SetColorKey(self.surface, SDL_TRUE, map_color(self.surface, color)):
                 raise error()
+
+            self.has_colorkey = True
 
     def get_colorkey(self):
         cdef Uint32 key
@@ -592,6 +606,7 @@ cdef class Surface:
         rv.parent = self
         rv.offset_x = sdl_rect.x
         rv.offset_y = sdl_rect.y
+        rv.has_colorkey = self.has_colorkey
 
         return rv
 
