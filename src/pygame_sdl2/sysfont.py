@@ -17,6 +17,7 @@
 ##
 ##    Pete Shinners
 ##    pete@shinners.org
+import glob
 
 "sysfont, used in the font module to find system fonts"
 
@@ -230,7 +231,7 @@ def initsysfonts_win32():
         for font in font_file_paths:
             file_name = os.path.basename(font)
             try:
-                name, bold, italic = win_font_file_mapping[file_name]
+                name, bold, italic = win_font_files_mapping[file_name]
             except KeyError:
                 pass
             else:
@@ -249,7 +250,7 @@ def initsysfonts_win32():
         try:
             key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, key_name)
             keys.append(key)
-        except WindowsError:
+        except WindowsError: # @UndefinedVariable
             pass
 
     for key in keys:
