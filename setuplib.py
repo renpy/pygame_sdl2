@@ -291,6 +291,7 @@ def setup(name, version, **kwargs):
         packages = [ name ],
         package_dir = { name : 'src/' + name },
         package_data = { name : package_data },
+        zip_safe=False,
         **kwargs
         )
 
