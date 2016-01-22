@@ -396,6 +396,14 @@ def get_surface():
 
     return main_window.get_surface()
 
+def get_window():
+    """
+    Returns the Window created by set_mode, or None if no such window
+    exists.
+    """
+
+    return main_window
+
 def flip():
     if main_window:
         main_window.flip()
