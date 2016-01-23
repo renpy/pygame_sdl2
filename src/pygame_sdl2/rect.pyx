@@ -19,37 +19,46 @@
 
 import collections
 
-def flatten(seq):
-    for obj in seq:
-        if isinstance(obj, collections.Iterable):
-            for x in flatten(obj):
-                yield x
-        else:
-            yield obj
-
+def flatten(*args):
+    if len(args) == 1:
+        return args[0]
+    else:
+        return args
 
 cdef class Rect:
 
     def __init__(self, *args):
 
         cdef int x, y, w, h
+        cdef int len_args
+        cdef Rect rect
 
-        if len(args) == 1 and isinstance(args[0], Rect):
+        len_args = len(args)
+
+        if len_args == 1 and isinstance(args[0], Rect):
+            rect = args[0]
+            x = rect.x
+            y = rect.y
+            w = rect.w
+            h = rect.h
+
+        elif len_args == 1 and len(args[0]) == 4:
             x, y, w, h = args[0]
 
+        elif len_args == 1 and len(args[0]) == 2:
+            x, y = args[0]
+            w = 0
+            h = 0
+
+        elif len_args == 2:
+            x, y = args[0]
+            w, h = args[1]
+
+        elif len_args == 4:
+            x, y, w, h = args
+
         else:
-            flat_args = tuple(flatten(args))
-
-            if len(flat_args) == 2:
-                x, y = flat_args
-                w = 0
-                h = 0
-
-            elif len(flat_args) == 4:
-                x, y, w, h = flat_args
-
-            else:
-                raise TypeError("Argument must be a rect style object.")
+            raise TypeError("Argument must be a rect style object.")
 
         self.x = x
         self.y = y
@@ -58,6 +67,12 @@ cdef class Rect:
 
     def __repr__(self):
         return "<rect(%d, %d, %d, %d)>" % (self.x, self.y, self.w, self.h)
+
+    def __len__(self):
+        return 4
+
+    def __iter__(self):
+        return iter((self.x, self.y, self.w, self.h))
 
     def __richcmp__(Rect a, b, int op):
         if not isinstance(b, Rect):
@@ -354,28 +369,37 @@ cdef int to_sdl_rect(rectlike, SDL_Rect *rect, argname=None) except -1:
     cdef int x, y, w, h
     cdef Rect rl
 
-    if isinstance(rectlike, Rect):
-        rl = rectlike
+    try:
+        if isinstance(rectlike, Rect):
+            rl = rectlike
 
-        rect.x = rl.x
-        rect.y = rl.y
-        rect.w = rl.w
-        rect.h = rl.h
+            rect.x = rl.x
+            rect.y = rl.y
+            rect.w = rl.w
+            rect.h = rl.h
 
-        return 0
+            return 0
 
-    elif isinstance(rectlike, (tuple, list)):
-
-        if len(rectlike) == 4:
+        elif len(rectlike) == 4:
             rect.x, rect.y, rect.w, rect.h = rectlike
             return 0
 
         elif len(rectlike) == 2:
             rect.x, rect.y = rectlike
             rect.w, rect.h = rectlike
-            return 0
 
-    if argname:
-        raise TypeError("Argument {} must be a rect style object.".format(argname))
-    else:
-        raise TypeError("Argument must be a rect style object.")
+        else:
+
+            if argname:
+                raise TypeError("Argument {} must be a rect style object.".format(argname))
+            else:
+                raise TypeError("Argument must be a rect style object.")
+
+    except:
+
+        raise
+
+        if argname:
+            raise TypeError("Argument {} must be a rect style object.".format(argname))
+        else:
+            raise TypeError("Argument must be a rect style object.")
