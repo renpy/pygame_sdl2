@@ -180,8 +180,6 @@ cdef class Surface:
         cdef SDL_Rect area_rect
         cdef SDL_Rect *area_ptr = NULL
 
-        print(source.has_colorkey, source.get_masks(), self.get_masks())
-
         if source.has_colorkey:
             SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE)
 
