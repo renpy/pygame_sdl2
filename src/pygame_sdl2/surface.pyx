@@ -378,7 +378,6 @@ cdef class Surface:
         self.unlock()
 
     def set_colorkey(self, color, flags=0):
-        print color
 
         if color is None:
             if SDL_SetColorKey(self.surface, SDL_FALSE, 0):
