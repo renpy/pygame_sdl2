@@ -1,0 +1,26 @@
+include gen/*.c
+include gen3/*.c
+
+include fix_virtualenv.py
+include COPYING.*
+
+include setup.py
+include setuplib.py
+
+include include/*.pxi
+include include/*.pxd
+
+include src/*.h
+include src/*.c
+
+include src/pygame_sdl2/*.h
+include src/pygame_sdl2/*.py
+include src/pygame_sdl2/*.pyx
+include src/pygame_sdl2/*.pxd
+
+
+include src/pygame_sdl2/threads/*.py
+
+exclude test/*
+
+

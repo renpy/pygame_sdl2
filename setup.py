@@ -20,6 +20,9 @@
 
 from __future__ import division, absolute_import, print_function
 
+# The version of pygame_sdl2.
+VERSION="2.1.0"
+
 from setuplib import android, ios, windows, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen, gen
 import setuplib
 
@@ -111,11 +114,19 @@ headers = [
     gen + "/pygame_sdl2.display_api.h",
     ]
 
-setup("pygame_sdl2", "2.0.0", headers=headers)
+if __name__ == "__main__":
+    setup(
+        "pygame_sdl2",
+        VERSION,
+        headers=headers,
+        url="https://github.com/renpy/pygame_sdl2",
+        maintainer="Tom Rothamel",
+        maintainer_email="tom@rothamel.us",
+        )
 
-find_unnecessary_gen()
+    find_unnecessary_gen()
 
-for i in setuplib.package_data:
-    os.unlink(os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i))
+    for i in setuplib.package_data:
+        os.unlink(os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i))
 
 
