@@ -3,6 +3,6 @@
 set -e
 
 export CC="ccache gcc"
-python setup.py install
+python setup.py -q install
 
 exec python "$@"
