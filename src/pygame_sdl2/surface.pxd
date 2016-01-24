@@ -52,8 +52,5 @@ cdef class Surface:
     # If not None, a function that returns the window flags.
     cdef object get_window_flags
 
-    # Does the surface have an associated colorkey?
-    cdef bint has_colorkey
-
     cdef void take_surface(self, SDL_Surface *)
 
