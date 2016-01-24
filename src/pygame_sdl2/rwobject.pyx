@@ -53,7 +53,7 @@ cdef set_error(e):
     cdef char *msg
     e = str(e)
     msg = <char *> e
-    SDL_SetError(e)
+    SDL_SetError("%s", e)
 
 cdef Sint64 python_size(SDL_RWops *context) with gil:
     f = <object> context.hidden.unknown.data1
