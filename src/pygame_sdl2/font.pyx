@@ -56,7 +56,7 @@ cdef class Font:
     def __init__(self, fi, size):
         if fi is None:
             fi = get_default_font()
-        self.font = TTF_OpenFontRW(to_rwops(fi), 1, size*72.0/96.0)
+        self.font = TTF_OpenFontRW(to_rwops(fi), 1, size)
         if self.font == NULL:
             raise error()
 
