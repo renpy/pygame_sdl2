@@ -20,6 +20,9 @@ print snd.get_length()
 channel = snd.play()
 channel.queue(snd)
 
+channel.set_volume(.1)
+print channel.get_volume()
+
 pygame.time.wait(3000)
 # channel.set_volume(0.0, 1.0)
 # channel.fadeout(1000)

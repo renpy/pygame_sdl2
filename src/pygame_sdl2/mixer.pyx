@@ -258,10 +258,8 @@ class Channel(object):
     def fadeout(self, time):
         Mix_FadeOutChannel(self.cid, time)
 
-    def set_volume(self, left, right=-1):
-        if right == -1:
-            right = left
-        Mix_SetPanning(self.cid, 255*left, 255*right)
+    def set_volume(self, volume):
+        Mix_Volume(self.cid, int(MIX_MAX_VOLUME * volume))
 
     def get_volume(self):
         cdef int vol = Mix_Volume(self.cid, -1)
