@@ -63,6 +63,11 @@ cdef class Font:
     def render(self, text, antialias, color, background=None):
         cdef SDL_Surface *surf
         cdef SDL_Color fg
+
+        if not text:
+            w, h = self.size(" ")
+            return Surface((0, h))
+
         to_sdl_color(color, &fg)
 
         TTF_SetFontStyle(self.font, self.style)
