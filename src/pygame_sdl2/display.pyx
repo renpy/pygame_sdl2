@@ -489,13 +489,51 @@ def get_wm_info():
 
     return {}
 
-def list_modes(depth=0, flags=SDL_WINDOW_FULLSCREEN):
-    warnings.warn("pygame_sdl2.display.list_modes is not implemented.")
-    return [ ]
+
+def get_num_video_displays():
+    """
+    Returns the number of video displays connected to the system.
+    """
+
+    rv = SDL_GetNumVideoDisplays()
+
+    if rv < 0:
+        raise error()
+
+    return rv
+
+
+def list_modes(depth=0, flags=0, display=0):
+    """
+    Returns a list of possible display modes for the display `display`.
+
+    `depth` and `flags` are ignored.
+    """
+
+    cdef int num_modes, i
+    cdef SDL_DisplayMode mode
+
+    rv = [ ]
+
+    num_modes = SDL_GetNumDisplayModes(display)
+    if num_modes < 0:
+        raise error()
+
+    for 0 <= i < num_modes:
+        if SDL_GetDisplayMode(display, i, &mode) == 0:
+            t = (mode.w, mode.h)
+            if t not in rv:
+                rv.append(t)
+
+    return rv
+
 
 def mode_ok(size, flags=0, depth=0):
-    warnings.warn("pygame_sdl2.display.mode_ok is not implemented.")
-    return True
+    """
+    Returns true if size is in the result of list_modes().
+    """
+
+    return tuple(size) in list_modes()
 
 def gl_reset_attributes():
     SDL_GL_ResetAttributes()
