@@ -22,6 +22,7 @@ from pygame_sdl2.rwobject cimport to_rwops
 from libc.string cimport memset
 
 import sys
+import threading
 from pygame_sdl2.error import error
 
 import pygame_sdl2.mixer_music as music
@@ -34,10 +35,31 @@ cdef dict channel_events = {}
 cdef dict channel_queued = {}
 cdef dict current_sounds = {}
 
-cdef void channel_callback(int channel):
+# The lock protects channel_queued and current_sounds.
+_lock = threading.Lock()
+
+def _play_current(int channel):
+    """
+    Caled by channel_callback to play the next sound. This has to be called
+    from a different thread, as the channel callback isn't allowed to call
+    MIX functions.
+    """
+
+    cdef Sound next_sound
+
+    with _lock:
+        next_sound = channel_queued[channel]
+        current_sounds[channel] = next_sound
+        channel_queued[channel] = None
+
+    if next_sound:
+        Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
+
+
+cdef void channel_callback(int channel) with gil:
+
     cdef int etype = 0
     cdef SDL_Event e
-    cdef Sound next_sound
 
     etype = channel_events.get(channel, 0)
     if etype != 0:
@@ -45,13 +67,10 @@ cdef void channel_callback(int channel):
         e.type = etype
         SDL_PushEvent(&e)
 
-    next_sound = channel_queued.get(channel)
-    if next_sound:
-        # Prevent garbage collection.
-        current_sounds[channel] = next_sound
-        channel_queued[channel] = None
-
-        Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
+    with _lock:
+        next_sound = channel_queued.get(channel)
+        if next_sound:
+            threading.Thread(target=_play_current, args=(channel,)).start()
 
 # A list of errors that occured during mixer initialization.
 errors = [ ]
@@ -224,6 +243,9 @@ class Channel(object):
         if cid == -1:
             raise error()
 
+        with _lock:
+            self.current_sounds[self._cid] = sound
+
     def stop(self):
         Mix_HaltChannel(self.cid)
 
@@ -249,16 +271,19 @@ class Channel(object):
         return Mix_Playing(self.cid) != 0
 
     def get_sound(self):
-        return current_sounds.get(self.cid)
+        with _lock:
+            return current_sounds.get(self.cid)
 
     def queue(self, Sound sound):
         if self.get_busy():
-            channel_queued[self.cid] = sound
+            with _lock:
+                channel_queued[self.cid] = sound
         else:
             self.play(sound)
 
     def get_queue(self):
-        return channel_queued.get(self.cid)
+        with _lock:
+            return channel_queued.get(self.cid)
 
     def set_endevent(self, type=None):
         channel_events[self.cid] = type or 0
