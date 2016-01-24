@@ -18,6 +18,8 @@ include src/pygame_sdl2/*.py
 include src/pygame_sdl2/*.pyx
 include src/pygame_sdl2/*.pxd
 
+include src/pygame_sdl2/*.txt
+include src/pygame_sdl2/*.ttf
 
 include src/pygame_sdl2/threads/*.py
 

@@ -38,7 +38,13 @@ def get_init():
     return TTF_WasInit() != 0
 
 def get_default_font():
-    # TODO: Include freesansbold.ttf.
+    import os
+
+    default = os.path.join(os.path.dirname(__file__), "DejaVuSans.ttf")
+
+    if os.path.exists(default):
+        return default
+
     return match_font("sans")
 
 cdef class Font:

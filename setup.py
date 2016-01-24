@@ -31,9 +31,17 @@ import platform
 import shutil
 import sys
 
+temporary_package_data = [ ]
+
 if android or ios:
     sdl_libs = [ 'SDL2' ]
+
 else:
+
+    setuplib.package_data.extend([
+        "DejaVuSans.ttf",
+        "DejaVuSans.txt",
+        ])
 
     try:
         parse_cflags([ "sh", "-c", "sdl2-config --cflags" ])
@@ -68,7 +76,9 @@ else:
                     os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i),
                     )
 
-                setuplib.package_data.append(i)
+                temporary_package_data.append(i)
+
+        setuplib.package_data.extend(temporary_package_data)
 
 if android:
     png = "png16"
@@ -126,7 +136,7 @@ if __name__ == "__main__":
 
     find_unnecessary_gen()
 
-    for i in setuplib.package_data:
+    for i in temporary_package_data:
         os.unlink(os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i))
 
 

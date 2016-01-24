@@ -52,7 +52,7 @@ PATTERN = [ (False, False), (False, True), (True, False), (True, True) ]
 def draw():
     screen = pygame.display.get_surface()
 
-    f = pygame.font.Font("DejaVuSans.ttf", 18)
+    f = pygame.font.Font(None, 18)
 
     screen.fill((128, 128, 128, 255))
 
