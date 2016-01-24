@@ -121,6 +121,23 @@ Finally, build and install pygame_sdl2 by running::
 
     python setup.py install
 
+
+Windows
+^^^^^^^
+
+To build on windows, change into the pygame_sdl2 checkout, clone
+renpy/pygame_sdl2_windeps using a command like::
+
+    git clone https://github.com/pygame_sdl2_windeps
+
+and then build and install using::
+
+    python setup.py install
+
+This assumes you have installed a version of Visual Studio that is
+appropriate for the version of Python you are using.
+
+
 Contributing
 ------------
 
