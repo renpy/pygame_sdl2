@@ -36,4 +36,4 @@ def get_error():
 
 def set_error(message):
     message = bytes(message)
-    SDL_SetError(message)
+    SDL_SetError("%s", <char *> message)
