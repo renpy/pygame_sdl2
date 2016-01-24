@@ -179,15 +179,44 @@ cdef class Surface:
         cdef SDL_Rect area_rect
         cdef SDL_Rect *area_ptr = NULL
 
-        SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_BLEND)
+        cdef Surface temp
+
+        cdef int err
+        cdef Uint32 key
+        cdef Uint8 alpha
+        cdef bint colorkey
+
+        colorkey = (SDL_GetColorKey(source.surface, &key) == 0)
+
+        if not source.surface.format.Amask:
+            if SDL_GetSurfaceAlphaMod(source.surface, &alpha):
+                raise error()
+
+            if alpha != 255 and (self.surface.format.Amask or colorkey):
+
+                if area:
+                    source = source.subsurface(area)
+                    area = None
+
+                SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE)
+                temp = Surface(source.get_size(), SRCALPHA)
+
+                with nogil:
+                    SDL_UpperBlit(source.surface, NULL, temp.surface, NULL)
+
+                source = temp
+                colorkey = False
+
+        if colorkey:
+            SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE)
+        else:
+            SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_BLEND)
 
         to_sdl_rect(dest, &dest_rect, "dest")
 
         if area is not None:
             to_sdl_rect(area, &area_rect, "area")
             area_ptr = &area_rect
-
-        cdef int err
 
         with nogil:
 
