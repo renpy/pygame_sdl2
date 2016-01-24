@@ -8,6 +8,15 @@ games written using the pygame API to run on SDL2 on desktop and
 mobile  platforms. We will then evolve the API to expose SDL2-provided
 functionality in a pythonic manner.
 
+Downloads
+---------
+
+Nightly builds are available from:
+
+http://nightly.renpy.org/pygame_sdl2/
+
+An official release will be coming to pypi shortly.
+
 License
 -------
 
@@ -23,8 +32,9 @@ Current Status
 --------------
 
 Pygame_sdl2 builds and runs on Windows, Mac OS X, and Linux, with a useful
-subset of the pygame API working. The following modules have at least
-some implementation:
+subset of the pygame API working. While not as well documented, it has also
+run on Android, iOS, and inside the Chrome browser. The following modules
+have at least some implementation:
 
 * pygame_sdl2.color
 * pygame_sdl2.display
@@ -49,6 +59,7 @@ some implementation:
 Experimental new modules include:
 
 * pygame_sdl2.render
+* pygame_sdl2.controller
 
 Current omissions include:
 
