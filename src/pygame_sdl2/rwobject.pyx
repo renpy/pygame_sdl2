@@ -49,6 +49,10 @@ cdef extern from "SDL.h" nogil:
     int SDL_RWclose(SDL_RWops* context)
 
 
+cdef extern from "Python.h":
+    void PyEval_InitThreads()
+
+
 cdef set_error(e):
     cdef char *msg
     e = str(e)
@@ -256,3 +260,5 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
 
 cdef api SDL_RWops *RWopsFromPython(filelike) except NULL:
     return to_rwops(filelike)
+
+PyEval_InitThreads()
