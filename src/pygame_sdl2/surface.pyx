@@ -56,6 +56,7 @@ cdef class Surface:
         self.surface = NULL
         self.owns_surface = False
         self.window_surface = False
+        self.has_alpha = False
 
     def __dealloc__(self):
         global total_size
@@ -425,6 +426,9 @@ cdef class Surface:
     def set_alpha(self, value, flags=0):
         if value is None:
             value = 255
+            self.has_alpha = False
+        else:
+            self.has_alpha = True
 
         if SDL_SetSurfaceAlphaMod(self.surface, value):
             raise error()
@@ -432,10 +436,15 @@ cdef class Surface:
     def get_alpha(self):
         cdef Uint8 rv
 
-        if SDL_GetSurfaceAlphaMod(self.surface, &rv):
-            raise error()
+        if self.has_alpha or self.surface.format.Amask:
 
-        return rv
+            if SDL_GetSurfaceAlphaMod(self.surface, &rv):
+                raise error()
+
+            return rv
+
+        else:
+            return None
 
     def lock(self, lock=None):
         cdef Surface root = self
@@ -627,6 +636,9 @@ cdef class Surface:
         rv.offset_x = sdl_rect.x
         rv.offset_y = sdl_rect.y
 
+        if self.has_alpha:
+            rv.set_alpha(self.get_alpha())
+
         return rv
 
     def get_parent(self):
@@ -686,7 +698,7 @@ cdef class Surface:
         else:
             rv = 0
 
-        if self.surface.format.Amask:
+        if self.surface.format.Amask or self.has_alpha:
             rv = rv | SRCALPHA
 
         return rv
