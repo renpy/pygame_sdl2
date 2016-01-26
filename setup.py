@@ -20,7 +20,7 @@
 
 from __future__ import division, absolute_import, print_function
 
-# The version of pygame_sdl2.
+# The version of pygame_sdl2. This should also be updated in version.py
 VERSION="2.1.0"
 
 from setuplib import android, ios, windows, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen, gen
