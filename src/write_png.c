@@ -132,7 +132,7 @@ int Pygame_SDL2_SavePNG_RW(SDL_RWops *src, SDL_Surface *surf,int compression){
 	}
 #else
 	if (fmt->Amask) {
-		target_format = SDL_PIXELFORMAT_RGBA8888
+		target_format = SDL_PIXELFORMAT_RGBA8888;
 	} else {
 		target_format = SDL_PIXELFORMAT_RGB888;
 	}
