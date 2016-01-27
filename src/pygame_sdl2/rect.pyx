@@ -234,6 +234,9 @@ cdef class Rect:
         return r
 
     def clamp_ip(self, other):
+        if not isinstance(other, Rect):
+            other = Rect(other)
+
         if self.w > other.w or self.h > other.h:
             self.center = other.center
         else:
@@ -249,6 +252,9 @@ cdef class Rect:
     def clip(self, other, y=None, w=None, h=None):
         if type(other) == int:
             other = Rect(other, y, w, h)
+
+        if not isinstance(other, Rect):
+            other = Rect(other)
 
         if not self.colliderect(other):
             return Rect(0,0,0,0)
@@ -279,6 +285,9 @@ cdef class Rect:
         return r
 
     def union_ip(self, other):
+        if not isinstance(other, Rect):
+            other = Rect(other)
+
         x = min(self.x, other.x)
         y = min(self.y, other.y)
         self.w = max(self.right, other.right) - x
@@ -296,6 +305,9 @@ cdef class Rect:
             self.union_ip(other)
 
     def fit(self, other):
+        if not isinstance(other, Rect):
+            other = Rect(other)
+
         # Not sure if this is entirely correct. Docs and tests are ambiguous.
         r = self.copy()
         r.topleft = other.topleft
@@ -315,6 +327,9 @@ cdef class Rect:
             self.h = -self.h
 
     def contains(self, other):
+        if not isinstance(other, Rect):
+            other = Rect(other)
+
         return other.x >= self.x and other.right <= self.right and \
                other.y >= self.y and other.bottom <= self.bottom and \
                other.left < self.right and other.top < self.bottom
@@ -328,6 +343,7 @@ cdef class Rect:
     def colliderect(self, other):
         if not isinstance(other, Rect):
             other = Rect(other)
+
         return self.left < other.right and self.top < other.bottom and \
                self.right > other.left and self.bottom > other.top
 
@@ -387,19 +403,12 @@ cdef int to_sdl_rect(rectlike, SDL_Rect *rect, argname=None) except -1:
         elif len(rectlike) == 2:
             rect.x, rect.y = rectlike
             rect.w, rect.h = rectlike
-
-        else:
-
-            if argname:
-                raise TypeError("Argument {} must be a rect style object.".format(argname))
-            else:
-                raise TypeError("Argument must be a rect style object.")
+            return 0
 
     except:
+        pass
 
-        raise
-
-        if argname:
-            raise TypeError("Argument {} must be a rect style object.".format(argname))
-        else:
-            raise TypeError("Argument must be a rect style object.")
+    if argname:
+        raise TypeError("Argument {} must be a rect style object.".format(argname))
+    else:
+        raise TypeError("Argument must be a rect style object.")
