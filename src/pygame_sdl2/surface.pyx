@@ -794,3 +794,8 @@ cdef class Surface:
 
 cdef api SDL_Surface *PySurface_AsSurface(surface):
     return (<Surface> surface).surface
+
+cdef api object PySurface_New(SDL_Surface *surf):
+    cdef Surface rv = Surface(())
+    rv.take_surface(surf)
+    return rv
