@@ -70,6 +70,7 @@ cdef class Surface:
         elif self.window_surface:
             return
         elif self.parent:
+            SDL_FreeSurface(self.surface)
             return
 
         warnings.warn("Memory leak via Surface in pygame_sdl2.")
