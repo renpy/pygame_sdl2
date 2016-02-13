@@ -312,7 +312,7 @@ cdef object get_events(kinds):
     return rv
 
 
-cdef void poll_sdl():
+cdef int poll_sdl() except 1:
     """
     Polls SDL for pending events, and places those events onto the event q
     queue.
@@ -323,6 +323,8 @@ cdef void poll_sdl():
     with lock:
         while SDL_PollEvent(&evt):
             event_queue.append(make_event(&evt))
+
+    return 0
 
 
 def pump():
