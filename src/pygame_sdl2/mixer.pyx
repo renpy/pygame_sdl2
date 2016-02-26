@@ -244,7 +244,7 @@ class Channel(object):
             raise error()
 
         with _lock:
-            self.current_sounds[self._cid] = sound
+            current_sounds[self.cid] = sound
 
     def stop(self):
         Mix_HaltChannel(self.cid)
