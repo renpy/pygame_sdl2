@@ -96,6 +96,9 @@ Event = EventType
 
 cdef get_textinput():
     cdef SDL_Event evt
+
+    SDL_PumpEvents()
+
     if SDL_PeepEvents(&evt, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT) > 0:
         return evt.text.text.decode('utf-8')
     return u''
