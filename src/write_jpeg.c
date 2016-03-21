@@ -62,11 +62,15 @@ static int write_jpeg (
     return 0;
 }
 
-int Pygame_SDL2_SaveJPEG(SDL_Surface *surface, const char *file) {
+int Pygame_SDL2_SaveJPEG(SDL_Surface *surface, const char *file, int quality) {
 
 	SDL_Surface *rgb_surf;
 	JSAMPROW *samples;
 	int i, rv;
+
+	if (quality < 0) {
+		quality = 90;
+	}
 
 	rgb_surf = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGB24, 0);
 
@@ -87,7 +91,7 @@ int Pygame_SDL2_SaveJPEG(SDL_Surface *surface, const char *file) {
         samples[i] = ((unsigned char*)rgb_surf->pixels) + i * rgb_surf->pitch;
     }
 
-    rv = write_jpeg (file, samples, surface->w, surface->h, 90);
+    rv = write_jpeg(file, samples, surface->w, surface->h, quality);
 
     free(samples);
     SDL_FreeSurface(rgb_surf);

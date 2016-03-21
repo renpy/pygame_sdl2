@@ -115,12 +115,12 @@ def load(fi, namehint=""):
         return surf
 
 cdef extern from "write_jpeg.h":
-    int Pygame_SDL2_SaveJPEG(SDL_Surface *, char *) nogil
+    int Pygame_SDL2_SaveJPEG(SDL_Surface *, char *, int) nogil
 
 cdef extern from "write_png.h":
     int Pygame_SDL2_SavePNG(const char *, SDL_Surface *, int) nogil
 
-def save(Surface surface not None, filename):
+def save(Surface surface not None, filename, compression=-1):
 
     if isinstance(filename, unicode_):
         filename = filesystem_encode(filename)
@@ -132,17 +132,18 @@ def save(Surface surface not None, filename):
 
     cdef char *fn = filename
     cdef SDL_RWops *rwops
+    cdef int compression_level = compression
 
     if ext == b'.PNG':
         with nogil:
-            err = Pygame_SDL2_SavePNG(fn, surface.surface, 9)
+            err = Pygame_SDL2_SavePNG(fn, surface.surface, compression_level)
     elif ext == b'.BMP':
         rwops = to_rwops(filename, "wb")
         with nogil:
             err = SDL_SaveBMP_RW(surface.surface, rwops, 1)
     elif ext == b".JPG" or ext == b".JPEG":
         with nogil:
-            err = Pygame_SDL2_SaveJPEG(surface.surface, fn)
+            err = Pygame_SDL2_SaveJPEG(surface.surface, fn, compression_level)
     else:
         raise ValueError("Unsupported format: %s" % ext)
 
