@@ -137,6 +137,21 @@ and then build and install using::
 This assumes you have installed a version of Visual Studio that is
 appropriate for the version of Python you are using.
 
+C Headers
+^^^^^^^^^
+
+A small number of C headers can be installed using the command::
+
+    python setup.py install_headers
+
+These headers export functions statically, and must be initialized by
+including "pygame_sdl2/pygame_sdl2.h" and calling
+the (C-language) import_pygame_sdl2() function from each C file in which a
+function will be called. The following functions are exposed:
+
+* PySurface_AsSurface - Returns the SDL_Surface underlying a pygame_sdl2.Surface.
+* PySurface_New - Wraps an SDL_Surface in a new pygame_sdl2.Surface.
+
 
 Contributing
 ------------
