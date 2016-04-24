@@ -128,7 +128,7 @@ Windows
 To build on windows, change into the pygame_sdl2 checkout, clone
 renpy/pygame_sdl2_windeps using a command like::
 
-    git clone https://github.com/pygame_sdl2_windeps
+    git clone https://github.com/renpy/pygame_sdl2_windeps
 
 and then build and install using::
 
