@@ -466,6 +466,8 @@ class Info(object):
             self.current_w = dm.w
             self.current_h = dm.h
 
+        self.refresh_rate = dm.refresh_rate
+
         # The rest of these are just guesses.
         self.hw = False
         self.wm = True
