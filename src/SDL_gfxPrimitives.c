@@ -6584,7 +6584,7 @@ void _murphyWideline(SDL_gfxMurphyIterator *m, Sint16 x1, Sint16 y1, Sint16 x2, 
 		x2 = temp;
 		temp = y1;
 		y1 = y2;
-		y1 = temp;
+		y2 = temp;
 		m->u *= -1;
 		m->v *= -1;
 	}
