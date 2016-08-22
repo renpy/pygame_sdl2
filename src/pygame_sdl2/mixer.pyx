@@ -53,7 +53,8 @@ def _play_current(int channel):
         channel_queued[channel] = None
 
     if next_sound:
-        Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
+        with nogil:
+            Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
 
 
 cdef void channel_callback(int channel) with gil:
@@ -117,16 +118,21 @@ def get_init():
         return frequency, format, channels
 
 def stop():
-    Mix_HaltChannel(-1)
+    with nogil:
+        Mix_HaltChannel(-1)
 
 def pause():
-    Mix_Pause(-1)
+    with nogil:
+        Mix_Pause(-1)
 
 def unpause():
-    Mix_Resume(-1)
+    with nogil:
+        Mix_Resume(-1)
 
 def fadeout(time):
-    Mix_FadeOutChannel(-1, time)
+    cdef int ms = time
+    with nogil:
+        Mix_FadeOutChannel(-1, ms)
 
 def set_num_channels(count):
     Mix_AllocateChannels(count)
@@ -169,10 +175,15 @@ cdef class Sound:
 
     def play(self, loops=0, maxtime=-1, fade_ms=0):
         cdef int cid
-        if fade_ms != 0:
-            cid = Mix_FadeInChannelTimed(-1, self.chunk, loops, fade_ms, maxtime)
-        else:
-            cid = Mix_PlayChannelTimed(-1, self.chunk, loops, maxtime)
+        cdef int _loops = loops
+        cdef int _maxtime = maxtime
+        cdef int _fade_ms = fade_ms
+
+        with nogil:
+            if _fade_ms != 0:
+                cid = Mix_FadeInChannelTimed(-1, self.chunk, _loops, _fade_ms, _maxtime)
+            else:
+                cid = Mix_PlayChannelTimed(-1, self.chunk, _loops, _maxtime)
 
         if cid == -1:
             raise error()
@@ -182,28 +193,33 @@ cdef class Sound:
         cdef int i = 0
         while i < Mix_AllocateChannels(-1):
             if Mix_GetChunk(i) == self.chunk:
-                Mix_HaltChannel(i)
+                with nogil:
+                    Mix_HaltChannel(i)
             i += 1
 
     def pause(self):
         cdef int i = 0
         while i < Mix_AllocateChannels(-1):
             if Mix_GetChunk(i) == self.chunk:
-                Mix_Pause(i)
+                with nogil:
+                    Mix_Pause(i)
             i += 1
 
     def unpause(self):
         cdef int i = 0
         while i < Mix_AllocateChannels(-1):
             if Mix_GetChunk(i) == self.chunk:
-                Mix_Resume(i)
+                with nogil:
+                    Mix_Resume(i)
             i += 1
 
     def fadeout(self, time):
         cdef int i = 0
+        cdef int ms = time
         while i < Mix_AllocateChannels(-1):
             if Mix_GetChunk(i) == self.chunk:
-                Mix_FadeOutChannel(i, time)
+                with nogil:
+                    Mix_FadeOutChannel(i, ms)
             i += 1
 
     def set_volume(self, value):
@@ -230,15 +246,22 @@ cdef class Sound:
         raise error("Not implemented.")
 
 
-class Channel(object):
+cdef class Channel(object):
+    cdef int cid
+
     def __init__(self, cid):
         self.cid = cid
 
     def play(self, Sound sound not None, loops=0, maxtime=-1, fade_ms=0):
-        if fade_ms != 0:
-            cid = Mix_FadeInChannelTimed(self.cid, sound.chunk, loops, fade_ms, maxtime)
-        else:
-            cid = Mix_PlayChannelTimed(self.cid, sound.chunk, loops, maxtime)
+        cdef int _loops = loops
+        cdef int _maxtime = maxtime
+        cdef int _fade_ms = fade_ms
+
+        with nogil:
+            if _fade_ms != 0:
+                cid = Mix_FadeInChannelTimed(self.cid, sound.chunk, _loops, _fade_ms, _maxtime)
+            else:
+                cid = Mix_PlayChannelTimed(self.cid, sound.chunk, _loops, _maxtime)
 
         if cid == -1:
             raise error()
@@ -247,16 +270,21 @@ class Channel(object):
             current_sounds[self.cid] = sound
 
     def stop(self):
-        Mix_HaltChannel(self.cid)
+        with nogil:
+            Mix_HaltChannel(self.cid)
 
     def pause(self):
-        Mix_Pause(self.cid)
+        with nogil:
+            Mix_Pause(self.cid)
 
     def unpause(self):
-        Mix_Resume(self.cid)
+        with nogil:
+            Mix_Resume(self.cid)
 
     def fadeout(self, time):
-        Mix_FadeOutChannel(self.cid, time)
+        cdef int ms = time
+        with nogil:
+            Mix_FadeOutChannel(self.cid, ms)
 
     def set_volume(self, volume):
         Mix_Volume(self.cid, int(MIX_MAX_VOLUME * volume))
