@@ -176,6 +176,8 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     cdef SubFile *sf
     cdef SDL_RWops *rv
     cdef SDL_RWops *rw
+    cdef char *cname
+    cdef char *cmode
 
     if not isinstance(mode, bytes_):
         mode = mode.encode("ascii")
@@ -192,7 +194,13 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
         name = None
 
     if name:
-        rv = SDL_RWFromFile(name.encode("utf-8"), mode)
+
+        dname = name.encode("utf-8")
+        cname = dname
+        cmode = mode
+
+        with nogil:
+            rv = SDL_RWFromFile(cname, cmode)
 
         if rv == NULL:
             raise IOError("Could not open {!r}: {}".format(filelike, SDL_GetError()))
@@ -213,7 +221,11 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
                 if not isinstance(name, unicode_):
                     name = name.decode(fsencoding)
 
-                rw = SDL_RWFromFile(name.encode("utf-8"), b"rb")
+                dname = name.encode("utf-8")
+                cname = dname
+
+                with nogil:
+                    rw = SDL_RWFromFile(cname, b"rb")
 
                 if not rw:
                     raise IOError("Could not open {!r}.".format(name))
