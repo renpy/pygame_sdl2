@@ -139,7 +139,7 @@ cdef Sint64 subfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
     elif whence == RW_SEEK_CUR:
         sf.tell = SDL_RWseek(sf.rw, seek, RW_SEEK_CUR) - sf.base
     elif whence == RW_SEEK_END:
-        sf.tell = SDL_RWseek(sf.rw, sf.base + sf.length + seek, SEEK_END) - sf.base
+        sf.tell = SDL_RWseek(sf.rw, sf.base + sf.length + seek, RW_SEEK_SET) - sf.base
 
     return sf.tell
 
