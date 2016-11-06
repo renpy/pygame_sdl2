@@ -136,9 +136,6 @@ def cmodule(name, source, libs=[], define_macros=[]):
     `source`, and the libraries in `libs`.
     """
 
-    if name in exclude:
-        return
-
     extensions.append(setuptools.Extension(
         name,
         source,
@@ -158,6 +155,9 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
     Compiles a cython module. This takes care of regenerating it as necessary
     when it, or any of the files it depends on, changes.
     """
+
+    if name in exclude:
+        return
 
     # Find the pyx file.
     split_name = name.split(".")
