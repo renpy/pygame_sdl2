@@ -26,6 +26,7 @@ VERSION="2.1.0"
 from setuplib import android, ios, windows, cython, pymodule, setup, parse_cflags, parse_libs, find_unnecessary_gen, gen
 import setuplib
 
+import multiprocessing.dummy
 import os
 import platform
 import shutil
@@ -85,6 +86,55 @@ if android:
 else:
     png = "png"
 
+cymodules=((('pygame_sdl2.error',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.color',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.controller',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.rect',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.rwobject',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.surface',),
+            dict(source=['src/alphablit.c'],libs=sdl_libs)),
+           (('pygame_sdl2.display',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.event',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.locals',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.key',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.mouse',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.joystick',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.pygame_time',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.image',),
+            dict(source=['src/write_jpeg.c','src/write_png.c'],libs=['SDL2_image','jpeg',png]+sdl_libs)),
+           (('pygame_sdl2.transform',),
+            dict(source=[ 'src/SDL2_rotozoom.c' ],libs=sdl_libs)),
+           (('pygame_sdl2.gfxdraw',),
+            dict(source=[ 'src/SDL_gfxPrimitives.c' ],libs=sdl_libs)),
+           (('pygame_sdl2.draw',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.font',),
+            dict(libs=['SDL2_ttf']+sdl_libs)),
+           (('pygame_sdl2.mixer',),
+            dict(libs=['SDL2_mixer']+sdl_libs)),
+           (('pygame_sdl2.mixer_music',),
+            dict(libs=['SDL2_mixer']+sdl_libs)),
+           (('pygame_sdl2.scrap',),
+            dict(libs=sdl_libs)),
+           (('pygame_sdl2.render',),
+            dict(libs=['SDL2_image']+sdl_libs)),)
+
+def initcymodule(x):
+    args,kwargs=x
+    cython(*args,**kwargs)
+
 pymodule("pygame_sdl2.__init__")
 pymodule("pygame_sdl2.compat")
 pymodule("pygame_sdl2.threads.__init__")
@@ -94,29 +144,6 @@ pymodule("pygame_sdl2.sysfont")
 pymodule("pygame_sdl2.time")
 pymodule("pygame_sdl2.version")
 
-cython("pygame_sdl2.error", libs=sdl_libs)
-cython("pygame_sdl2.color", libs=sdl_libs)
-cython("pygame_sdl2.controller", libs=sdl_libs)
-cython("pygame_sdl2.rect", libs=sdl_libs)
-cython("pygame_sdl2.rwobject", libs=sdl_libs)
-cython("pygame_sdl2.surface", source=[ "src/alphablit.c" ], libs=sdl_libs)
-cython("pygame_sdl2.display", libs=sdl_libs)
-cython("pygame_sdl2.event", libs=sdl_libs)
-cython("pygame_sdl2.locals", libs=sdl_libs)
-cython("pygame_sdl2.key", libs=sdl_libs)
-cython("pygame_sdl2.mouse", libs=sdl_libs)
-cython("pygame_sdl2.joystick", libs=sdl_libs)
-cython("pygame_sdl2.pygame_time", libs=sdl_libs)
-cython("pygame_sdl2.image", source=[ "src/write_jpeg.c", "src/write_png.c" ], libs=[ 'SDL2_image', "jpeg", png ] + sdl_libs)
-cython("pygame_sdl2.transform", source=[ "src/SDL2_rotozoom.c" ], libs=sdl_libs)
-cython("pygame_sdl2.gfxdraw", source=[ "src/SDL_gfxPrimitives.c" ], libs=sdl_libs)
-cython("pygame_sdl2.draw", libs=sdl_libs)
-cython("pygame_sdl2.font", libs=['SDL2_ttf'] + sdl_libs)
-cython("pygame_sdl2.mixer", libs=['SDL2_mixer'] + sdl_libs)
-cython("pygame_sdl2.mixer_music", libs=['SDL2_mixer'] + sdl_libs)
-cython("pygame_sdl2.scrap", libs=sdl_libs)
-cython("pygame_sdl2.render", libs=['SDL2_image'] + sdl_libs)
-
 headers = [
     "src/pygame_sdl2/pygame_sdl2.h",
     gen + "/pygame_sdl2.rwobject_api.h",
@@ -125,6 +152,9 @@ headers = [
     ]
 
 if __name__ == "__main__":
+    p=multiprocessing.dummy.Pool()
+    for a in p.map(initcymodule,cymodules):pass
+
     setup(
         "pygame_sdl2",
         VERSION,
