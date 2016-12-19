@@ -91,11 +91,34 @@ def get_init():
 # The window that is used by the various module globals.
 main_window = None
 
+# Have we shown the first window?
+_shown_first_window = False
+
+def _before_first_window():
+    global _shown_first_window
+
+    if _shown_first_window:
+        return
+
+    _shown_first_window = True
+
+    # If we're on android, we have to close the splash window before opening
+    # our window.
+    try:
+        import androidembed
+        androidembed.close_window()
+    except ImportError:
+        pass
+
+
+
 cdef class Window:
     def __init__(self, title, resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
 
         if not isinstance(title, bytes):
             title = title.encode("utf-8")
+
+        _before_first_window()
 
         self.create_flags = flags
 
@@ -365,14 +388,6 @@ default_swap_control = 1
 
 def set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
     global main_window
-
-    # If we're on android, we have to close the splash window before opening
-    # our window.
-    try:
-        import androidembed
-        androidembed.close_window()
-    except ImportError:
-        pass
 
     if main_window:
 
