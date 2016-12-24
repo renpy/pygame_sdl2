@@ -188,7 +188,7 @@ cdef class Color:
     def __len__(self):
         return self.length
 
-    def __mul__(self, Color rhs not None):
+    def __mul__(self not None, Color rhs not None):
         # Multiplying this way doesn't make much sense,
         # but it's how pygame does it.
 
@@ -199,7 +199,7 @@ cdef class Color:
 
         return Color(r, g, b, a)
 
-    def __add__(self, Color rhs not None):
+    def __add__(self not None, Color rhs not None):
         r = min(255, self.r + rhs.r)
         g = min(255, self.g + rhs.g)
         b = min(255, self.b + rhs.b)
@@ -207,7 +207,7 @@ cdef class Color:
 
         return Color(r, g, b, a)
 
-    def __sub__(self, Color rhs not None):
+    def __sub__(self not None, Color rhs not None):
         r = max(0, self.r - rhs.r)
         g = max(0, self.g - rhs.g)
         b = max(0, self.b - rhs.b)
@@ -215,7 +215,7 @@ cdef class Color:
 
         return Color(r, g, b, a)
 
-    def __mod__(self, Color rhs not None):
+    def __mod__(self not None, Color rhs not None):
         r = self.r % rhs.r
         g = self.g % rhs.g
         b = self.b % rhs.b
@@ -223,7 +223,7 @@ cdef class Color:
 
         return Color(r, g, b, a)
 
-    def __div__(self, Color rhs not None):
+    def __div__(self not None, Color rhs not None):
         r = min(255, self.r / rhs.r)
         g = min(255, self.g / rhs.g)
         b = min(255, self.b / rhs.b)
@@ -231,11 +231,18 @@ cdef class Color:
 
         return Color(r, g, b, a)
 
-    def __floordiv__(self, Color rhs not None):
-        r = min(255, self.r // rhs.r)
-        g = min(255, self.g // rhs.g)
-        b = min(255, self.b // rhs.b)
-        a = min(255, self.a // rhs.a)
+    def __floordiv__(self not None, Color rhs not None):
+
+        def div(a, b):
+            if b == 0:
+                return b
+
+            return min(255, a // b)
+
+        r = div(self.r, rhs.r)
+        g = div(self.g, rhs.g)
+        b = div(self.b, rhs.b)
+        a = div(self.a, rhs.a)
 
         return Color(r, g, b, a)
 
@@ -289,6 +296,8 @@ cdef class Color:
             else:
                 h, s, v, a = val
 
+            h = h % 360.0
+
             # These should be in a range of [0.0, 1.0]
             s /= 100.0
             v /= 100.0
@@ -326,7 +335,7 @@ cdef class Color:
             cdef double r, g, b
             cdef double cmin, cmax, delta
 
-            h = self.hsva[0]
+            h = self.hsva[0] % 360.0
 
             r = self.r / 255.0
             g = self.g / 255.0
