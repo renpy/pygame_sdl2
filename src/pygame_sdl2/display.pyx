@@ -125,7 +125,7 @@ cdef class Window:
         self.window = SDL_CreateWindow(
             title,
             pos[0], pos[1],
-            resolution[0], resolution[1], flags | SDL_WINDOW_OPENGL)
+            resolution[0], resolution[1], flags)
 
         if not self.window:
             raise error()
@@ -389,6 +389,13 @@ default_swap_control = 1
 def set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
     global main_window
 
+    # We check in set_mode() to allow games to turn GL off internally.
+    gl = 'PYGAME_AVOID_GL' not in os.environ and SDL_WINDOW_OPENGL or 0
+    if not gl:
+        # And store it in a flag so we can resize windows w/o trying to use
+        # a GL window as a nonGL window.
+        flags |= 0x8000000
+
     if main_window:
 
         if (flags & ~SDL_WINDOW_OPENGL) == (main_window.create_flags & ~SDL_WINDOW_OPENGL):
@@ -398,7 +405,7 @@ def set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, 
         else:
             main_window.destroy()
 
-    main_window = Window(default_title, resolution, flags, depth, pos=pos)
+    main_window = Window(default_title, resolution, flags | gl, depth, pos=pos)
 
     if default_icon is not None:
         main_window.set_icon(default_icon)
