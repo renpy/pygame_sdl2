@@ -152,10 +152,17 @@ cdef class Window:
 
         self.create_flags = flags
 
+        # If we do not get the AVOID_GL hint, we always create a GL-compatible
+        # window. This lets us change the OPENGL flag later on.
+        if int(_get_hint("PYGAME_SDL2_AVOID_GL", "0")):
+            gl_flag = 0
+        else:
+            gl_flag = SDL_WINDOW_OPENGL
+
         self.window = SDL_CreateWindow(
             title,
             pos[0], pos[1],
-            resolution[0], resolution[1], flags | SDL_WINDOW_OPENGL)
+            resolution[0], resolution[1], flags | gl_flag)
 
         if not self.window:
             raise error()
