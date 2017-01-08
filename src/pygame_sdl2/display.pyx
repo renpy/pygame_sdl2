@@ -34,6 +34,36 @@ ios = ("PYGAME_IOS" in os.environ)
 
 # This inits SDL proper, and should be called by the other init methods.
 
+# A map from a PYGAME_SDL2 hint to what it was set to.
+_pygame_hints = { }
+
+def hint(hint, value):
+
+    if str(hint).startswith("PYGAME_SDL2"):
+        _pygame_hints[str(hint)] = str(value)
+        return
+
+
+    if not isinstance(hint, bytes):
+        hint = hint.encode("utf-8")
+
+    if not isinstance(value, bytes):
+        value = value.encode("utf-8")
+
+    SDL_SetHint(hint, value)
+
+def _get_hint(hint, default):
+    hint = str(hint)
+
+    if hint in _pygame_hints:
+        return _pygame_hints[hint]
+
+    if hint in os.environ:
+        return os.environ[hint]
+
+    return default
+
+
 main_done = False
 
 def sdl_main_init():
@@ -658,16 +688,6 @@ def get_display_bounds(index):
     rv = SDL_GetDisplayBounds(index, &rect)
 
     return (rect.x, rect.y, rect.w, rect.h)
-
-def hint(hint, value):
-
-    if not isinstance(hint, bytes):
-        hint = hint.encode("utf-8")
-
-    if not isinstance(value, bytes):
-        value = value.encode("utf-8")
-
-    SDL_SetHint(hint, value)
 
 def get_platform():
     return SDL_GetPlatform()
