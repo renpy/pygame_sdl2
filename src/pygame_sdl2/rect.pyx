@@ -65,6 +65,9 @@ cdef class Rect:
         self.w = w
         self.h = h
 
+    def __reduce__(self):
+        return (Rect, (self.x, self.y, self.w, self.h))
+
     def __repr__(self):
         return "<rect(%d, %d, %d, %d)>" % (self.x, self.y, self.w, self.h)
 
