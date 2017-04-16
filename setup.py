@@ -32,6 +32,18 @@ import platform
 import shutil
 import sys
 
+
+def setup_env(name):
+    # If PYGAME_SDL2_CC or PYGAME_SDL2_LD are in the environment, and CC or LD are not, use them.
+
+    renpy_name = "PYGAME_SDL2_" + name
+    if (renpy_name in os.environ) and (name not in os.environ):
+        os.environ[name] = os.environ[renpy_name]
+
+setup_env("CC")
+setup_env("LD")
+setup_env("CXX")
+
 temporary_package_data = [ ]
 
 if android or ios:
@@ -168,5 +180,3 @@ if __name__ == "__main__":
 
     for i in temporary_package_data:
         os.unlink(os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i))
-
-

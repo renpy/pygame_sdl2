@@ -34,6 +34,36 @@ ios = ("PYGAME_IOS" in os.environ)
 
 # This inits SDL proper, and should be called by the other init methods.
 
+# A map from a PYGAME_SDL2 hint to what it was set to.
+_pygame_hints = { }
+
+def hint(hint, value):
+
+    if str(hint).startswith("PYGAME_SDL2"):
+        _pygame_hints[str(hint)] = str(value)
+        return
+
+
+    if not isinstance(hint, bytes):
+        hint = hint.encode("utf-8")
+
+    if not isinstance(value, bytes):
+        value = value.encode("utf-8")
+
+    SDL_SetHint(hint, value)
+
+def _get_hint(hint, default):
+    hint = str(hint)
+
+    if hint in _pygame_hints:
+        return _pygame_hints[hint]
+
+    if hint in os.environ:
+        return os.environ[hint]
+
+    return default
+
+
 main_done = False
 
 def sdl_main_init():
@@ -91,18 +121,48 @@ def get_init():
 # The window that is used by the various module globals.
 main_window = None
 
+# Have we shown the first window?
+_shown_first_window = False
+
+def _before_first_window():
+    global _shown_first_window
+
+    if _shown_first_window:
+        return
+
+    _shown_first_window = True
+
+    # If we're on android, we have to close the splash window before opening
+    # our window.
+    try:
+        import androidembed
+        androidembed.close_window()
+    except ImportError:
+        pass
+
+
+
 cdef class Window:
     def __init__(self, title, resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
 
         if not isinstance(title, bytes):
             title = title.encode("utf-8")
 
+        _before_first_window()
+
         self.create_flags = flags
+
+        # If we do not get the AVOID_GL hint, we always create a GL-compatible
+        # window. This lets us change the OPENGL flag later on.
+        if int(_get_hint("PYGAME_SDL2_AVOID_GL", "0")):
+            gl_flag = 0
+        else:
+            gl_flag = SDL_WINDOW_OPENGL
 
         self.window = SDL_CreateWindow(
             title,
             pos[0], pos[1],
-            resolution[0], resolution[1], flags | SDL_WINDOW_OPENGL)
+            resolution[0], resolution[1], flags | gl_flag)
 
         if not self.window:
             raise error()
@@ -365,14 +425,6 @@ default_swap_control = 1
 
 def set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
     global main_window
-
-    # If we're on android, we have to close the splash window before opening
-    # our window.
-    try:
-        import androidembed
-        androidembed.close_window()
-    except ImportError:
-        pass
 
     if main_window:
 
@@ -643,16 +695,6 @@ def get_display_bounds(index):
     rv = SDL_GetDisplayBounds(index, &rect)
 
     return (rect.x, rect.y, rect.w, rect.h)
-
-def hint(hint, value):
-
-    if not isinstance(hint, bytes):
-        hint = hint.encode("utf-8")
-
-    if not isinstance(value, bytes):
-        value = value.encode("utf-8")
-
-    SDL_SetHint(hint, value)
 
 def get_platform():
     return SDL_GetPlatform()

@@ -73,11 +73,19 @@ def aaline(Surface surface, x1, y1, x2, y2, color):
 def thick_line(Surface surface, x1, y1, x2, y2, width, color):
     cdef Color c = Color(color)
 
-    # This locks up in c code when trying to draw a zero-length line.
-    if x1 == x2 and y1 == y2:
+    # This locks up in c code when trying to draw a zero-length line. So make
+    # sure that doesn't happen.
+    cdef int x1int, y1int, x2int, y2int
+    x1int = x1
+    y1int = y1
+    x2int = x2
+    y2int = y2
+
+
+    if x1int == x2int and y1int == y2int:
         return
 
-    thickLineRGBA(surface.surface, x1, y1, x2, y2, width, c.r, c.g, c.b, c.a)
+    thickLineRGBA(surface.surface, x1int, y1int, x2int, y2int, width, c.r, c.g, c.b, c.a)
 
 def circle(Surface surface, x, y, r, color):
     cdef Color c = Color(color)
