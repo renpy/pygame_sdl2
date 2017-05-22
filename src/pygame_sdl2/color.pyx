@@ -106,8 +106,16 @@ cdef class Color:
         if op == 2:
             return x.r == y.r and x.g == y.g and x.b == y.b and x.a == y.a
 
+    def __cinit__(self):
+        self.length = 4
+        self.r = 0
+        self.g = 0
+        self.b = 0
+        self.a = 255
+
     def __init__(self, *args):
         self.length = 4
+
         if len(args) == 1:
             c = args[0]
             if isinstance(c, basestring):
@@ -197,7 +205,7 @@ cdef class Color:
         b = min(255, self.b * rhs.b)
         a = min(255, self.a * rhs.a)
 
-        return Color(r, g, b, a)
+        return type(self)(r, g, b, a)
 
     def __add__(self not None, Color rhs not None):
         r = min(255, self.r + rhs.r)
@@ -205,7 +213,7 @@ cdef class Color:
         b = min(255, self.b + rhs.b)
         a = min(255, self.a + rhs.a)
 
-        return Color(r, g, b, a)
+        return type(self)(r, g, b, a)
 
     def __sub__(self not None, Color rhs not None):
         r = max(0, self.r - rhs.r)
@@ -213,15 +221,22 @@ cdef class Color:
         b = max(0, self.b - rhs.b)
         a = max(0, self.a - rhs.a)
 
-        return Color(r, g, b, a)
+        return type(self)(r, g, b, a)
 
     def __mod__(self not None, Color rhs not None):
-        r = self.r % rhs.r
-        g = self.g % rhs.g
-        b = self.b % rhs.b
-        a = self.a % rhs.a
 
-        return Color(r, g, b, a)
+        def mod(l, r):
+            if r == 0:
+                return 0
+
+            return l % r
+
+        r = mod(self.r, rhs.r)
+        g = mod(self.g, rhs.g)
+        b = mod(self.b, rhs.b)
+        a = mod(self.a, rhs.a)
+
+        return type(self)(r, g, b, a)
 
     def __div__(self not None, Color rhs not None):
         r = min(255, self.r / rhs.r)
@@ -229,7 +244,7 @@ cdef class Color:
         b = min(255, self.b / rhs.b)
         a = min(255, self.a / rhs.a)
 
-        return Color(r, g, b, a)
+        return type(self)(r, g, b, a)
 
     def __floordiv__(self not None, Color rhs not None):
 
@@ -244,7 +259,7 @@ cdef class Color:
         b = div(self.b, rhs.b)
         a = div(self.a, rhs.a)
 
-        return Color(r, g, b, a)
+        return type(self)(r, g, b, a)
 
     property cmy:
         def __get__(self):
@@ -436,7 +451,7 @@ cdef class Color:
 
     def correct_gamma(self, gamma):
         m = map(lambda x: int(round(pow(x / 255.0, gamma) * 255)), tuple(self))
-        c = Color(tuple(m))
+        c = type(self)(tuple(m))
         return c
 
     def set_length(self, n):
