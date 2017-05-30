@@ -13,7 +13,7 @@ Downloads
 
 Nightly builds are available from:
 
-http://nightly.renpy.org/pygame_sdl2/
+https://nightly.renpy.org/current/
 
 An official release will be coming to pypi shortly.
 
