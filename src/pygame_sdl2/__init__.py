@@ -22,6 +22,7 @@ from __future__ import division, print_function, absolute_import
 import sys
 import importlib
 
+
 class MissingModule(object):
 
     def __init__(self, name, reason):
@@ -30,6 +31,7 @@ class MissingModule(object):
 
     def __getattr__(self, attr):
         raise NotImplementedError(self.reason)
+
 
 def try_import(name):
     full_name = "pygame_sdl2." + name
@@ -42,17 +44,21 @@ def try_import(name):
     globals()[name] = module
     sys.modules[full_name] = module
 
+
 # Lists of functions that are called on init and quit.
 init_functions = [ ]
 quit_functions = [ ]
+
 
 def register_init(fn):
     init_functions.append(fn)
     return fn
 
+
 def register_quit(fn):
     quit_functions.append(fn)
     return fn
+
 
 def init():
     numpass = 0
@@ -67,7 +73,8 @@ def init():
 
     return numpass, numfail
 
-def quit(): # @ReservedAssignment
+
+def quit():  # @ReservedAssignment
     for i in quit_functions:
         try:
             i()
@@ -85,7 +92,7 @@ import pygame_sdl2.color
 import pygame_sdl2.display
 import pygame_sdl2.event
 import pygame_sdl2.key
-import pygame_sdl2.locals # @ReservedAssignment
+import pygame_sdl2.locals  # @ReservedAssignment
 import pygame_sdl2.time
 import pygame_sdl2.version
 import pygame_sdl2.locals as constants
@@ -98,6 +105,7 @@ try_import("image")
 try_import("joystick")
 try_import("mixer")
 try_import("mouse")
+try_import("power")
 try_import("transform")
 try_import("scrap")
 try_import("sprite")
@@ -105,6 +113,8 @@ try_import("sysfont")
 
 # Optional imports should be included in this function, so they show up
 # in packaging tools (like py2exe).
+
+
 def _optional_imports():
     import pygame_sdl2.compat
     import pygame_sdl2.controller
@@ -116,13 +126,16 @@ def _optional_imports():
     import pygame_sdl2.joystick
     import pygame_sdl2.mixer
     import pygame_sdl2.mouse
+    import pygame_sdl2.power
     import pygame_sdl2.transform
     import pygame_sdl2.scrap
     import pygame_sdl2.sprite
     import pygame_sdl2.sysfont
 
+
 # Fill this module with locals.
 from pygame_sdl2.locals import *
+
 
 def import_as_pygame():
     """
@@ -130,7 +143,8 @@ def import_as_pygame():
     statement will import pygame_sdl2.whatever instead.
     """
 
-    import os, warnings
+    import os
+    import warnings
 
     if "PYGAME_SDL2_USE_PYGAME" in os.environ:
         return
@@ -150,11 +164,14 @@ def import_as_pygame():
 
     sys.modules['pygame.constants'] = constants
 
+
 def get_sdl_byteorder():
     return BYTEORDER
 
+
 def get_sdl_version():
     return SDL_VERSION_TUPLE
+
 
 get_platform = pygame_sdl2.display.get_platform
 

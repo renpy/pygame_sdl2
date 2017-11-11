@@ -39,6 +39,7 @@ def setup_env(name):
     if (renpy_name in os.environ) and (name not in os.environ):
         os.environ[name] = os.environ[renpy_name]
 
+
 setup_env("CC")
 setup_env("LD")
 setup_env("CXX")
@@ -118,6 +119,7 @@ cython("pygame_sdl2.locals", libs=sdl_libs)
 cython("pygame_sdl2.key", libs=sdl_libs)
 cython("pygame_sdl2.mouse", libs=sdl_libs)
 cython("pygame_sdl2.joystick", libs=sdl_libs)
+cython("pygame_sdl2.power", libs=sdl_libs)
 cython("pygame_sdl2.pygame_time", libs=sdl_libs)
 cython("pygame_sdl2.image", source=[ "src/write_jpeg.c", "src/write_png.c" ], libs=[ 'SDL2_image', "jpeg", png ] + sdl_libs)
 cython("pygame_sdl2.transform", source=[ "src/SDL2_rotozoom.c" ], libs=sdl_libs)
