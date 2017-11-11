@@ -81,8 +81,8 @@ def init(frequency=22050, size=MIX_DEFAULT_FORMAT, channels=2, buffer=4096):
     if get_init() is not None:
         return
 
-    for flag in (MIX_INIT_FLAC, MIX_INIT_MOD, MIX_INIT_MODPLUG,
-                 MIX_INIT_MP3, MIX_INIT_OGG, MIX_INIT_FLUIDSYNTH):
+    for flag in (MIX_INIT_FLAC, MIX_INIT_MOD,
+                 MIX_INIT_MP3, MIX_INIT_OGG, MIX_INIT_MID):
 
         if Mix_Init(flag) != flag:
             errors.append("{}\n".format(SDL_GetError()))
