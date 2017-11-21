@@ -598,6 +598,8 @@ def gl_set_attribute(flag, value):
         if ios:
             return
 
+        global default_swap_control
+
         # Try setting the swap interval - first positive, then negated
         # to deal with the case where the negative interval isn't
         # supported. Then give up and carry on.
