@@ -736,6 +736,8 @@ cdef class Surface:
 
         cdef int x
         cdef int y
+        cdef int w
+        cdef int h
 
         cdef int minx = self.surface.w - 1
         cdef int maxx = 0
@@ -744,7 +746,7 @@ cdef class Surface:
 
         cdef Uint32 *row
 
-        if not amask:
+        if (not amask) or (self.surface.w == 0) or (self.surface.h == 0):
             return Rect((0, 0, self.surface.w, self.surface.h))
 
         self.lock()
@@ -774,12 +776,12 @@ cdef class Surface:
         if minx > maxx:
             return Rect((0, 0, 0, 0))
 
-        return Rect((
-            minx,
-            miny,
-            maxx - minx + 1,
-            maxy - miny + 1,
-            ))
+        x = minx
+        y = miny
+        w = min(maxx - minx + 1, self.surface.w - x)
+        h = min(maxy - miny + 1, self.surface.h - y)
+
+        return Rect((x, y, w, h))
 
     def get_view(self, kind='2'):
         raise error("Surface.get_view is not supported.")
