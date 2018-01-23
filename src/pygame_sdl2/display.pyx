@@ -296,13 +296,15 @@ cdef class Window:
 
     def flip(self):
         if self.gl_context != NULL:
-            SDL_GL_SwapWindow(self.window)
+            with nogil:
+                SDL_GL_SwapWindow(self.window)
         else:
 
             if self.surface.surface != self.window_surface:
                 self.proxy_window_surface()
 
-            SDL_UpdateWindowSurface(self.window)
+            with nogil:
+                SDL_UpdateWindowSurface(self.window)
 
     def get_surface(self):
         return self.surface
