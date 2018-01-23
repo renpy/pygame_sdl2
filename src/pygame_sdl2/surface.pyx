@@ -746,6 +746,9 @@ cdef class Surface:
 
         cdef Uint32 *row
 
+        cdef Uint32 topleft
+        cdef Uint32 botright
+
         if (not amask) or (self.surface.w == 0) or (self.surface.h == 0):
             return Rect((0, 0, self.surface.w, self.surface.h))
 
@@ -754,21 +757,38 @@ cdef class Surface:
         cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
 
         with nogil:
-            for 0 <= y < self.surface.h:
-                row = <Uint32*> (pixels + self.surface.pitch * y)
 
-                for 0 <= x < self.surface.w:
+            topleft = (<Uint32*> pixels)[0]
+            botright = (<Uint32*> (pixels + self.surface.pitch * (self.surface.h - 1)))[self.surface.w - 1]
 
-                    if (row[x] & amask) >= amin:
+            if ((topleft & amask) > amin) and ((botright & amask) > amin):
 
-                        if minx > x:
-                            minx = x
-                        if miny > y:
-                            miny = y
-                        if maxx < x:
-                            maxx = x
-                        if maxy < y:
-                            maxy = y
+                # Bounding box covers image.
+
+                minx = 0
+                miny = 0
+                maxx = self.surface.w - 1
+                maxy = self.surface.h - 1
+
+            else:
+
+                # Bounding box is smaller than image.
+
+                for 0 <= y < self.surface.h:
+                    row = <Uint32*> (pixels + self.surface.pitch * y)
+
+                    for 0 <= x < self.surface.w:
+
+                        if (row[x] & amask) >= amin:
+
+                            if minx > x:
+                                minx = x
+                            if miny > y:
+                                miny = y
+                            if maxx < x:
+                                maxx = x
+                            if maxy < y:
+                                maxy = y
 
         self.unlock()
 
