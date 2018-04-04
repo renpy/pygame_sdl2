@@ -337,8 +337,7 @@ cdef class Sprite:
                 # TODO: Adjust for rotation.
                 self.adjust_rect(&dest_rect, &self.bounding_box, &real_dest)
 
-                SDL_SetRenderDrawColor(tex.renderer, 0xFF, 0x00, 0xFF, 0xFF)
-                SDL_RenderDrawRect(tex.renderer, &real_dest)
+                SDL_SetRenderDrawColor(tex.renderer, 0x00, 0x00, 0x00, 0x00)
 
         cdef TextureNode tn
         for x in self.nodes:
