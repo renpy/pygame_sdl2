@@ -785,7 +785,7 @@ class LayeredUpdates(AbstractGroup):
         """
         _sprites = self._spritelist
         rect = Rect(pos, (0, 0))
-        colliding_idx = rect.collidelistall([sprite.rect for sprite in _sprites])
+        colliding_idx = rect.collidelistall(_sprites)
         colliding = [_sprites[i] for i in colliding_idx]
         return colliding
 
