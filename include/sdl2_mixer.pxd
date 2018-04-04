@@ -18,10 +18,9 @@ cdef extern from "SDL_mixer.h" nogil:
     ctypedef enum MIX_InitFlags:
         MIX_INIT_FLAC
         MIX_INIT_MOD
-        MIX_INIT_MODPLUG
         MIX_INIT_MP3
         MIX_INIT_OGG
-        MIX_INIT_FLUIDSYNTH
+        MIX_INIT_MID
 
     int Mix_Init(int flags)
     void Mix_Quit()
