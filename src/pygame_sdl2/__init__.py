@@ -106,6 +106,7 @@ try_import("joystick")
 try_import("mixer")
 try_import("mouse")
 try_import("power")
+try_import("render")
 try_import("transform")
 try_import("scrap")
 try_import("sprite")
@@ -127,10 +128,16 @@ def _optional_imports():
     import pygame_sdl2.mixer
     import pygame_sdl2.mouse
     import pygame_sdl2.power
+    import pygame_sdl2.render
     import pygame_sdl2.transform
     import pygame_sdl2.scrap
     import pygame_sdl2.sprite
     import pygame_sdl2.sysfont
+
+    # Added to include the python json module in frozen package, it is currently only imported from the cython render
+    # module and so doesn't get gathered up by the setup script. If this module eventually gets used in one of the
+    # python modules then we won't need this import.
+    import json
 
 
 # Fill this module with locals.
