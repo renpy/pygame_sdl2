@@ -139,11 +139,11 @@ appropriate for the version of Python you are using.
 
 If you also want to install the python headers in a standard fashion
 to make an IDE's autocomplete work then you should try creating a
-python wheel. First grab the wheel package::
+python wheel. First grab the wheel package:
 
     pip install wheel
     
-Then use this command to build your wheel::
+Then use this command to build your wheel:
 
     python setup.py sdist bdist_wheel
     
@@ -151,7 +151,7 @@ Finally, you will need to install your wheel from the dist
 directory with pip. What it is called will depend on your version
 of python, the current version of the library and your platform.
 For example, here is the command to install a python 3.6 wheel,
-on windows 32::
+on windows 32:
 
     pip install dist\pygame_sdl2-2.1.0-cp36-cp36m-win32.whl
 
@@ -175,12 +175,11 @@ function will be called. The following functions are exposed:
 * PySurface_New - Wraps an SDL_Surface in a new pygame_sdl2.Surface.
 
 Pygame incompatibility
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
-Pygame_sdl2 is designed as a complete replacement for pygame. 
-
-If you try to use both the `pygame_sdl2` and `pygame` libraries in the same program
-you may encounter some errors; such as library import failures in frozen programs.
+Pygame_sdl2 is designed as a complete replacement for pygame. If you try to use both the 
+`pygame_sdl2` and `pygame` libraries in the same program you may encounter some errors;
+such as library import failures in frozen programs.
 
 
 Contributing
