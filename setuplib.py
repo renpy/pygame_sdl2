@@ -56,7 +56,10 @@ windows = platform.win32_ver()[0]
 
 # The cython command.
 if windows:
-    cython_command = os.path.join(os.path.dirname(sys.executable), "Scripts", "cython.exe")
+    if "Scripts" in os.listdir(os.path.dirname(sys.executable)):
+        cython_command = os.path.join(os.path.dirname(sys.executable), "Scripts", "cython.exe")
+    else:
+        cython_command = os.path.join(os.path.dirname(sys.executable), "cython.exe")
 else:
     cython_command = "cython"
 
@@ -161,8 +164,9 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
 
     # Find the pyx file.
     split_name = name.split(".")
+    split_name[-1] = split_name[-1] + ".pyx"
 
-    fn = "src/" + "/".join(split_name) + ".pyx"
+    fn = os.path.join("src", *split_name)
 
     if not os.path.exists(fn):
         print("Could not find {0}.".format(fn))
@@ -206,7 +210,7 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
 
     out_of_date = False
 
-    # print c_fn, "depends on", deps
+    # print (c_fn, "depends on", deps)
 
     for dep_fn in deps:
 
