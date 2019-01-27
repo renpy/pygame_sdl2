@@ -246,12 +246,15 @@ cdef class Window:
 
         SDL_DestroyWindow(self.window)
 
-    def resize(self, size, opengl=False):
+    def resize(self, size, opengl=False, fullscreen=None):
         """
         Resizes the window to `size`, which must be a width, height tuple. If opengl
         is true, adds an OpenGL context, if it's missing. Otherwise, removes the
         opengl context if present.
         """
+
+        if fullscreen is None:
+            fullscreen = SDL_GetWindowFlags(self.window) & SDL_WINDOW_FULLSCREEN_DESKTOP
 
         # Prevents a loop between the surface and this object.
         self.surface.get_window_flags = None
@@ -263,14 +266,19 @@ cdef class Window:
         cdef int cur_width = 0
         cdef int cur_height = 0
 
-        width, height = size
+        if fullscreen:
+            if SDL_SetWindowFullscreen(self.window, SDL_WINDOW_FULLSCREEN_DESKTOP):
+                fullscreen = False
 
-        SDL_GetWindowSize(self.window, &cur_width, &cur_height)
+        if not fullscreen:
+            SDL_SetWindowFullscreen(self.window, 0)
 
-        if (cur_width != width) or (cur_height != height):
-            SDL_SetWindowSize(self.window, width, height)
+            width, height = size
 
-        cdef int w, h
+            SDL_GetWindowSize(self.window, &cur_width, &cur_height)
+
+            if (cur_width != width) or (cur_height != height):
+                SDL_SetWindowSize(self.window, width, height)
 
         # Create a missing GL context.
         if opengl and not self.gl_context:
@@ -428,10 +436,12 @@ default_swap_control = 1
 def set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED)):
     global main_window
 
+    RESIZE_FLAGS = SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP
+
     if main_window:
 
-        if (flags & ~SDL_WINDOW_OPENGL) == (main_window.create_flags & ~SDL_WINDOW_OPENGL):
-            main_window.resize(resolution, flags & SDL_WINDOW_OPENGL)
+        if (flags & ~RESIZE_FLAGS) == (main_window.create_flags & ~RESIZE_FLAGS):
+            main_window.resize(resolution, flags & SDL_WINDOW_OPENGL, flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
             return main_window.surface
 
         else:
