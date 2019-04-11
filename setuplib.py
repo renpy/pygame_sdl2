@@ -52,6 +52,9 @@ android = "PYGAME_SDL2_ANDROID" in os.environ
 # True if we're building on ios.
 ios = "PYGAME_SDL2_IOS" in os.environ
 
+# True if we're doing a static build.
+static = "PYGAME_SDL2_STATIC" in os.environ
+
 windows = platform.win32_ver()[0]
 
 # The cython command.
@@ -68,6 +71,9 @@ else:
     version_flag = "-2"
     gen = "gen"
 
+if static:
+    gen = gen + "-static"
+
 
 def system_path(path):
     """
@@ -79,6 +85,7 @@ def system_path(path):
         path = subprocess.check_output([ "sh", "-c", "cmd //c echo " + path ]).strip()
 
     return path
+
 
 def parse_cflags(command):
     """
@@ -100,7 +107,9 @@ def parse_cflags(command):
         else:
             extra_compile_args.append(i)
 
+
 parse_cflags(None)
+
 
 def parse_libs(command):
     """
@@ -130,6 +139,7 @@ def parse_libs(command):
 # A list of modules we do not wish to include.
 exclude = set(os.environ.get("PYGAME_SDL2_EXCLUDE", "").split())
 
+
 def cmodule(name, source, libs=[], define_macros=[]):
     """
     Compiles the python module `name` from the files given in
@@ -152,6 +162,7 @@ def cmodule(name, source, libs=[], define_macros=[]):
 
 
 necessary_gen = [ ]
+
 
 def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
     """
@@ -243,15 +254,18 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
                 fn,
                 "-o",
                 c_fn])
+
             # Fix-up source for static loading
-            if len(split_name) > 1:
+            if static and len(split_name) > 1:
                 parent_module = '.'.join(split_name[:-1])
                 parent_module_identifier = parent_module.replace('.', '_')
-                with open(c_fn, 'r') as f: ccode = f.read()
+                with open(c_fn, 'r') as f:
+                    ccode = f.read()
                 ccode = re.sub('Py_InitModule4\("([^"]+)"', 'Py_InitModule4("'+parent_module+'.\\1"', ccode)
                 ccode = re.sub('^__Pyx_PyMODINIT_FUNC init', '__Pyx_PyMODINIT_FUNC init'+parent_module_identifier+'_', ccode, 0, re.MULTILINE)  # Cython 0.28.2
                 ccode = re.sub('^PyMODINIT_FUNC init', 'PyMODINIT_FUNC init'+parent_module_identifier+'_', ccode, 0, re.MULTILINE)  # Cython 0.25.2
-                with open(c_fn, 'w') as f: f.write(ccode)
+                with open(c_fn, 'w') as f:
+                    f.write(ccode)
 
         except subprocess.CalledProcessError as e:
             print()
@@ -262,6 +276,7 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
     # Build the module normally once we have the c file.
     if compile_if:
         cmodule(name, [ c_fn ] + source, libs=libs, define_macros=define_macros)
+
 
 def find_unnecessary_gen():
 
@@ -277,6 +292,7 @@ def find_unnecessary_gen():
 
 py_modules = [ ]
 
+
 def pymodule(name):
     """
     Causes a python module to be included in the build.
@@ -287,22 +303,24 @@ def pymodule(name):
 
     py_modules.append(name)
 
+
 def setup(name, version, **kwargs):
     """
     Calls the distutils setup function.
     """
 
     setuptools.setup(
-        name = name,
-        version = version,
-        ext_modules = extensions,
-        py_modules = py_modules,
-        packages = [ name ],
-        package_dir = { name : 'src/' + name },
-        package_data = { name : package_data },
+        name=name,
+        version=version,
+        ext_modules=extensions,
+        py_modules=py_modules,
+        packages=[ name ],
+        package_dir={ name : 'src/' + name },
+        package_data={ name : package_data },
         zip_safe=False,
         **kwargs
         )
+
 
 # Start in the directory containing setup.py.
 os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
