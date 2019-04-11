@@ -8,3 +8,6 @@ sdl2.i
 dist/
 gen3/
 .idea/
+emscripten-static/
+gen-static
+gen3-static
