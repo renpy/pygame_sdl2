@@ -22,8 +22,7 @@ from pygame_sdl2.rwobject cimport to_rwops
 from libc.string cimport memset
 
 import sys
-#import threading
-threading = None
+import threading
 from pygame_sdl2.error import error
 
 import pygame_sdl2.mixer_music as music
@@ -37,8 +36,7 @@ cdef dict channel_queued = {}
 cdef dict current_sounds = {}
 
 # The lock protects channel_queued and current_sounds.
-#_lock = threading.Lock()
-_lock = None
+_lock = threading.Lock()
 
 def _play_current(int channel):
     """

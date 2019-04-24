@@ -21,7 +21,7 @@ from cpython.ref cimport Py_INCREF, Py_DECREF
 
 from sdl2 cimport *
 from pygame_sdl2.display cimport Window, main_window
-#import threading
+import threading
 import pygame_sdl2
 import sys
 
@@ -269,11 +269,7 @@ cdef make_event(SDL_Event *e):
 cdef public event_queue = list()
 
 # The lock that protects the event queue.
-#lock = threading.RLock()
-class RLockStub:
-    def __enter__(self): pass
-    def __exit__(self, type, value, traceback): pass
-lock = RLockStub()
+lock = threading.RLock()
 
 # This is the object that is returned when no event exists.
 NOEVENT_EVENT = EventType(0)
