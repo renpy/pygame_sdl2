@@ -3,13 +3,13 @@
 
 #ifdef __EMSCRIPTEN__
 
-static inline void init_python_threads() { }
+static inline void init_python_threads(void) { }
 
 #else
 
 #include "Python.h"
 
-static inline void init_python_threads() { PyEval_InitThreads(); }
+static inline void init_python_threads(void) { PyEval_InitThreads(); }
 
 #endif
 
