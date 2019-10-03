@@ -166,6 +166,9 @@ cdef class Surface:
         self.take_surface(surface)
 
     cdef void take_surface(self, SDL_Surface *surface):
+        if not surface:
+            raise error("A null pointer was passed in.")
+
         self.surface = surface
         self.owns_surface = True
 
@@ -200,19 +203,25 @@ cdef class Surface:
                     source = source.subsurface(area)
                     area = None
 
-                SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE)
+                if SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE):
+                    raise error()
                 temp = Surface(source.get_size(), SRCALPHA)
 
                 with nogil:
-                    SDL_UpperBlit(source.surface, NULL, temp.surface, NULL)
+                    err = SDL_UpperBlit(source.surface, NULL, temp.surface, NULL)
+
+                if err:
+                    raise error()
 
                 source = temp
                 colorkey = False
 
         if colorkey:
-            SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE)
+            if SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_NONE):
+                raise error()
         else:
-            SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_BLEND)
+            if SDL_SetSurfaceBlendMode(source.surface, SDL_BLENDMODE_BLEND):
+                raise error()
 
         to_sdl_rect(dest, &dest_rect, "dest")
 
@@ -257,6 +266,9 @@ cdef class Surface:
             with nogil:
                 new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
 
+            if not new_surface:
+                raise error()
+
         else:
 
             rmask = sample_format.Rmask
@@ -268,6 +280,9 @@ cdef class Surface:
 
             with nogil:
                 new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
+
+            if not new_surface:
+                raise error()
 
         cdef Surface rv = Surface(())
         rv.take_surface(new_surface)
@@ -298,6 +313,9 @@ cdef class Surface:
             with nogil:
                 new_surface = SDL_ConvertSurface(self.surface, sample_format, 0)
 
+            if not new_surface:
+                raise error()
+
         else:
 
             if sample_format.BytesPerPixel == 4:
@@ -310,6 +328,9 @@ cdef class Surface:
 
             with nogil:
                 new_surface = SDL_ConvertSurfaceFormat(self.surface, pixel_format, 0)
+
+            if not new_surface:
+                raise error()
 
         cdef Surface rv = Surface(())
         rv.take_surface(new_surface)
@@ -461,7 +482,8 @@ cdef class Surface:
 
         root.locklist.append(lock)
 
-        SDL_LockSurface(root.surface)
+        if SDL_LockSurface(root.surface):
+            raise error()
 
     def unlock(self, lock=None):
         cdef Surface root = self
@@ -629,6 +651,9 @@ cdef class Surface:
             self.surface.format.Gmask,
             self.surface.format.Bmask,
             self.surface.format.Amask)
+
+        if not new_surface:
+            raise error()
 
         cdef Surface rv = Surface(())
 
