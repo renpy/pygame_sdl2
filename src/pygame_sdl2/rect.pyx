@@ -365,14 +365,14 @@ cdef class Rect:
 
     def collidedict(self, other_dict, rects_values=0):
         # What is rects_values supposed to do? Not in docs.
-        for key, val in other_dict.iteritems():
+        for key, val in other_dict.items():
             if self.colliderect(val):
                 return key, val
         return None
 
     def collidedictall(self, other_dict, rects_values=0):
         ret = []
-        for key, val in other_dict.iteritems():
+        for key, val in other_dict.items():
             if self.colliderect(val):
                 ret.append((key,val))
         return ret

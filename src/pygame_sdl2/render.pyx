@@ -254,7 +254,7 @@ cdef class TextureAtlas:
         self.frames = {}
 
         cdef TextureNode itex
-        for itm in jdata["frames"].iteritems():
+        for itm in jdata["frames"].items():
             iname, idict = itm
             itex = TextureNode(tn)
             f = idict["frame"]
