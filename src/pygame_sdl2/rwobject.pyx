@@ -25,6 +25,7 @@ from libc.stdlib cimport calloc, free
 from pygame_sdl2.compat import file_type, bytes_, unicode_
 
 import sys
+import io
 
 # The fsencoding.
 fsencoding = sys.getfilesystemencoding() or "utf-8"
@@ -182,7 +183,9 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     if not isinstance(mode, bytes_):
         mode = mode.encode("ascii")
 
-    if isinstance(filelike, file_type) and mode == b"rb":
+    if isinstance(filelike, file_type) and mode == "rb":
+        filelike = filelike.name
+    elif isinstance(filelike, io.IOBase) and mode == "rb":
         filelike = filelike.name
 
     # Try to open as a file.
