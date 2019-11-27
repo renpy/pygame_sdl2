@@ -183,10 +183,8 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     if not isinstance(mode, bytes_):
         mode = mode.encode("ascii")
 
-    if isinstance(filelike, file_type) and mode == "rb":
-        filelike = filelike.name
-    elif isinstance(filelike, io.IOBase) and mode == "rb":
-        filelike = filelike.name
+    if isinstance(filelike, (file_type, io.IOBase)) and mode == "rb":
+        filelike = getattr(filelike, "name", filelike)
 
     # Try to open as a file.
     if isinstance(filelike, bytes_):
