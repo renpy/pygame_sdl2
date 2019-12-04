@@ -308,8 +308,14 @@ def setup(name, version, **kwargs):
     Calls the distutils setup function.
     """
 
+    global extensions
+
     if (len(sys.argv) >= 2) and (sys.argv[1] == "generate"):
         return
+
+    if "--no-extensions" in sys.argv:
+        sys.argv = [ i for i in sys.argv if i != "--no-extensions" ]
+        extensions = [ ]
 
     setuptools.setup(
         name=name,
