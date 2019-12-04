@@ -63,7 +63,6 @@ if windows:
 else:
     cython_command = "cython"
 
-
 if sys.version_info[0] >= 3:
     version_flag = "-3"
     gen = "gen3"
@@ -261,9 +260,9 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
                 parent_module_identifier = parent_module.replace('.', '_')
                 with open(c_fn, 'r') as f:
                     ccode = f.read()
-                ccode = re.sub('Py_InitModule4\("([^"]+)"', 'Py_InitModule4("'+parent_module+'.\\1"', ccode)
-                ccode = re.sub('^__Pyx_PyMODINIT_FUNC init', '__Pyx_PyMODINIT_FUNC init'+parent_module_identifier+'_', ccode, 0, re.MULTILINE)  # Cython 0.28.2
-                ccode = re.sub('^PyMODINIT_FUNC init', 'PyMODINIT_FUNC init'+parent_module_identifier+'_', ccode, 0, re.MULTILINE)  # Cython 0.25.2
+                ccode = re.sub('Py_InitModule4\("([^"]+)"', 'Py_InitModule4("' + parent_module + '.\\1"', ccode)
+                ccode = re.sub('^__Pyx_PyMODINIT_FUNC init', '__Pyx_PyMODINIT_FUNC init' + parent_module_identifier + '_', ccode, 0, re.MULTILINE) # Cython 0.28.2
+                ccode = re.sub('^PyMODINIT_FUNC init', 'PyMODINIT_FUNC init' + parent_module_identifier + '_', ccode, 0, re.MULTILINE) # Cython 0.25.2
                 with open(c_fn, 'w') as f:
                     f.write(ccode)
 
@@ -308,6 +307,9 @@ def setup(name, version, **kwargs):
     """
     Calls the distutils setup function.
     """
+
+    if (len(sys.argv) >= 2) and (sys.argv[1] == "generate"):
+        return
 
     setuptools.setup(
         name=name,
