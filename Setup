@@ -1,0 +1,20 @@
+pygame_sdl2.error gen/pygame_sdl2.error.c
+pygame_sdl2.color gen/pygame_sdl2.color.c
+pygame_sdl2.controller gen/pygame_sdl2.controller.c
+pygame_sdl2.rect gen/pygame_sdl2.rect.c
+pygame_sdl2.rwobject gen/pygame_sdl2.rwobject.c
+pygame_sdl2.surface gen/pygame_sdl2.surface.c src/alphablit.c
+pygame_sdl2.display gen/pygame_sdl2.display.c
+pygame_sdl2.event gen/pygame_sdl2.event.c
+pygame_sdl2.locals gen/pygame_sdl2.locals.c
+pygame_sdl2.key gen/pygame_sdl2.key.c
+pygame_sdl2.mouse gen/pygame_sdl2.mouse.c
+pygame_sdl2.joystick gen/pygame_sdl2.joystick.c
+pygame_sdl2.power gen/pygame_sdl2.power.c
+pygame_sdl2.pygame_time gen/pygame_sdl2.pygame_time.c
+pygame_sdl2.image gen/pygame_sdl2.image.c src/write_jpeg.c src/write_png.c
+pygame_sdl2.transform gen/pygame_sdl2.transform.c src/SDL2_rotozoom.c
+pygame_sdl2.gfxdraw gen/pygame_sdl2.gfxdraw.c src/SDL_gfxPrimitives.c
+pygame_sdl2.draw gen/pygame_sdl2.draw.c
+pygame_sdl2.scrap gen/pygame_sdl2.scrap.c
+
