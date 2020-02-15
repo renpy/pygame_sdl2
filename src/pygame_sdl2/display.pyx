@@ -424,6 +424,14 @@ cdef class Window:
         SDL_GL_GetDrawableSize(self.window, &w, &h)
         return w, h
 
+
+    def get_size(self):
+        cdef int w, h
+
+        SDL_GetWindowSize(self.window, &w, &h)
+        return w, h
+
+
 # The icon that's used for new windows.
 default_icon = None
 
@@ -695,6 +703,11 @@ def get_caption():
 def get_drawable_size():
     if main_window:
         return main_window.get_drawable_size()
+    return None
+
+def get_size():
+    if main_window:
+        return main_window.get_size()
     return None
 
 def get_num_video_displays():
