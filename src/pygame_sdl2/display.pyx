@@ -431,6 +431,15 @@ cdef class Window:
         SDL_GetWindowSize(self.window, &w, &h)
         return w, h
 
+    def restore(self):
+        SDL_RestoreWindow(self.window)
+
+    def maximize(self):
+        SDL_MaximizeWindow(self.window)
+
+    def minimize(self):
+        SDL_MinimizeWindow(self.window)
+
 
 # The icon that's used for new windows.
 default_icon = None
