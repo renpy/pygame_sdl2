@@ -289,6 +289,17 @@ cdef class Window:
 
         self.create_surface()
 
+    def recreate_gl_context(self):
+
+        if self.gl_context:
+            SDL_GL_DeleteContext(self.gl_context)
+            self.gl_context = NULL
+
+        self.gl_context = SDL_GL_CreateContext(self.window)
+
+        if self.gl_context == NULL:
+            raise error()
+
     def get_window_flags(self):
         rv = SDL_GetWindowFlags(self.window)
 
