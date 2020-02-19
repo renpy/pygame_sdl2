@@ -314,9 +314,19 @@ cdef class Window:
         SDL_UpperBlit(self.surface.surface, NULL, self.window_surface, NULL)
 
     def flip(self):
+        cdef const char *err
+
         if self.gl_context != NULL:
             with nogil:
+                SDL_ClearError();
+
                 SDL_GL_SwapWindow(self.window)
+
+                err = SDL_GetError()
+
+            if err[0]:
+                raise error(err)
+
         else:
 
             if self.surface.surface != self.window_surface:
