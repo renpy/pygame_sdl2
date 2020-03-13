@@ -246,10 +246,12 @@ cdef class Surface:
         if not isinstance(surface, Surface):
             surface = pygame_sdl2.display.get_surface()
 
-        if surface is None:
-            raise error("No video mode has been set.")
+        cdef SDL_PixelFormat *sample_format
 
-        cdef SDL_PixelFormat *sample_format = (<Surface> surface).surface.format
+        if surface is None:
+            sample_format = SDL_AllocFormat(SDL_PIXELFORMAT_BGRX8888)
+        else:
+            sample_format = (<Surface> surface).surface.format
 
         cdef Uint32 amask
         cdef Uint32 rmask
@@ -293,10 +295,12 @@ cdef class Surface:
         if surface is None:
             surface = pygame_sdl2.display.get_surface()
 
-        if surface is None:
-            raise error("No video mode has been set.")
+        cdef SDL_PixelFormat *sample_format
 
-        cdef SDL_PixelFormat *sample_format = surface.surface.format
+        if surface is None:
+            sample_format = SDL_AllocFormat(SDL_PIXELFORMAT_BGRA8888)
+        else:
+            sample_format = (<Surface> surface).surface.format
 
         cdef Uint32 amask = 0xff000000
         cdef Uint32 rmask = 0x00ff0000
