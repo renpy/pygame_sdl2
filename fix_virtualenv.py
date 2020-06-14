@@ -7,7 +7,16 @@ import shutil
 import sysconfig
 
 def main():
-    target = os.path.dirname(sysconfig.get_config_h_filename())
+    venv = os.environ.get("VIRTUAL_ENV", None)
+    if not venv:
+        print("VIRTUAL_ENV is not set.")
+        sys.exit(1)
+
+    for dn in os.listdir(os.path.join(venv, "include")):
+        if dn.startswith("python"):
+            break
+
+    target = os.path.join(venv, "include", dn)
 
     try:
         source = os.readlink(target)
