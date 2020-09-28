@@ -207,6 +207,8 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
         if rv == NULL:
             raise IOError("Could not open {!r}: {}".format(name, SDL_GetError()))
 
+        filelike.close()
+
         return rv
 
     if mode == b"rb":
