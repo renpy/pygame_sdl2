@@ -63,8 +63,9 @@ def circle(Surface surface, color, pos, radius, width=0):
         gfxdraw.circle(surface, x, y, radius, color)
         n = 1
         while n < width:
-            gfxdraw.circle(surface, x, y, radius - 1, color)
-            gfxdraw.circle(surface, x, y, radius + 1, color)
+            gfxdraw.circle(surface, x, y, radius - n, color)
+            gfxdraw.circle(surface, x + 1, y, radius - n, color)
+            gfxdraw.circle(surface, x - 1, y, radius - n, color)
             n += 1
         dirty = Rect(x - radius - width, y - radius - width, (radius*2) + width, (radius*2) + width)
         return dirty.clip(surface.get_rect())
