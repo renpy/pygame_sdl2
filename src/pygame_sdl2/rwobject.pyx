@@ -251,6 +251,8 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
                 rv.type = 0
                 rv.hidden.unknown.data1 = <void *> sf
 
+                filelike.close()
+
                 return rv
 
         except AttributeError:
