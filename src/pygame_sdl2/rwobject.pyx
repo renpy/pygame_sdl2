@@ -183,7 +183,8 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     if not isinstance(mode, bytes_):
         mode = mode.encode("ascii")
 
-    name = None
+    name = filelike
+
     if isinstance(filelike, (file_type, io.IOBase)) and mode == "rb":
         name = getattr(filelike, "name", None)
 
@@ -207,7 +208,10 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
         if rv == NULL:
             raise IOError("Could not open {!r}: {}".format(name, SDL_GetError()))
 
-        filelike.close()
+        try:
+            filelike.close()
+        except:
+            pass
 
         return rv
 
@@ -251,7 +255,10 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
                 rv.type = 0
                 rv.hidden.unknown.data1 = <void *> sf
 
-                filelike.close()
+                try:
+                    filelike.close()
+                except:
+                    pass
 
                 return rv
 
