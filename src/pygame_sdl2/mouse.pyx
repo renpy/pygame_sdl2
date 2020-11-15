@@ -17,12 +17,15 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from pygame_sdl2.surface cimport Surface
 
 def init():
-    pass
+    global active_cursor
+    active_cursor = None
 
 def quit():
-    pass
+    global active_cursor
+    active_cursor = None
 
 def get_pressed():
     cdef Uint32 state = SDL_GetMouseState(NULL, NULL)
@@ -46,6 +49,7 @@ def set_pos(pos):
 
 def set_visible(visible):
     SDL_ShowCursor(1 if visible else 0)
+    pass
 
 def get_focused():
     return SDL_GetMouseFocus() != NULL
@@ -56,3 +60,23 @@ def set_cursor(size, hotspot, xormasks, andmasks):
 
 def get_cursor():
     return None
+
+# The ColorCursor that is currently in use.
+active_cursor = False
+
+cdef class ColorCursor(object):
+
+    cdef SDL_Cursor *cursor
+
+    def __init__(self, Surface surface, x, y):
+        self.cursor = SDL_CreateColorCursor(surface.surface, x, y)
+
+    def __dealloc__(self):
+        SDL_FreeCursor(self.cursor)
+
+    def activate(self):
+        global active_cursor
+        if active_cursor is not self:
+            active_cursor = self
+            SDL_SetCursor(self.cursor)
+
