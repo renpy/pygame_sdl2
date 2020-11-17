@@ -27,6 +27,11 @@ def quit():
     global active_cursor
     active_cursor = None
 
+def reset():
+    SDL_SetCursor(SDL_GetDefaultCursor())
+    global active_cursor
+    active_cursor = None
+
 def get_pressed():
     cdef Uint32 state = SDL_GetMouseState(NULL, NULL)
     return (1 if state & SDL_BUTTON_LMASK else 0,
@@ -39,7 +44,7 @@ def get_pos():
     return (x, y)
 
 def get_rel():
-    cdef int x,y
+    cdef int x, y
     SDL_GetRelativeMouseState(&x, &y)
     return (x, y)
 
