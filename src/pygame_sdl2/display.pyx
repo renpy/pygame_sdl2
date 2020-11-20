@@ -37,12 +37,11 @@ ios = ("PYGAME_IOS" in os.environ)
 # A map from a PYGAME_SDL2 hint to what it was set to.
 _pygame_hints = { }
 
-def hint(hint, value):
+def hint(hint, value, priority=1):
 
     if str(hint).startswith("PYGAME_SDL2"):
         _pygame_hints[str(hint)] = str(value)
         return
-
 
     if not isinstance(hint, bytes):
         hint = hint.encode("utf-8")
@@ -50,7 +49,7 @@ def hint(hint, value):
     if not isinstance(value, bytes):
         value = value.encode("utf-8")
 
-    SDL_SetHint(hint, value)
+    SDL_SetHintWithPriority(hint, value, priority)
 
 def _get_hint(hint, default):
     hint = str(hint)
