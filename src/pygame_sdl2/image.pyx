@@ -24,6 +24,7 @@ from pygame_sdl2.rwobject cimport to_rwops
 from pygame_sdl2.error import error
 from pygame_sdl2.compat import bytes_, unicode_, filesystem_encode
 
+import sys
 import os
 import pygame_sdl2
 
@@ -122,15 +123,16 @@ cdef extern from "write_png.h":
 
 def save(Surface surface not None, filename, compression=-1):
 
-    if isinstance(filename, unicode_):
-        filename = filesystem_encode(filename)
+    if not isinstance(filename, unicode_):
+        filename = filename.decode(sys.getfilesystemencoding())
 
     ext = os.path.splitext(filename)[1]
     ext = ext.upper()
     err = 0
 
+    utf8_filename = filename.encode("utf-8")
 
-    cdef char *fn = filename
+    cdef char *fn = utf8_filename
     cdef SDL_RWops *rwops
     cdef int compression_level = compression
 
