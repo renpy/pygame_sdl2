@@ -1704,6 +1704,8 @@ cdef extern from "SDL.h" nogil:
 
     Uint8 SDL_GameControllerGetButton(SDL_GameController *gamecontroller, SDL_GameControllerButton button)
 
+    int SDL_GameControllerRumble(SDL_GameController *gamecontroller, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble, Uint32 duration_ms)
+
     void SDL_GameControllerClose(SDL_GameController *gamecontroller)
 
     ctypedef Sint64 SDL_TouchID
