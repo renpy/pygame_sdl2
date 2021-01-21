@@ -293,11 +293,15 @@ cdef class Window:
         Check to see if the GL context was lost, and re-create it if it was.
         """
 
-        if 0 == <unsigned int> SDL_GL_GetCurrentContext():
-            self.gl_context = SDL_GL_CreateContext(self.window)
+        if <unsigned int> SDL_GL_GetCurrentContext():
+            return False
+
+        self.gl_context = SDL_GL_CreateContext(self.window)
 
         if self.gl_context == NULL:
             raise error()
+
+        return True
 
     def get_window_flags(self):
         rv = SDL_GetWindowFlags(self.window)
