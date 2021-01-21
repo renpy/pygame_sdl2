@@ -289,12 +289,12 @@ cdef class Window:
         self.create_surface()
 
     def recreate_gl_context(self):
+        """
+        Check to see if the GL context was lost, and re-create it if it was.
+        """
 
-        if self.gl_context:
-            SDL_GL_DeleteContext(self.gl_context)
-            self.gl_context = NULL
-
-        self.gl_context = SDL_GL_CreateContext(self.window)
+        if 0 == <unsigned int> SDL_GL_GetCurrentContext():
+            self.gl_context = SDL_GL_CreateContext(self.window)
 
         if self.gl_context == NULL:
             raise error()
