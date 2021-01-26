@@ -52,6 +52,9 @@ def name_filter(name):
     if name in whitelist:
         return True
 
+    if name.startswith("SDL_compile_time_assert"):
+        return False
+
     if name.startswith("SDL_dummy"):
         return False
 
@@ -59,6 +62,9 @@ def name_filter(name):
         return False
 
     if name.startswith("SDL"):
+        return True
+
+    if name.startswith("WindowShapeMode"):
         return True
 
     return False
