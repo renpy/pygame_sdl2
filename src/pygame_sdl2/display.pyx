@@ -756,6 +756,16 @@ def get_display_bounds(index):
 
     return (rect.x, rect.y, rect.w, rect.h)
 
+def set_screensaver(state):
+    """
+    Sets the screenslaver to `state`.
+    """
+
+    if state:
+        SDL_EnableScreenSaver()
+    else:
+        SDL_DisableScreenSaver()
+
 def get_platform():
     return SDL_GetPlatform()
 
