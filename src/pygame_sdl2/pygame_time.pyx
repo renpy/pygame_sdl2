@@ -50,7 +50,7 @@ def delay(milliseconds):
     # SDL_Delay() should be accurate enough.
     return wait(milliseconds)
 
-cdef Uint32 timer_callback(Uint32 interval, void *param):
+cdef Uint32 timer_callback(Uint32 interval, void *param) nogil:
     cdef SDL_Event e
     e.type = <int>param
     e.user.code = 0
