@@ -120,25 +120,10 @@ def get_init():
 # The window that is used by the various module globals.
 main_window = None
 
-# Have we shown the first window?
-_shown_first_window = False
-
-def _before_first_window():
-    global _shown_first_window
-
-    if _shown_first_window:
-        return
-
-    _shown_first_window = True
-
-    # If we're on android, we have to close the splash window before opening
-    # our window.
-    try:
-        import androidembed
-        androidembed.close_window()
-    except ImportError:
-        pass
-
+try:
+    import androidembed
+except ImportError:
+    pass
 
 
 cdef class Window:
@@ -146,8 +131,6 @@ cdef class Window:
 
         if not isinstance(title, bytes):
             title = title.encode("utf-8")
-
-        _before_first_window()
 
         self.create_flags = flags
 
@@ -158,10 +141,18 @@ cdef class Window:
         else:
             gl_flag = SDL_WINDOW_OPENGL
 
-        self.window = SDL_CreateWindow(
-            title,
-            pos[0], pos[1],
-            resolution[0], resolution[1], flags | gl_flag)
+        self.window = NULL
+
+        if androidembed is not None:
+            self.window = SDL_GL_GetCurrentWindow()
+            if self.window:
+                SDL_SetWindowTitle(self.window, title)
+
+        if not self.window:
+            self.window = SDL_CreateWindow(
+                title,
+                pos[0], pos[1],
+                resolution[0], resolution[1], flags | gl_flag)
 
         if not self.window:
             raise error()
