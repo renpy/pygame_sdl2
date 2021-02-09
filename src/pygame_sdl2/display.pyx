@@ -123,7 +123,7 @@ main_window = None
 try:
     import androidembed
 except ImportError:
-    pass
+    androidembed = None
 
 
 cdef class Window:
