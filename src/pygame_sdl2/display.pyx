@@ -284,7 +284,7 @@ cdef class Window:
         Check to see if the GL context was lost, and re-create it if it was.
         """
 
-        if <unsigned int> SDL_GL_GetCurrentContext():
+        if <unsigned long> SDL_GL_GetCurrentContext():
             return False
 
         self.gl_context = SDL_GL_CreateContext(self.window)
@@ -454,6 +454,16 @@ cdef class Window:
 
     def minimize(self):
         SDL_MinimizeWindow(self.window)
+
+    def get_sdl_window_pointer(self):
+        """
+        Returns the pointer to the SDL_Window corresponding to this window.
+        """
+
+        import ctypes
+        return ctypes.c_void_p(<unsigned long> self.window)
+
+
 
 
 # The icon that's used for new windows.
