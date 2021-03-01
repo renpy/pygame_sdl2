@@ -145,8 +145,16 @@ cdef class Window:
 
         if androidembed is not None:
             self.window = SDL_GL_GetCurrentWindow()
+
             if self.window:
-                SDL_SetWindowTitle(self.window, title)
+
+                # Android bug - a RGB_565 format is likely to mean the window
+                # wasn't created properly, so re-make it.
+                if SDL_GetWindowPixelFormat(self.window) == SDL_PIXELFORMAT_RGB565:
+                    SDL_DestroyWindow(self.window)
+                    self.window = NULL
+                else:
+                    SDL_SetWindowTitle(self.window, title)
 
         if not self.window:
             self.window = SDL_CreateWindow(
@@ -176,6 +184,8 @@ cdef class Window:
                     if SDL_GL_SetSwapInterval(default_swap_control):
                         SDL_GL_SetSwapInterval(-default_swap_control)
 
+
+                SDL_GL_MakeCurrent(self.window, self.gl_context)
 
             self.create_surface()
 
