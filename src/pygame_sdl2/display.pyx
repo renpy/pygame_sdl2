@@ -177,6 +177,8 @@ cdef class Window:
                 if self.gl_context == NULL:
                     raise error()
 
+                SDL_GL_MakeCurrent(self.window, self.gl_context)
+
                 if not ios:
                     # Try setting the swap interval - first positive, then negated
                     # to deal with the case where the negative interval isn't
@@ -184,8 +186,6 @@ cdef class Window:
                     if SDL_GL_SetSwapInterval(default_swap_control):
                         SDL_GL_SetSwapInterval(-default_swap_control)
 
-
-                SDL_GL_MakeCurrent(self.window, self.gl_context)
 
             self.create_surface()
 
