@@ -506,6 +506,13 @@ def set_mode(resolution=(0, 0), flags=0, depth=0, pos=(SDL_WINDOWPOS_UNDEFINED, 
 
     return main_window.surface
 
+def destroy():
+    global main_window
+
+    if main_window is not None:
+        main_window.destroy()
+        main_window = None
+
 def get_surface():
     if main_window is None:
         return None
