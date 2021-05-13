@@ -184,8 +184,8 @@ cdef class Window:
                     # to deal with the case where the negative interval isn't
                     # supported. Then give up and carry on.
                     if SDL_GL_SetSwapInterval(default_swap_control):
-                        SDL_GL_SetSwapInterval(-default_swap_control)
-
+                        if default_swap_control < 0:
+                            SDL_GL_SetSwapInterval(-default_swap_control)
 
             self.create_surface()
 
