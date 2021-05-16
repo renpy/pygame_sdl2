@@ -240,3 +240,19 @@ cdef class Controller:
 
         return s
 
+    def rumble(self, low_frequency_rumble, high_frequency_rumble, duration_ms):
+        """
+        Start a rumble effect
+        Each call to this function cancels any previous rumble effect, and calling it with 0 intensity stops any rumbling.
+
+        `low_frequency_rumble`: The intensity of the low frequency (left) rumble motor, from 0 to 0xFFFF
+        `high_frequency_rumble`: The intensity of the high frequency (right) rumble motor, from 0 to 0xFFFF
+        `duration_ms`: The duration of the rumble effect, in milliseconds
+
+        Returns 0, or -1 if rumble isn't supported on this controller
+        """
+
+        if self.controller == NULL:
+            raise error("controller not initialized.")
+
+        return SDL_GameControllerRumble(self.controller, low_frequency_rumble, high_frequency_rumble, duration_ms)
