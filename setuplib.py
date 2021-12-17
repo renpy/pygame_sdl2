@@ -64,15 +64,14 @@ else:
     cython_command = "cython"
 
 if sys.version_info[0] >= 3:
-    version_flag = "-3"
     gen = "gen3"
 else:
-    version_flag = "-2"
     gen = "gen"
+
+version_flag = "--3str"
 
 if static:
     gen = gen + "-static"
-
 
 def system_path(path):
     """
