@@ -22,18 +22,21 @@ class error(RuntimeError):
 
     def __init__(self, message=None):
         if message is None:
-            message = str(SDL_GetError())
-
+            message = bytes(SDL_GetError())
+            message = message.decode("utf-8")
+            
         RuntimeError.__init__(self, message)
 
 def get_error():
     cdef const char *message = SDL_GetError()
 
     if message:
-        return str(message)
+        return message.decode("utf-8")
     else:
         return ''
 
 def set_error(message):
-    message = bytes(message)
+    if isinstance(message, unicode):
+        message = message.encode("utf-8")
+
     SDL_SetError("%s", <char *> message)

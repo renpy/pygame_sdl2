@@ -83,7 +83,7 @@ cdef class Joystick:
         rv = SDL_JoystickName(self.joystick)
 
         if rv:
-            return rv
+            return rv.decode("utf-8")
         else:
             return None
 
