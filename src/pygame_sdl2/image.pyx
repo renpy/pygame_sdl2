@@ -128,6 +128,7 @@ def save(Surface surface not None, filename, compression=-1):
 
     ext = os.path.splitext(filename)[1]
     ext = ext.upper()
+    ext = ext.encode("utf-8")
     err = 0
 
     utf8_filename = filename.encode("utf-8")
