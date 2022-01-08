@@ -515,3 +515,7 @@ def init():
 
         if SDL_InitSubSystem(SDL_INIT_EVENTS):
             raise pygame_sdl2.error.error()
+
+_types = """
+Event = EventType
+"""

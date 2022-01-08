@@ -246,6 +246,8 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
             subprocess.check_call([
                 cython_command,
                 version_flag,
+                "-X", "profile=False",
+                "-X", "embedsignature=True",
                 "-Iinclude",
                 "-I" + gen,
                 "-a",

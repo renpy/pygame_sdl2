@@ -61,3 +61,7 @@ def lost():
 
 def set_mode(mode):
     pass
+
+_types = """
+SCRAP_TEXT : int 
+"""
