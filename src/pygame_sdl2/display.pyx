@@ -785,7 +785,7 @@ def set_screensaver(state):
         SDL_DisableScreenSaver()
 
 def get_platform():
-    return SDL_GetPlatform()
+    return SDL_GetPlatform().decode("utf-8")
 
 cdef api SDL_Window *PyWindow_AsWindow(window):
     """

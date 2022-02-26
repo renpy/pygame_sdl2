@@ -113,7 +113,7 @@ def get_string_for_axis(axis):
     cdef const char *rv = SDL_GameControllerGetStringForAxis(axis)
 
     if rv != NULL:
-        return rv
+        return rv.decode("utf-8")
     else:
         return None
 
@@ -126,7 +126,7 @@ def get_string_for_button(button):
     cdef const char *rv = SDL_GameControllerGetStringForButton(button)
 
     if rv != NULL:
-        return rv
+        return rv.decode("utf-8")
     else:
         return None
 
