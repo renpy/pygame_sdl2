@@ -275,26 +275,6 @@ def cython(name, source=[], libs=[], compile_if=True, define_macros=[]):
                     ccode = re.sub('^__Pyx_PyMODINIT_FUNC PyInit_', '__Pyx_PyMODINIT_FUNC PyInit_' + parent_module_identifier + '_', ccode, 0, re.MULTILINE) # Py3 Cython 0.28+
                     ccode = re.sub('^PyMODINIT_FUNC init', 'PyMODINIT_FUNC init' + parent_module_identifier + '_', ccode, 0, re.MULTILINE) # Py2 Cython 0.25.2
 
-                cname = "_".join(split_name)
-
-                ccode += """
-
-static struct _inittab CNAME_inittab[] = {
-#if PY_MAJOR_VERSION < 3
-    { "PYNAME", initCNAME },
-#else
-    { "PYNAME", PyInit_CNAME },
-#endif
-    { NULL, NULL },
-};
-
-static void CNAME_constructor(void) __attribute__((constructor));
-
-static void CNAME_constructor(void) {
-    PyImport_ExtendInittab(CNAME_inittab);
-}
-""".replace("PYNAME", name).replace("CNAME", cname)
-
                 with open(c_fn, 'w') as f:
                     f.write(ccode)
 
