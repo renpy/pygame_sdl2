@@ -183,10 +183,9 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     if not isinstance(mode, bytes_):
         mode = mode.encode("ascii")
 
-    name = filelike
-
-    if isinstance(filelike, (file_type, io.IOBase)) and mode == "rb":
-        name = getattr(filelike, "name", None)
+    name = getattr(filelike, "name", None)
+    if name is None:
+        name = filelike
 
     # Try to open as a file.
     if isinstance(name, bytes_):
@@ -196,7 +195,7 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     else:
         name = None
 
-    if name is not None:
+    if (mode == b"rb") and (name is not None):
 
         dname = name.encode("utf-8")
         cname = dname
@@ -209,62 +208,40 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
             raise IOError("Could not open {!r}: {}".format(name, SDL_GetError()))
 
         try:
+
+            # If we have these properties, we're either an APK asset or a Ren'Py-style
+            # subfile, so use an optimized path.
+            base = filelike.base
+            length = filelike.length
+
+            rw = rv
+
+            SDL_RWseek(rw, base, RW_SEEK_SET);
+
+            sf = <SubFile *> calloc(sizeof(SubFile), 1)
+            sf.rw = rw
+            sf.base = base
+            sf.length = length
+            sf.tell = 0;
+
+            rv = SDL_AllocRW()
+            rv.size = subfile_size
+            rv.seek = subfile_seek
+            rv.read = subfile_read
+            rv.write = NULL
+            rv.close = subfile_close
+            rv.type = 0
+            rv.hidden.unknown.data1 = <void *> sf
+
+        except AttributeError:
+            pass
+
+        try:
             filelike.close()
         except:
             pass
 
         return rv
-
-    if mode == b"rb":
-        try:
-
-            # If we have these properties, we're either an APK asset or a Ren'Py-style
-            # subfile, so use an optimized path.
-            name = filelike.name
-            base = filelike.base
-            length = filelike.length
-
-            if name is not None:
-
-                if not isinstance(name, unicode_):
-                    name = name.decode(fsencoding)
-
-                dname = name.encode("utf-8")
-                cname = dname
-
-                with nogil:
-                    rw = SDL_RWFromFile(cname, b"rb")
-
-                if not rw:
-                    raise IOError("Could not open {!r}.".format(name))
-
-                SDL_RWseek(rw, base, RW_SEEK_SET);
-
-                sf = <SubFile *> calloc(sizeof(SubFile), 1)
-                sf.rw = rw
-                sf.base = base
-                sf.length = length
-                sf.tell = 0;
-
-                rv = SDL_AllocRW()
-                rv.size = subfile_size
-                rv.seek = subfile_seek
-                rv.read = subfile_read
-                rv.write = NULL
-                rv.close = subfile_close
-                rv.type = 0
-                rv.hidden.unknown.data1 = <void *> sf
-
-                try:
-                    filelike.close()
-                except:
-                    pass
-
-                return rv
-
-        except AttributeError:
-            pass
-
 
     if not (hasattr(filelike, "read") or hasattr(filelike, "write")):
         raise IOError("{!r} is not a filename or file-like object.".format(filelike))
