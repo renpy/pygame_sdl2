@@ -114,7 +114,7 @@ GNU/Linux
 Darwin
 ^^^^^^
 
-**Mac OS X** (with `brew <http://brew.sh>`_)::
+**macOS** (with `brew <http://brew.sh>`_)::
 
     brew install sdl2 sdl2_gfx sdl2_image sdl2_mixer sdl2_ttf
     sudo pip install virtualenvwrapper
