@@ -184,10 +184,16 @@ cdef make_joybtn_event(SDL_JoyButtonEvent *e):
     return EventType(e.type, joy=e.which, button=e.button)
 
 cdef make_textinput_event(SDL_TextInputEvent *e):
-    return EventType(e.type, text=e.text.decode("utf-8"))
+    try:
+        return EventType(e.type, text=e.text.decode("utf-8"))
+    except UnicodeDecodeError:
+        return EventType(e.type, text='')
 
 cdef make_textediting_event(SDL_TextEditingEvent *e):
-    return EventType(e.type, text=e.text.decode("utf-8"), start=e.start, length=e.length)
+    try:
+        return EventType(e.type, text=e.text.decode("utf-8"), start=e.start, length=e.length)
+    except UnicodeDecodeError:
+        return EventType(e.type, text='', start=e.start, length=e.length)
 
 cdef make_window_event(SDL_WindowEvent *e):
     # SDL_APPMOUSEFOCUS
