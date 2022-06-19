@@ -96,8 +96,8 @@ and SDL2_ttf libraries; and the ability to compile cython code.
 
 To build pygame_sdl2, install the build dependencies:
 
-GNU/Linux
-^^^^^^^^^
+Linux
+^^^^^
 
 **Ubuntu**::
 
@@ -109,7 +109,7 @@ GNU/Linux
 
     sudo dnf install SDL2 SDL2-devel SDL2_gfx-devel SDL2_image-devel \
         SDL2_sound-devel SDL2_ttf-devel SDL2_mixer-devel SDL2_net-devel \
-        libjpeg-turbo-devel  libjpeg-turbo python-devel
+        libjpeg-turbo-devel libjpeg-turbo python-devel
 
 Darwin
 ^^^^^^
