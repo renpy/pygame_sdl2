@@ -32,12 +32,24 @@ import pygame_sdl2
 cdef int image_formats = 0
 
 def init():
+    # Attempt to initialize everything. Only fail loudly if all formats fail
     global image_formats
-    image_formats = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP)
+    image_formats = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP | IMG_INIT_JXL | IMG_INIT_AVIF)
     if image_formats == 0:
         raise error()
 
 init()
+
+# Make it possible for python to check individual formats
+INIT_JPG = IMG_INIT_JPG
+INIT_PNG = IMG_INIT_PNG
+INIT_TIF = IMG_INIT_TIF
+INIT_WEBP = IMG_INIT_WEBP
+INIT_JXL = IMG_INIT_JXL
+INIT_AVIF = IMG_INIT_AVIF
+
+def has_init(int flags):
+    return (flags & image_formats) == flags
 
 def quit(): # @ReservedAssignment
     IMG_Quit()

@@ -6,6 +6,8 @@ cdef extern from "SDL_image.h" nogil:
         IMG_INIT_PNG
         IMG_INIT_TIF
         IMG_INIT_WEBP
+        IMG_INIT_JXL
+        IMG_INIT_AVIF
 
     int IMG_Init(int flags)
     void IMG_Quit()
