@@ -15,7 +15,9 @@ cdef extern from "SDL_image.h" nogil:
     SDL_Surface *IMG_Load(const char *file)
     SDL_Surface *IMG_Load_RW(SDL_RWops *src, int freesrc)
     SDL_Surface *IMG_LoadTyped_RW(SDL_RWops *src, int freesrc, const char *type)
-    
+
+    SDL_Surface *IMG_LoadSizedSVG_RW(SDL_RWops *src, int width, int height)
+
     SDL_Texture *IMG_LoadTexture(SDL_Renderer *renderer, const char *file)
     SDL_Texture *IMG_LoadTexture_RW(SDL_Renderer *renderer, SDL_RWops *src, int freesrc)
     SDL_Texture *IMG_LoadTextureTyped_RW(SDL_Renderer *renderer, SDL_RWops *src, int freesrc, const char *type)

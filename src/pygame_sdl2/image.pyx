@@ -71,11 +71,20 @@ cdef process_namehint(namehint):
 
     return ext.upper()
 
-def load(fi, namehint=""):
+def load(fi, namehint="", size=None):
+    """
+    `size`
+        A width, height tuple that specifies the size the image is loaded
+        at. This is only supported for SVG images.
+    """
+
     cdef SDL_Surface *img
 
     cdef SDL_RWops *rwops
     cdef char *ftype
+
+    cdef int width
+    cdef int height
 
     # IMG_Load_RW can't load TGA images.
     if isinstance(fi, str):
@@ -92,8 +101,18 @@ def load(fi, namehint=""):
         namehint = process_namehint(namehint)
         ftype = namehint
 
-        with nogil:
-            img = IMG_LoadTyped_RW(rwops, 1, ftype)
+        if namehint == b".SVG" and size is not None:
+            width, height = size
+
+            with nogil:
+                img = IMG_LoadSizedSVG_RW(rwops, width, height)
+
+            SDL_RWclose(rwops)
+
+        else:
+
+            with nogil:
+                img = IMG_LoadTyped_RW(rwops, 1, ftype)
 
     if img == NULL:
         raise error()
