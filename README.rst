@@ -3,19 +3,12 @@ Pygame_sdl2
 ===========
 
 Pygame_sdl2 is a reimplementation of the Pygame API using SDL2 and
-related libraries. The initial goal of this project are to allow
-games written using the pygame API to run on SDL2 on desktop and
-mobile  platforms. We will then evolve the API to expose SDL2-provided
-functionality in a pythonic manner.
+related libraries. While in the past it was meant to support multiple
+applications, it only saw adoption as technology underlying Ren'Py, and
+is currently being supported for that purpose.
 
-Downloads
----------
-
-Nightly builds are available from:
-
-https://nightly.renpy.org/current/
-
-An official release will be coming to pypi shortly.
+The `original pygame <https://www.pygame.org>`_ now runs on SDL2, and should
+be used for most applications.
 
 License
 -------
@@ -27,6 +20,7 @@ determine its licensing status.
 
 See the COPYING.ZLIB and COPYING.LGPL21 files for details - you'll need
 to comply with both to distribute software containing pygame_sdl2.
+
 
 Current Status
 --------------
@@ -76,17 +70,6 @@ Current omissions include:
 * Support for palette functions, which only apply to 8-bit surfaces.
 
 
-Documentation
--------------
-
-The latest documentation can be found at:
-
-    http://pygame-sdl2.readthedocs.org/
-
-An Android packaging example can be found at:
-
-    https://github.com/renpytom/rapt-pygame-example
-
 Building
 --------
 
@@ -96,13 +79,25 @@ and SDL2_ttf libraries; and the ability to compile cython code.
 
 To build pygame_sdl2, install the build dependencies:
 
+Linux
+^^^^^
+
 **Ubuntu**::
 
     sudo apt-get install build-essential python-dev libsdl2-dev \
         libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
         libjpeg-dev libpng12-dev virtualenvwrapper
 
-**Mac OS X** (with `brew <http://brew.sh>`_)::
+**Fedora**::
+
+    sudo dnf install SDL2 SDL2-devel SDL2_gfx-devel SDL2_image-devel \
+        SDL2_sound-devel SDL2_ttf-devel SDL2_mixer-devel SDL2_net-devel \
+        libjpeg-turbo-devel libjpeg-turbo python-devel
+
+Darwin
+^^^^^^
+
+**macOS** (with `brew <http://brew.sh>`_)::
 
     brew install sdl2 sdl2_gfx sdl2_image sdl2_mixer sdl2_ttf
     sudo pip install virtualenvwrapper
@@ -124,6 +119,8 @@ Finally, build and install pygame_sdl2 by running::
 
 Windows
 ^^^^^^^
+
+**These instructions are likely out of date.**
 
 To build on windows, change into the pygame_sdl2 checkout, clone
 renpy/pygame_sdl2_windeps using a command like::
@@ -182,19 +179,10 @@ Pygame_sdl2 is designed as a complete replacement for pygame.
 If you try to use both the `pygame_sdl2` and `pygame` libraries in the same program
 you may encounter errors; such as library import failures in frozen programs.
 
-
-Contributing
-------------
-
-We're looking for people to contribute to pygame_sdl2 development. For
-simple changes, just give us a pull request. Before making a change that
-is a lot of work, it might make sense to send us an email to ensure we're
-not already working on it.
-
 Credits
 -------
 
-Pygame_sdl2 is written by:
+Pygame_sdl2 was written by:
 
 * Patrick Dawson <pat@dw.is>
 * Tom Rothamel <tom@rothamel.us>

@@ -94,6 +94,9 @@ def get_axis_from_string(name):
     pygame.CONTROLLER_AXIS_INVALID if `name` is not known.
     """
 
+    if not isinstance(name, bytes):
+        name = name.encode("utf-8")
+
     return SDL_GameControllerGetAxisFromString(name)
 
 def get_button_from_string(name):
@@ -101,6 +104,9 @@ def get_button_from_string(name):
     Returns the button number of the controller button with `name`, or
     pygame.CONTROLLER_BUTTON_INVALID if `name` is not known.
     """
+
+    if not isinstance(name, bytes):
+        name = name.encode("utf-8")
 
     return SDL_GameControllerGetButtonFromString(name)
 
