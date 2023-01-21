@@ -467,9 +467,10 @@ cdef class RWopsImpl(object):
         return ctypes.c_void_p(<uintptr_t> self.ops)
 
 class RWops(io.RawIOBase):
-    def __init__(self):
+    def __init__(self, name=None):
         io.RawIOBase.__init__(self)
         self._holder = RWopsImpl()
+        self.name = name
 
     # Implemented class: io.IOBase
 
@@ -559,7 +560,7 @@ def RWops_from_file(name, mode="rb"):
         if rw == NULL:
             raise IOError("Could not open {!r}: {}".format(name, SDL_GetError()))
 
-        rv = RWops()
+        rv = RWops(name)
         (<RWopsImpl>rv._holder).set_rwops(rw)
 
         return rv
