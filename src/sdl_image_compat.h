@@ -3,7 +3,7 @@
 
 #include "SDL_image.h"
 
-#if ! SDL_VERSION_ATLEAST(2, 6, 0)
+#if ! SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
 
 #define IMG_INIT_JXL  (0x00000010)
 #define IMG_INIT_AVIF (0x00000020)
