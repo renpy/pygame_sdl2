@@ -24,10 +24,10 @@ import re
 import subprocess
 import platform
 
-try:
-    import setuptools
-except:
+if sys.version_info.major == 2:
     import distutils.core as setuptools
+else:
+    import setuptools
 
 # The include and library dirs that we compile against.
 include_dirs = [ ".", "src" ]
