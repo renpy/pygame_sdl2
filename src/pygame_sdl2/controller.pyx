@@ -143,6 +143,7 @@ cdef class Controller:
 
     cdef SDL_GameController *controller
     cdef int index
+    cdef public int instance_id
 
     def __cinit__(self):
         self.controller = NULL
@@ -159,6 +160,8 @@ cdef class Controller:
         """
         Opens the game controller, causing it to begin sending events.
         """
+
+        self.instance_id = SDL_JoystickGetDeviceInstanceID(self.index)
 
         if self.controller == NULL:
             self.controller = SDL_GameControllerOpen(self.index)
