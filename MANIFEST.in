@@ -1,5 +1,7 @@
 include gen/*.c
+include gen/*.h
 include gen3/*.c
+include gen3/*.h
 
 include fix_virtualenv.py
 include COPYING.*
@@ -24,5 +26,3 @@ include src/pygame_sdl2/*.ttf
 include src/pygame_sdl2/threads/*.py
 
 exclude test/*
-
-
