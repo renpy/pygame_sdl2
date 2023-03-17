@@ -474,6 +474,14 @@ cdef class Window:
         import ctypes
         return ctypes.c_void_p(<unsigned long> self.window)
 
+    def get_position(self):
+        cdef int x, y
+
+        SDL_GetWindowPosition(self.window, &x, &y)
+        return x, y
+
+    def set_position(self, pos):
+        SDL_SetWindowPosition(self.window, pos[0], pos[1])
 
 
 
@@ -761,6 +769,17 @@ def get_size():
     if main_window:
         return main_window.get_size()
     return None
+
+def get_position():
+    if main_window:
+        return main_window.get_position()
+    return None
+
+def set_position(pos):
+    if main_window:
+        return main_window.set_position(pos)
+    return False
+
 
 def get_num_video_displays():
     rv = SDL_GetNumVideoDisplays()
