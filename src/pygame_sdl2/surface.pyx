@@ -843,6 +843,19 @@ cdef class Surface:
         def __get__(self):
             return <Uint64> self.surface.pixels
 
+    def from_data(self, data):
+        if len(data) != self.surface.w * self.surface.h * self.surface.format.BytesPerPixel:
+            raise ValueError("The data must fill the surface.")
+
+        cdef Uint8 *d = <Uint8 *> data
+        cdef Uint8 *pixels = <Uint8 *> self.surface.pixels
+
+        cdef int i
+
+        for 0 <= i < self.surface.h:
+            memmove(pixels, d, self.surface.w * self.surface.format.BytesPerPixel)
+            d += self.surface.w * self.surface.format.BytesPerPixel
+            pixels += self.surface.pitch
 
 cdef api SDL_Surface *PySurface_AsSurface(surface):
     return (<Surface> surface).surface
