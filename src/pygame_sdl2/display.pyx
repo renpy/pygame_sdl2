@@ -246,15 +246,23 @@ cdef class Window:
 
         SDL_DestroyWindow(self.window)
 
-    def resize(self, size, opengl=False, fullscreen=None):
+    def resize(self, size, opengl=False, fullscreen=None, maximized=None):
         """
         Resizes the window to `size`, which must be a width, height tuple. If opengl
         is true, adds an OpenGL context, if it's missing. Otherwise, removes the
         opengl context if present.
         """
 
+        flags = SDL_GetWindowFlags(self.window)
+
         if fullscreen is None:
-            fullscreen = SDL_GetWindowFlags(self.window) & SDL_WINDOW_FULLSCREEN_DESKTOP
+            fullscreen = flags & SDL_WINDOW_FULLSCREEN_DESKTOP
+
+        if maximized is None:
+            maximized = flags & SDL_WINDOW_MAXIMIZED
+
+        if fullscreen:
+            maximized = False
 
         # Prevents a loop between the surface and this object.
         self.surface.get_window_flags = None
@@ -266,12 +274,18 @@ cdef class Window:
         cdef int cur_width = 0
         cdef int cur_height = 0
 
+        if (not maximized) and (flags & SDL_WINDOW_MAXIMIZED):
+            SDL_RestoreWindow(self.window)
+
         if fullscreen:
+
             if SDL_SetWindowFullscreen(self.window, SDL_WINDOW_FULLSCREEN_DESKTOP):
                 fullscreen = False
 
         if not fullscreen:
             SDL_SetWindowFullscreen(self.window, 0)
+
+        if (not fullscreen) and (not maximized):
 
             width, height = size
 
@@ -279,6 +293,9 @@ cdef class Window:
 
             if (cur_width != width) or (cur_height != height):
                 SDL_SetWindowSize(self.window, width, height)
+
+        if maximized:
+            SDL_MaximizeWindow(self.window)
 
         # Create a missing GL context.
         if opengl and not self.gl_context:
