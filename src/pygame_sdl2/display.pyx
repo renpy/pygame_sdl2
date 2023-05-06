@@ -272,7 +272,7 @@ cdef class Window:
         cdef int cur_width = 0
         cdef int cur_height = 0
 
-        if (not maximized) and (flags & SDL_WINDOW_MAXIMIZED):
+        if (not fullscreen) and (not maximized) and (flags & SDL_WINDOW_MAXIMIZED):
             SDL_RestoreWindow(self.window)
 
         if fullscreen:
