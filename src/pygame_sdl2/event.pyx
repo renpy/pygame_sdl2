@@ -196,6 +196,15 @@ cdef make_textediting_event(SDL_TextEditingEvent *e):
     except UnicodeDecodeError:
         return EventType(e.type, text='', start=e.start, length=e.length)
 
+cdef make_drop_event(SDL_DropEvent *e):
+    if e.file:
+        file = e.file.decode("utf-8")
+        SDL_free(e.file)
+    else:
+        file = None
+
+    return EventType(e.type, file=file, timestamp=e.timestamp, window_id=e.windowID)
+
 cdef make_window_event(SDL_WindowEvent *e):
     # SDL_APPMOUSEFOCUS
     if e.event == SDL_WINDOWEVENT_ENTER:
@@ -261,6 +270,8 @@ cdef make_event(SDL_Event *e):
         return EventType(e.type, touchId=e.tfinger.touchId, fingerId=e.tfinger.fingerId, touch_id=e.tfinger.touchId, finger_id=e.tfinger.fingerId, x=e.tfinger.x, y=e.tfinger.y, dx=e.tfinger.dx, dy=e.tfinger.dy, pressure=e.tfinger.pressure)
     elif e.type == SDL_MULTIGESTURE:
         return EventType(e.type, touchId=e.mgesture.touchId, dTheta=e.mgesture.dTheta, dDist=e.mgesture.dDist, x=e.mgesture.x, y=e.mgesture.y, numFingers=e.mgesture.numFingers, touch_id=e.mgesture.touchId, rotated=e.mgesture.dTheta, pinched=e.mgesture.dDist, num_fingers=e.mgesture.numFingers)
+    elif e.type in (SDL_DROPFILE, SDL_DROPTEXT, SDL_DROPBEGIN, SDL_DROPCOMPLETE):
+        return make_drop_event(<SDL_DropEvent*> e)
     elif e.type == POSTEDEVENT:
         o = <object> e.user.data1
         Py_DECREF(o)
