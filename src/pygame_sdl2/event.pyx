@@ -461,6 +461,9 @@ def get_blocked(t):
 def set_grab(on):
     SDL_SetWindowGrab(main_window.window, on)
 
+    if SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE:
+        SDL_SetRelativeMouseMode(on)
+
 def get_grab():
     return SDL_GetWindowGrab(main_window.window)
 
