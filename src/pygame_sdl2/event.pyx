@@ -34,6 +34,7 @@ include "event_names.pxi"
 ACTIVEEVENT = SDL_LASTEVENT - 1
 VIDEORESIZE = SDL_LASTEVENT - 2
 VIDEOEXPOSE = SDL_LASTEVENT - 3
+WINDOWMOVED = SDL_LASTEVENT - 4
 
 event_names[ACTIVEEVENT] = "ACTIVEEVENT"
 event_names[VIDEORESIZE] = "VIDEORESIZE"
@@ -229,6 +230,9 @@ cdef make_window_event(SDL_WindowEvent *e):
 
     elif e.event == SDL_WINDOWEVENT_EXPOSED:
         return EventType(VIDEOEXPOSE)
+
+    elif e.event == SDL_WINDOWEVENT_MOVED:
+        return EventType(WINDOWMOVED, pos=(e.data1, e.data2), x=e.data1, y=e.data2)
 
     return EventType(SDL_WINDOWEVENT, event=e.event, data1=e.data1, data2=e.data2)
 
