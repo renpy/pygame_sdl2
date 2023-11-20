@@ -156,6 +156,9 @@ cdef class Window:
                     SDL_SetWindowTitle(self.window, title)
 
         if not self.window:
+
+            flags |= SDL_WINDOW_HIDDEN
+
             if shape is not None:
 
                 shape_mode.mode = ShapeModeDefault
@@ -169,13 +172,15 @@ cdef class Window:
 
             else:
 
-
                 self.window = SDL_CreateWindow(
                     title,
                     pos[0], pos[1],
                     resolution[0], resolution[1], flags | gl_flag)
 
+            if pos != (SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED):
+                SDL_SetWindowPosition(self.window, pos[0], pos[1])
 
+            SDL_ShowWindow(self.window)
 
         if not self.window:
             raise error()
