@@ -39,15 +39,16 @@ WINDOWMOVED = SDL_LASTEVENT - 4
 event_names[ACTIVEEVENT] = "ACTIVEEVENT"
 event_names[VIDEORESIZE] = "VIDEORESIZE"
 event_names[VIDEOEXPOSE] = "VIDEOEXPOSE"
+event_names[WINDOWMOVED] = "WINDOWMOVED"
 
 # This is used for events posted to the event queue. This won't be returned
 # to the user - it's just used internally, with the event object itself
 # giving the type.
 cdef unsigned int POSTEDEVENT
-POSTEDEVENT = SDL_LASTEVENT - 4
+POSTEDEVENT = SDL_LASTEVENT - 5
 
 # The maximum number of a user-defined event.
-USEREVENT_MAX = SDL_LASTEVENT - 5
+USEREVENT_MAX = SDL_LASTEVENT - 6
 
 # If true, the mousewheel is mapped to buttons 4 and 5. Otherwise, a
 # MOUSEWHEEL event is created.
@@ -67,7 +68,7 @@ class EventType(object):
         self.__dict__.update(kwargs)
 
     def __repr__(self):
-        if SDL_USEREVENT <= self.type < VIDEOEXPOSE:
+        if SDL_USEREVENT <= self.type < WINDOWMOVED:
             ename = "UserEvent%d" % (self.type - SDL_USEREVENT)
         else:
             try:
