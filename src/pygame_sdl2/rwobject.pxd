@@ -18,5 +18,4 @@
 
 from sdl2 cimport SDL_RWops
 
-cdef SDL_RWops *to_rwops(filelike, mode=*) except NULL
-
+cdef SDL_RWops *to_rwops(filelike, mode=*, base=*, length=*) except NULL

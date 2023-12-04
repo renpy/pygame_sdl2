@@ -57,7 +57,6 @@ cdef extern from "SDL.h" nogil:
 cdef extern from "python_threads.h":
     void init_python_threads()
 
-
 cdef set_error(e):
     cdef char *msg
     e = str(e)
@@ -263,7 +262,32 @@ cdef int buffile_close(SDL_RWops *context) with gil:
 
     return 0
 
-cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
+
+cdef SDL_RWops *to_rwops(filelike, mode="rb", base=None, length=None) except NULL:
+    """
+    This accepts, in order:
+
+    * An io.BufferedIOBase object, which is unwrapped to get the
+      underlying file object. (Which is then processed as below.)
+
+    * A RWopsIO object, which is closed and the underlying SDL_RWops
+      object is returned.
+
+    * A filename, which is opened.
+
+    * An object with the name, base, and length attributes. The name is
+      interpreted as a filename, and the base and length are used to
+      create a subfile.
+
+    * An object with a name fileld. The name is interpreted as a filename.
+      and opened. The object will be closed.
+
+    * An object that supports the buffer protocol.
+
+    * A file-like object, which is wrapped in a Python file-like object
+
+    It returns an SDL_RWops object, or NULL on error.
+    """
 
     cdef FILE *f
     cdef SubFile *sf
@@ -272,16 +296,31 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     cdef char *cname
     cdef char *cmode
 
+    cdef RWopsIOImpl rwopsio
+
     if not isinstance(mode, bytes_):
         mode = mode.encode("ascii")
 
     name = filelike
 
-    if isinstance(filelike, RWops):
-        rv = (<RWopsImpl>filelike._holder).get_rwops()
-        if rv == NULL:
-            raise ValueError("Passed in RWops object is closed")
-        (<RWopsImpl>filelike._holder).clear_rwops()
+    base = None
+    length = None
+
+    # Handle turning BufferedIOBase and RWopsIO objects into their underlying
+    # objects.
+    try:
+        while True:
+            filelike = filelike.raw
+    except AttributeError:
+        pass
+
+    if isinstance(filelike, RWopsIOImpl):
+        rwopsio = <RWopsIOImpl> filelike
+        if not rwopsio.ops:
+            raise ValueError("I/O on closed file.")
+
+        rv = rwopsio.ops
+        rwopsio.ops = NULL
         return rv
 
     if isinstance(filelike, (file_type, io.IOBase)) and mode == "rb":
@@ -307,7 +346,14 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
         if rv == NULL:
             raise IOError("Could not open {!r}: {}".format(name, SDL_GetError()))
 
-        try:
+        if base is None and length is None:
+            try:
+                base = filelike.base
+                length = filelike.length
+            except AttributeError:
+                pass
+
+        if base is not None and length is not None:
 
             # If we have these properties, we're either an APK asset or a Ren'Py-style
             # subfile, so use an optimized path.
@@ -317,14 +363,6 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
             rw = rv
 
             SDL_RWseek(rw, base, RW_SEEK_SET);
-
-            sf = <SubFile *> calloc(sizeof(SubFile), 1)
-            sf.rw = rw
-            sf.base = base
-            sf.length = length
-            sf.tell = 0;
-
-            SDL_RWseek(rw, base, RW_SEEK_SET)
 
             sf = <SubFile *> calloc(sizeof(SubFile), 1)
             sf.rw = rw
@@ -340,16 +378,6 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
             rv.close = subfile_close
             rv.type = 0
             rv.hidden.unknown.data1 = <void *> sf
-
-            try:
-                filelike.close()
-            except:
-                pass
-
-            return rv
-
-        except AttributeError:
-            pass
 
         try:
             filelike.close()
@@ -375,111 +403,155 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb") except NULL:
     return rv
 
 
-cdef api SDL_RWops *RWopsFromPython(filelike) except NULL:
-    return to_rwops(filelike)
+whence_mapping = {
+    io.SEEK_SET : RW_SEEK_SET,
+    io.SEEK_CUR : RW_SEEK_CUR,
+    io.SEEK_END : RW_SEEK_END,
+}
 
-cdef class RWopsImpl(object):
+cdef class RWopsIOImpl:
+    """
+    This wraps an SDL_RWops object in a Python file-like object.
+    """
+
     cdef SDL_RWops *ops
-    cdef int closed
+    cdef public object name
+    cdef public object base
+    cdef public object length
 
-    def check_closed(self):
-        """
-        Internal: raise a ValueError if this RWops object is closed
-        """
-        if self.closed != 0:
-            raise ValueError("I/O operation on closed RWops.")
+    def __dealloc__(self):
+        if self.ops != NULL:
+            SDL_RWclose(self.ops)
+            self.ops = NULL
 
-    def get_closed(self):
-        return self.closed != 0
+    def __init__(self, filelike, mode="rb", base=None, length=None, name=None):
+        """
+        Creates a new RWopsIO object. All parameter are passed to to_rwops
+        to create the SDL_RWops object.
+        """
 
-    cdef SDL_RWops *get_rwops(self):
-        return self.ops
 
-    cdef set_rwops(self, SDL_RWops * ops):
-        """
-        Internal: Set the rwops object.
-        """
-        self.ops = ops
-        self.closed = 0
+        if isinstance(filelike, basestring):
+            self.name = filelike
+        else:
+            self.name = getattr(filelike, "name", name)
 
-    cdef clear_rwops(self):
-        """
-        Internal: Clear the rwops object.
-        """
-        self.ops = NULL
-        self.closed = 1
+        self.base = base
+        self.length = length
+
+        if filelike is not None:
+            self.ops = to_rwops(filelike, mode, base, length)
+        else:
+            self.ops = NULL
 
     def close(self):
-        # Allow close to be called multiple times without raising an exception.
-        if self.closed != 0:
-            return
-        self.closed = 1
-        ops = self.ops
-        self.ops = NULL
-        SDL_RWclose(ops)
 
-    def seek(self, offset, whence):
-        whence_rw = RW_SEEK_SET
-        whence_mapping = {
-            io.SEEK_SET : RW_SEEK_SET,
-            io.SEEK_CUR : RW_SEEK_CUR,
-            io.SEEK_END : RW_SEEK_END,
-        }
-        if whence in whence_mapping:
-            whence_rw = whence_mapping[whence]
-        rv = SDL_RWseek(self.ops, offset, whence_rw)
+        # A closed file may be closed again.
+
+        if self.ops:
+            SDL_RWclose(self.ops)
+            self.ops = NULL
+
+    def is_closed(self):
+        return not self.ops
+
+    def seek(self, long long offset, whence=0):
+        cdef int whence_rw
+        cdef long long rv
+
+        if not self.ops:
+            raise ValueError("I/O operation on closed file.")
+
+        whence_rw = whence_mapping.get(whence, RW_SEEK_SET)
+
+        with nogil:
+            rv = SDL_RWseek(self.ops, offset, whence_rw)
+
         if rv < 0:
             raise IOError("Could not seek: {}".format(SDL_GetError()))
+
         return rv
 
     def readinto(self, b):
         cdef Py_buffer view
-        rv = 0
-        
+        cdef long long rv = 0
+
+        if not self.ops:
+            raise ValueError("I/O operation on closed file.")
+
         if not PyObject_CheckBuffer(b):
             raise ValueError("Passed in object does not support buffer protocol")
+
         try:
             PyObject_GetBuffer(b, &view, PyBUF_CONTIG)
-            rv = SDL_RWread(self.ops, view.buf, 1, view.len)
+
+            with nogil:
+                rv = SDL_RWread(self.ops, view.buf, 1, view.len)
         finally:
             PyBuffer_Release(&view)
+
         if rv < 0:
             raise IOError("Could not read: {}".format(SDL_GetError()))
+
         return rv
 
     def write(self, b):
         cdef Py_buffer view
-        rv = 0
+        cdef long long rv = 0
+
+        if not self.ops:
+            raise ValueError("I/O operation on closed file.")
 
         if not PyObject_CheckBuffer(b):
             raise ValueError("Passed in object does not support buffer protocol")
+
         try:
             PyObject_GetBuffer(b, &view, PyBUF_CONTIG_RO)
-            rv = SDL_RWwrite(self.ops, view.buf, 1, view.len)
+            with nogil:
+                rv = SDL_RWwrite(self.ops, view.buf, 1, view.len)
         finally:
             PyBuffer_Release(&view)
+
         if rv < 0:
             raise IOError("Could not write: {}".format(SDL_GetError()))
+
         return rv
 
-    def get_sdl_rwops_pointer(self):
-        import ctypes
-        return ctypes.c_void_p(<uintptr_t> self.ops)
 
-class RWops(io.RawIOBase):
-    def __init__(self, name=None):
+cdef api SDL_RWops *RWopsFromPython(filelike) except NULL:
+    return to_rwops(filelike, "rb", None, None)
+
+
+class RWopsIO(io.RawIOBase):
+
+    def __init__(self, filelike, mode='rb', base=None, length=None, name=None):
+        """
+        Creates a new RWopsIO object. All parameter are passed to to_rwops
+        to create the SDL_RWops object.
+        """
+
         io.RawIOBase.__init__(self)
-        self._holder = RWopsImpl()
-        self.name = name
+
+        self.raw = RWopsIOImpl(filelike, mode=mode, base=base, length=length, name=name)
+
+        self.close = self.raw.close
+        self.seek = self.raw.seek
+        self.write = self.raw.write
+        self.readinto = self.raw.readinto
+
+    def __repr__(self):
+        if self.raw.base is not None:
+            return "<RWopsIO {!r} base={!r} length={!r}>".format(self.raw.name, self.raw.base, self.raw.length)
+        else:
+            return "<RWopsIO {!r}>".format(self.raw.name)
 
     # Implemented class: io.IOBase
 
-    def close(self):
-        self._holder.close()
+    # close is taken from RWopsIOImpl.
 
     @property
     def closed(self):
-        return self._holder.get_closed()
+        return self.raw.is_closed()
 
     def fileno(self):
         raise OSError()
@@ -495,10 +567,7 @@ class RWops(io.RawIOBase):
 
     # inherited readlines is used
 
-    def seek(self, offset, whence=0):
-        self._holder.check_closed()
-        return self._holder.seek(offset, whence)
-
+    # seek is taken from RWopsIOImpl.
 
     def seekable(self):
         return True
@@ -521,184 +590,46 @@ class RWops(io.RawIOBase):
 
     # inherited readall is used
 
-    def readinto(self, b):
-        self._holder.check_closed()
-        return self._holder.readinto(b)
+    # readinto is taken from RWopsIOImpl.
 
-    def write(self, b):
-        self._holder.check_closed()
-        return self._holder.write(b)
+    # write is taken from RWopsIOImpl.
 
-    def get_sdl_rwops_pointer(self):
-        return self._holder.get_sdl_rwops_pointer()
+    @staticmethod
+    def from_buffer(self, buffer, mode="rb", name=None):
+        """
+        Creates a new RWopsIO object from a buffer.
+        """
 
-def RWops_from_file(name, mode="rb"):
-    cdef SDL_RWops *rw
-    cdef char *cname
-    cdef char *cmode
+        cdef BufFile *bf
+        cdef SDL_RWops *rw
 
-    if not isinstance(mode, bytes_):
-        mode = mode.encode("ascii")
+        if not PyObject_CheckBuffer(buffer):
+            raise ValueError("Passed in object does not support buffer protocol")
 
-    # Try to open as a file.
-    if isinstance(name, bytes_):
-        name = name.decode(fsencoding)
-    elif isinstance(name, unicode_):
-        pass
-    else:
-        name = None
+        bf = <BufFile *> calloc(sizeof(BufFile), 1)
+        if bf == NULL:
+            raise MemoryError()
 
-    if name is not None:
+        if PyObject_GetBuffer(buffer, &bf.view, PyBUF_CONTIG_RO) < 0:
+            free(bf)
+            raise ValueError("Could not get buffer.")
 
-        dname = name.encode("utf-8")
-        cname = dname
-        cmode = mode
+        bf.base = <Uint8 *> bf.view.buf
+        bf.here = bf.base
+        bf.stop = bf.base + bf.view.len
 
-        with nogil:
-            rw = SDL_RWFromFile(cname, cmode)
+        rw = SDL_AllocRW()
+        rw.size = buffile_size
+        rw.seek = buffile_seek
+        rw.read = buffile_read
+        rw.write = buffile_write
+        rw.close = buffile_close
+        rw.type = 0
+        rw.hidden.unknown.data1 = <void *> bf
 
-        if rw == NULL:
-            raise IOError("Could not open {!r}: {}".format(name, SDL_GetError()))
-
-        rv = RWops(name)
-        (<RWopsImpl>rv._holder).set_rwops(rw)
-
+        rv = RWopsIO(None, name=name)
+        (<RWopsIOImpl> rv.raw).ops = rw
         return rv
 
-    return ValueError("Invalid value passed in for name")
-
-def RWops_from_file_like_object(filelike):
-    cdef SDL_RWops *rw
-
-    rw = to_rwops(filelike)
-
-    rv = RWops()
-    (<RWopsImpl>rv._holder).set_rwops(rw)
-
-    return rv
-
-def RWops_is_file_like_object(rw_in_object):
-    cdef Py_buffer view
-    cdef SDL_RWops *rw_in
-    cdef SDL_RWops *rw
-
-    if not isinstance(rw_in_object, RWops):
-        return False
-    rw_in = (<RWopsImpl>rw_in_object._holder).get_rwops()
-    if rw_in == NULL:
-        return False
-    return rw_in.read == python_read
-
-def RWops_from_buffer(b, mode="rb"):
-    cdef Py_buffer view
-    cdef SDL_RWops *rw
-
-    if not PyObject_CheckBuffer(b):
-        raise ValueError("Passed in object does not support buffer protocol")
-    PyObject_GetBuffer(b, &view, PyBUF_CONTIG_RO if ("r" in mode) else PyBUF_CONTIG)
-
-    bf = <BufFile *> calloc(sizeof(BufFile), 1)
-    bf.view = view
-    bf.base = <Uint8 *>view.buf
-    bf.here = bf.base
-    bf.stop = bf.base + view.len
-
-    rw = SDL_AllocRW()
-    rw.size = buffile_size
-    rw.seek = buffile_seek
-    rw.read = buffile_read
-    rw.write = buffile_write
-    rw.close = buffile_close
-    rw.type = 0
-    rw.hidden.unknown.data1 = <void *> bf
-
-    rv = RWops()
-    (<RWopsImpl>rv._holder).set_rwops(rw)
-
-    return rv
-
-def RWops_is_buffer(rw_in_object):
-    cdef Py_buffer view
-    cdef SDL_RWops *rw_in
-    cdef SDL_RWops *rw
-
-    if not isinstance(rw_in_object, RWops):
-        return False
-    rw_in = (<RWopsImpl>rw_in_object._holder).get_rwops()
-    if rw_in == NULL:
-        return False
-    return rw_in.read == buffile_read
-
-def RWops_create_subfile(rw_in_object, base, length):
-    cdef Py_buffer view
-    cdef SDL_RWops *rw_in
-    cdef SDL_RWops *rw
-
-    if not isinstance(rw_in_object, RWops):
-        raise ValueError("Passed in object should be RWops")
-    rw_in = (<RWopsImpl>rw_in_object._holder).get_rwops()
-    if rw_in == NULL:
-        raise ValueError("Passed in RWops object is closed")
-    (<RWopsImpl>rw_in_object._holder).clear_rwops()
-
-    SDL_RWseek(rw_in, base, RW_SEEK_SET)
-
-    sf = <SubFile *> calloc(sizeof(SubFile), 1)
-    sf.rw = rw_in
-    sf.base = base
-    sf.length = length
-    sf.tell = 0
-
-    rw = SDL_AllocRW()
-    rw.size = subfile_size
-    rw.seek = subfile_seek
-    rw.read = subfile_read
-    rw.write = NULL
-    rw.close = subfile_close
-    rw.type = 0
-    rw.hidden.unknown.data1 = <void *> sf
-
-    rv = RWops()
-    (<RWopsImpl>rv._holder).set_rwops(rw)
-
-    return rv
-
-def RWops_is_subfile(rw_in_object):
-    cdef Py_buffer view
-    cdef SDL_RWops *rw_in
-    cdef SDL_RWops *rw
-
-    if not isinstance(rw_in_object, RWops):
-        return False
-    rw_in = (<RWopsImpl>rw_in_object._holder).get_rwops()
-    if rw_in == NULL:
-        return False
-    return rw_in.read == subfile_read
-
-def RWops_unwrap_subfile(rw_in_object):
-    cdef Py_buffer view
-    cdef SDL_RWops *rw_in
-    cdef SDL_RWops *rw
-    cdef SubFile *sf
-
-    if not isinstance(rw_in_object, RWops):
-        raise ValueError("Passed in object should be RWops")
-    rw_in = (<RWopsImpl>rw_in_object._holder).get_rwops()
-    if rw_in == NULL:
-        raise ValueError("Passed in RWops object is closed")
-    if rw_in.read != subfile_read:
-        raise ValueError("Passed in RWops object is not SubFile")
-    (<RWopsImpl>rw_in_object._holder).clear_rwops()
-    sf = <SubFile *>rw_in_object.hidden.unknown.data1
-    rw = sf.rw
-    sf.rw = NULL
-    SDL_RWclose(rw_in)
-
-    SDL_RWseek(rw, 0, RW_SEEK_SET)
-
-    rv = RWops()
-    (<RWopsImpl>rv._holder).set_rwops(rw)
-
-    return rv
 
 init_python_threads()
