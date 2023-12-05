@@ -509,8 +509,9 @@ cdef class RWopsIOImpl:
         to create the SDL_RWops object.
         """
 
-
-        if isinstance(filelike, basestring):
+        if name not None:
+            self.name = name
+        elif isinstance(filelike, basestring):
             self.name = filelike
         else:
             self.name = getattr(filelike, "name", name)
