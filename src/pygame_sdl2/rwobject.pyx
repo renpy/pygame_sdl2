@@ -184,6 +184,90 @@ cdef int subfile_close(SDL_RWops *context) nogil:
 
     return 0
 
+
+cdef struct SplitFile:
+    SDL_RWops *a
+    SDL_RWops *b
+    Sint64 split
+    Sint64 tell
+
+cdef Sint64 splitfile_size(SDL_RWops *context) nogil:
+    cdef SplitFile *sf = <SplitFile *> context.hidden.unknown.data1
+    cdef Sint64 rv
+
+    return SDL_RWsize(sf.a) + SDL_RWsize(sf.b)
+
+cdef Sint64 splitfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
+    cdef SplitFile *sf = <SplitFile *> context.hidden.unknown.data1
+    cdef Sint64 rv
+
+    if whence == RW_SEEK_SET:
+        sf.tell = seek
+    elif whence == RW_SEEK_CUR:
+        sf.tell += seek
+    elif whence == RW_SEEK_END:
+        sf.tell = splitfile_size(context) + seek
+
+    if sf.tell < sf.split:
+        rv = SDL_RWseek(sf.a, sf.tell, RW_SEEK_SET)
+        SDL_RWseek(sf.b, 0, RW_SEEK_SET)
+    else:
+        SDL_RWseek(sf.a, sf.split, RW_SEEK_SET)
+        rv = SDL_RWseek(sf.b, sf.tell - sf.split, RW_SEEK_SET)
+
+    if rv < 0:
+        return rv
+    else:
+        return sf.tell
+
+cdef size_t splitfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) nogil:
+    cdef SplitFile *sf = <SplitFile *> context.hidden.unknown.data1
+    cdef Sint64 left = splitfile_size(context) - sf.tell
+    cdef size_t rv
+
+    cdef size_t total_read
+    cdef size_t left_read
+    cdef size_t right_read
+    cdef size_t ret
+
+    total_read = size * maxnum
+
+    left_read = min(total_read, sf.split - sf.tell)
+    left_read = max(left_read, 0)
+
+    if left_read > 0:
+        left_read = SDL_RWread(sf.a, ptr, 1, left_read)
+        if left_read < 0:
+            return left_read
+
+    right_read = total_read - left_read
+
+    if right_read > 0:
+        right_read = SDL_RWread(sf.b, <char *> ptr + left_read, 1, right_read)
+        if right_read < 0:
+            return right_read
+
+    sf.tell += left_read + right_read
+
+    return (left_read + right_read) // size
+
+cdef int splitfile_close(SDL_RWops *context) nogil:
+    cdef SplitFile *sf
+
+    if context != NULL:
+        sf = <SplitFile *> context.hidden.unknown.data1
+        if sf.a != NULL:
+            SDL_RWclose(sf.a)
+        if sf.b != NULL:
+            SDL_RWclose(sf.b)
+        if sf != NULL:
+            free(sf)
+            context.hidden.unknown.data1 = NULL
+        SDL_FreeRW(context)
+
+    return 0
+
+
 cdef struct BufFile:
     Py_buffer view
     Uint8 *base
@@ -303,9 +387,6 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb", base=None, length=None) except NUL
 
     name = filelike
 
-    base = None
-    length = None
-
     # Handle turning BufferedIOBase and RWopsIO objects into their underlying
     # objects.
     try:
@@ -357,8 +438,6 @@ cdef SDL_RWops *to_rwops(filelike, mode="rb", base=None, length=None) except NUL
 
             # If we have these properties, we're either an APK asset or a Ren'Py-style
             # subfile, so use an optimized path.
-            base = filelike.base
-            length = filelike.length
 
             rw = rv
 
@@ -630,6 +709,39 @@ class RWopsIO(io.RawIOBase):
         rv = RWopsIO(None, name=name)
         (<RWopsIOImpl> rv.raw).ops = rw
         return rv
+
+    @staticmethod
+    def from_split(a, b, name=None):
+        """
+        Creates a new RWopsIO object from two other RWopsIO objects,
+        representing the concatenation of the two.
+        """
+
+        cdef SplitFile *sf
+        cdef SDL_RWops *rw
+
+        sf = <SplitFile *> calloc(sizeof(SplitFile), 1)
+        if sf == NULL:
+            raise MemoryError()
+
+        sf.a = to_rwops(a)
+        sf.b = to_rwops(b)
+        sf.split = SDL_RWsize(sf.a)
+        sf.tell = 0
+
+        rw = SDL_AllocRW()
+        rw.size = splitfile_size
+        rw.seek = splitfile_seek
+        rw.read = splitfile_read
+        rw.write = NULL
+        rw.close = splitfile_close
+        rw.type = 0
+        rw.hidden.unknown.data1 = <void *> sf
+
+        rv = RWopsIO(None, name=name)
+        (<RWopsIOImpl> rv.raw).ops = rw
+        return rv
+
 
 
 init_python_threads()
