@@ -509,7 +509,7 @@ cdef class RWopsIOImpl:
         to create the SDL_RWops object.
         """
 
-        if name not None:
+        if name is not None:
             self.name = name
         elif isinstance(filelike, basestring):
             self.name = filelike
