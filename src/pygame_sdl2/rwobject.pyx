@@ -595,7 +595,7 @@ class RWopsIO(io.RawIOBase):
     # write is taken from RWopsIOImpl.
 
     @staticmethod
-    def from_buffer(self, buffer, mode="rb", name=None):
+    def from_buffer(buffer, mode="rb", name=None):
         """
         Creates a new RWopsIO object from a buffer.
         """
