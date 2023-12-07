@@ -17,6 +17,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 from sdl2 cimport *
+from pygame_sdl2.display cimport main_window
 from pygame_sdl2.surface cimport Surface
 
 def init():
@@ -54,7 +55,9 @@ def set_pos(pos):
 
 def set_visible(visible):
     SDL_ShowCursor(1 if visible else 0)
-    pass
+
+    if SDL_GetWindowGrab(main_window.window) == SDL_ENABLE:
+        SDL_SetRelativeMouseMode(SDL_FALSE if visible else SDL_TRUE)
 
 def get_focused():
     return SDL_GetMouseFocus() != NULL
