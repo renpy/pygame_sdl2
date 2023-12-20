@@ -340,6 +340,8 @@ cdef class Window:
         if self.gl_context == NULL:
             raise error()
 
+        SDL_GL_MakeCurrent(self.window, self.gl_context)
+
         return True
 
     def get_window_flags(self):
