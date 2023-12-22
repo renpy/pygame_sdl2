@@ -106,6 +106,7 @@ try_import("joystick")
 try_import("mixer")
 try_import("mouse")
 try_import("power")
+try_import("render")
 try_import("transform")
 try_import("scrap")
 try_import("sprite")
@@ -127,10 +128,13 @@ def _optional_imports():
     import pygame_sdl2.mixer
     import pygame_sdl2.mouse
     import pygame_sdl2.power
+    import pygame_sdl2.render
     import pygame_sdl2.transform
     import pygame_sdl2.scrap
     import pygame_sdl2.sprite
     import pygame_sdl2.sysfont
+
+    import json  # this fixes a missing import error when freezing pygame_sdl2 programs that use the render module
 
 
 # Fill this module with locals.
