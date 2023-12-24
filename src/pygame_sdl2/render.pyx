@@ -212,19 +212,27 @@ cdef class TextureNode:
     cdef int source_w
     cdef int source_h
 
-    def __init__(self, tex):
+    """ Create a TextureNode with a Texture and an optional rectangle that represents the area of the texture to use."""
+    def __init__(self, tex, rect=None):
         if isinstance(tex, Texture):
             self.texture = tex
-            to_sdl_rect((0,0,tex.w,tex.h), &self.source_rect)
-            to_sdl_rect((0,0,tex.w,tex.h), &self.trimmed_rect)
-            self.source_w = tex.w
-            self.source_h = tex.h
 
         elif isinstance(tex, TextureNode):
             self.texture = (<TextureNode>tex).texture
 
         else:
             raise ValueError()
+
+        if rect is not None:
+            to_sdl_rect(rect, &self.source_rect)
+            to_sdl_rect((0,0,rect[2],rect[3]), &self.trimmed_rect)
+            self.source_w = rect[2]
+            self.source_h = rect[3]
+        else:
+            to_sdl_rect((0,0,self.texture.w,self.texture.h), &self.source_rect)
+            to_sdl_rect((0,0,self.texture.w,self.texture.h), &self.trimmed_rect)
+            self.source_w = self.texture.w
+            self.source_h = self.texture.h
 
     def render(self, dest=None):
         cdef SDL_Rect dest_rect
