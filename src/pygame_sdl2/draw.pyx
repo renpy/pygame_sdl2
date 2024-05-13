@@ -71,7 +71,20 @@ def circle(Surface surface, color, pos, radius, width=0):
         return dirty.clip(surface.get_rect())
 
 def ellipse(Surface surface, color, rect, width=0):
-    raise error("Not implemented.")
+    x, y, rx, ry = rect
+    if width == 0:
+        gfxdraw.filled_ellipse(surface, x, y, rx, ry, color)
+        dirty = Rect((x - rx, y - ry), (rx*2, ry*2))
+    else:
+        gfxdraw.ellipse(surface, x, y, rx, ry, color)
+        n = 1
+        while n < width:
+            gfxdraw.ellipse(surface, x, y, rx - n, ry - n, color)
+            gfxdraw.ellipse(surface, x + 1, y, rx - n, ry - n, color)
+            gfxdraw.ellipse(surface, x - 1, y, rx - n, ry - n, color)
+            n += 1
+        dirty = Rect(x - rx - width, y - ry - width, (rx*2) + width, (ry*2) + width)
+    return dirty.clip(surface.get_rect())
 
 def arc(Surface surface, color, rect, start_angle, stop_angle, width=1):
     raise error("Not implemented.")
