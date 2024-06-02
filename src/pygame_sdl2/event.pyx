@@ -127,6 +127,12 @@ cdef make_keyboard_event(SDL_KeyboardEvent *e):
             elif e.keysym.sym <= 0xFFFF:
                 dargs['unicode'] = get_textinput()
 
+    else:
+        if e.type == SDL_KEYDOWN and not(e.keysym.mod & KMOD_NUM):
+            if SDLK_KP_1 <= e.keysym.sym <= SDLK_KP_0:
+                get_textinput()
+                dargs['unicode'] = ''
+
     return EventType(e.type, dict=dargs, repeat=e.repeat)
 
 cdef make_mousemotion_event(SDL_MouseMotionEvent *e):
