@@ -552,6 +552,14 @@ cdef class RWopsIOImpl:
 
         return rv
 
+    def tell(self):
+        cdef long long rv
+
+        with nogil:
+          rv = SDL_RWtell(self.ops)
+
+        return rv
+
     def readinto(self, b):
         cdef Py_buffer view
         cdef long long rv = 0
@@ -616,6 +624,7 @@ class RWopsIO(io.RawIOBase):
 
         self.close = self.raw.close
         self.seek = self.raw.seek
+        self.tell = self.raw.tell
         self.write = self.raw.write
         self.readinto = self.raw.readinto
 
@@ -652,7 +661,7 @@ class RWopsIO(io.RawIOBase):
     def seekable(self):
         return True
 
-    # inherited tell is used
+    # tell is taken from RWopsIOImpl.
 
     def truncate(self, size=None):
         raise OSError()
