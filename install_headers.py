@@ -3,6 +3,7 @@
 import argparse
 import pathlib
 import shutil
+import sysconfig
 
 from setuplib import gen
 
@@ -20,17 +21,20 @@ def main():
         gen + "/pygame_sdl2.display_api.h",
         ]
 
+    targets = [
+        pathlib.Path(args.target) / "include" / "pygame_sdl2",
+        pathlib.Path(args.target) / "include" / ("python" + sysconfig.get_config_var("py_version_short")) / "pygame_sdl2",
+    ]
 
+    for target in targets:
 
-    headers_dir = pathlib.Path(args.target) / "pygame_sdl2"
+        target.mkdir(exist_ok=True, parents=True)
 
-    headers_dir.mkdir(exist_ok=True)
+        for header in headers:
+            srcpath = pathlib.Path(header)
+            dstpath = target / srcpath.name
 
-    for header in headers:
-        srcpath = pathlib.Path(header)
-        dstpath = headers_dir / srcpath.name
-
-        shutil.copy(srcpath, dstpath)
+            shutil.copy(srcpath, dstpath)
 
 if __name__ == "__main__":
     main()
