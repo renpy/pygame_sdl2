@@ -77,9 +77,15 @@ class EventType(object):
             except KeyError:
                 ename = "UNKNOWN"
 
-        d = self.__dict__.copy()
-        del d['_type']
-        return '<Event(%d-%s %s)>' % (self.type, ename, d)
+        rest = [ ]
+
+        for k, v in sorted(self.__dict__.items()):
+            if k == "_type" or k == "timestamp":
+                continue
+
+            rest.append("%s=%r" % (k, v))
+
+        return '<Event(%d-%s %s)>' % (self.type, ename, ", ".join(rest))
 
     @property
     def dict(self):
