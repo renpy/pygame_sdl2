@@ -218,7 +218,7 @@ cdef make_drop_event(SDL_DropEvent *e):
     else:
         file = None
 
-    return EventType(e.type, file=file, timestamp=e.timestamp, window_id=e.windowID)
+    return EventType(e.type, file=file, window_id=e.windowID)
 
 cdef make_window_event(SDL_WindowEvent *e):
     # SDL_APPMOUSEFOCUS
@@ -361,7 +361,9 @@ cdef int poll_sdl() except 1:
 
     with lock:
         while SDL_PollEvent(&evt):
-            event_queue.append(make_event(&evt))
+            e = make_event(&evt)
+            e.timestamp = evt.common.timestamp
+            event_queue.append(e)
 
     return 0
 
