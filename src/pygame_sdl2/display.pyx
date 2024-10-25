@@ -109,6 +109,9 @@ def quit(): # @ReservedAssignment
         main_window.destroy()
         main_window = None
 
+
+    SDL_QuitSubSystem(SDL_INIT_VIDEO)
+
     init_done = False
 
 def get_init():
