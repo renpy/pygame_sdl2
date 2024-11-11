@@ -23,6 +23,11 @@ from pygame_sdl2.locals import SCRAP_TEXT
 
 from pygame_sdl2.compat import bytes_
 
+try:
+    import emscripten
+except ImportError:
+    emscripten = None
+
 def init():
     pass
 
@@ -44,6 +49,14 @@ def get_types():
 def put(type, data):
     if type != SCRAP_TEXT:
         raise error("Not implemented.")
+
+    if emscripten is not None:
+        # SDL_SetClipboardText() is not implemented for Web
+        import re
+        text = data.decode('utf-8')
+        script = 'navigator.clipboard.writeText(`%s`)' % (re.sub(r'([\\`$])', r'\\\1', text),)
+        emscripten.run_script(script)
+        return
 
     data = bytes_(data)
 
