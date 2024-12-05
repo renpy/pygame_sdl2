@@ -63,7 +63,7 @@ cdef set_error(e):
     msg = <char *> e
     SDL_SetError("%s", msg)
 
-cdef Sint64 python_size(SDL_RWops *context) with gil:
+cdef Sint64 python_size(SDL_RWops *context) noexcept with gil:
     f = <object> context.hidden.unknown.data1
 
     try:
@@ -71,12 +71,12 @@ cdef Sint64 python_size(SDL_RWops *context) with gil:
         f.seek(0, 2)
         rv = f.tell()
         f.seek(cur, 0)
-    except:
+    except Exception as e:
         return -1
 
     return rv
 
-cdef Sint64 python_seek(SDL_RWops *context, Sint64 seek, int whence) with gil:
+cdef Sint64 python_seek(SDL_RWops *context, Sint64 seek, int whence) noexcept with gil:
     f = <object> context.hidden.unknown.data1
 
     try:
@@ -88,7 +88,7 @@ cdef Sint64 python_seek(SDL_RWops *context, Sint64 seek, int whence) with gil:
 
     return rv
 
-cdef size_t python_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) with gil:
+cdef size_t python_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) noexcept with gil:
     f = <object> context.hidden.unknown.data1
 
     try:
@@ -100,7 +100,7 @@ cdef size_t python_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnu
     memcpy(ptr, <void *><char *> data, len(data))
     return len(data)
 
-cdef size_t python_write(SDL_RWops *context, const void *ptr, size_t size, size_t maxnum) with gil:
+cdef size_t python_write(SDL_RWops *context, const void *ptr, size_t size, size_t maxnum) noexcept with gil:
     f = <object> context.hidden.unknown.data1
     data = (<char *> ptr)[:size * maxnum]
 
@@ -112,7 +112,7 @@ cdef size_t python_write(SDL_RWops *context, const void *ptr, size_t size, size_
 
     return len(data)
 
-cdef int python_close(SDL_RWops *context) with gil:
+cdef int python_close(SDL_RWops *context) noexcept with gil:
     if context != NULL:
         if context.hidden.unknown.data1 != NULL:
             f = <object> context.hidden.unknown.data1
@@ -135,11 +135,11 @@ cdef struct SubFile:
     Sint64 length
     Sint64 tell
 
-cdef Sint64 subfile_size(SDL_RWops *context) nogil:
+cdef Sint64 subfile_size(SDL_RWops *context) noexcept nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
     return sf.length
 
-cdef Sint64 subfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
+cdef Sint64 subfile_seek(SDL_RWops *context, Sint64 seek, int whence) noexcept nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
 
     if whence == RW_SEEK_SET:
@@ -151,7 +151,7 @@ cdef Sint64 subfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
 
     return sf.tell
 
-cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) nogil:
+cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) noexcept nogil:
     cdef SubFile *sf = <SubFile *> context.hidden.unknown.data1
 
     cdef Sint64 left = sf.length - sf.tell
@@ -170,7 +170,7 @@ cdef size_t subfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxn
 
     return rv
 
-cdef int subfile_close(SDL_RWops *context) nogil:
+cdef int subfile_close(SDL_RWops *context) noexcept nogil:
     cdef SubFile *sf
 
     if context != NULL:
@@ -191,13 +191,13 @@ cdef struct SplitFile:
     Sint64 split
     Sint64 tell
 
-cdef Sint64 splitfile_size(SDL_RWops *context) nogil:
+cdef Sint64 splitfile_size(SDL_RWops *context) noexcept nogil:
     cdef SplitFile *sf = <SplitFile *> context.hidden.unknown.data1
     cdef Sint64 rv
 
     return SDL_RWsize(sf.a) + SDL_RWsize(sf.b)
 
-cdef Sint64 splitfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
+cdef Sint64 splitfile_seek(SDL_RWops *context, Sint64 seek, int whence) noexcept nogil:
     cdef SplitFile *sf = <SplitFile *> context.hidden.unknown.data1
     cdef Sint64 rv
 
@@ -220,7 +220,7 @@ cdef Sint64 splitfile_seek(SDL_RWops *context, Sint64 seek, int whence) nogil:
     else:
         return sf.tell
 
-cdef size_t splitfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) nogil:
+cdef size_t splitfile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) noexcept nogil:
     cdef SplitFile *sf = <SplitFile *> context.hidden.unknown.data1
     cdef Sint64 left = splitfile_size(context) - sf.tell
     cdef size_t rv
@@ -251,7 +251,7 @@ cdef size_t splitfile_read(SDL_RWops *context, void *ptr, size_t size, size_t ma
 
     return (left_read + right_read) // size
 
-cdef int splitfile_close(SDL_RWops *context) nogil:
+cdef int splitfile_close(SDL_RWops *context) noexcept nogil:
     cdef SplitFile *sf
 
     if context != NULL:
@@ -274,12 +274,12 @@ cdef struct BufFile:
     Uint8 *here
     Uint8 *stop
 
-cdef Sint64 buffile_size(SDL_RWops *context) nogil:
+cdef Sint64 buffile_size(SDL_RWops *context) noexcept nogil:
     cdef BufFile *bf = <BufFile *> context.hidden.unknown.data1
 
     return bf.stop - bf.base
 
-cdef Sint64 buffile_seek(SDL_RWops *context, Sint64 offset, int whence) nogil:
+cdef Sint64 buffile_seek(SDL_RWops *context, Sint64 offset, int whence) noexcept nogil:
     cdef BufFile *bf = <BufFile *> context.hidden.unknown.data1
 
     cdef Uint8 *newpos
@@ -302,7 +302,7 @@ cdef Sint64 buffile_seek(SDL_RWops *context, Sint64 offset, int whence) nogil:
 
     return bf.here - bf.base
 
-cdef size_t buffile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) nogil:
+cdef size_t buffile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxnum) noexcept nogil:
     cdef BufFile *bf = <BufFile *> context.hidden.unknown.data1
     cdef size_t total_bytes = 0
     cdef size_t mem_available = 0
@@ -320,7 +320,7 @@ cdef size_t buffile_read(SDL_RWops *context, void *ptr, size_t size, size_t maxn
 
     return (total_bytes // size)
 
-cdef size_t buffile_write(SDL_RWops *context, const void *ptr, size_t size, size_t num) nogil:
+cdef size_t buffile_write(SDL_RWops *context, const void *ptr, size_t size, size_t num) noexcept nogil:
     cdef BufFile *bf = <BufFile *> context.hidden.unknown.data1
 
     if bf.view.readonly != 0:
@@ -333,7 +333,7 @@ cdef size_t buffile_write(SDL_RWops *context, const void *ptr, size_t size, size
 
     return num
 
-cdef int buffile_close(SDL_RWops *context) with gil:
+cdef int buffile_close(SDL_RWops *context) noexcept with gil:
     cdef BufFile *bf
 
     if context != NULL:
