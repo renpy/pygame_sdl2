@@ -57,7 +57,7 @@ def _play_current(int channel):
             Mix_PlayChannelTimed(channel, next_sound.chunk, 0, -1)
 
 
-cdef void channel_callback(int channel) with gil:
+cdef void channel_callback(int channel) noexcept with gil:
 
     cdef int etype = 0
     cdef SDL_Event e

@@ -27,7 +27,7 @@ cdef Mix_Music *current_music = NULL
 cdef object queued_music = None
 cdef int endevent = 0
 
-cdef void music_finished():
+cdef void music_finished() noexcept:
     global queued_music
     if queued_music:
         load(queued_music)

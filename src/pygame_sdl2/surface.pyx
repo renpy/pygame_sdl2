@@ -34,7 +34,7 @@ cdef extern from "src/surface.h" nogil:
     int pygame_Blit (SDL_Surface * src, SDL_Rect * srcrect,
                  SDL_Surface * dst, SDL_Rect * dstrect, int the_args);
 
-cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int dstpitch) nogil:
+cdef void move_pixels(Uint8 *src, Uint8 *dst, int h, int span, int srcpitch, int dstpitch) noexcept nogil:
     if src < dst:
         src += (h - 1) * srcpitch;
         dst += (h - 1) * dstpitch;
