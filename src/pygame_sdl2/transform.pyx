@@ -104,7 +104,7 @@ def rotozoom(Surface surface, double angle, double scale, int smooth=1):
 
     return rv
 
-cdef uint32_t get_at(SDL_Surface *surf, int x, int y) nogil:
+cdef uint32_t get_at(SDL_Surface *surf, int x, int y) noexcept nogil:
     if x < 0:
         x = 0
     elif x >= surf.w:
@@ -119,7 +119,7 @@ cdef uint32_t get_at(SDL_Surface *surf, int x, int y) nogil:
     p += x
     return p[0]
 
-cdef void set_at(SDL_Surface *surf, int x, int y, uint32_t color) nogil:
+cdef void set_at(SDL_Surface *surf, int x, int y, uint32_t color) noexcept nogil:
     cdef uint32_t *p = <uint32_t*>surf.pixels
     p += y * (surf.pitch // sizeof(uint32_t))
     p += x
