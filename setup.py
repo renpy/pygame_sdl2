@@ -168,7 +168,7 @@ if __name__ == "__main__":
         else:
             headers_dir = pathlib.Path(sysconfig.get_paths()['include']) / "pygame_sdl2"
 
-        headers_dir.mkdir(exist_ok=True)
+        headers_dir.mkdir(parents=True, exist_ok=True)
 
         for header in headers:
             srcpath = pathlib.Path(header)
