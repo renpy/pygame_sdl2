@@ -1,5 +1,3 @@
-include gen/*.c
-include gen/*.h
 include gen3/*.c
 include gen3/*.h
 
