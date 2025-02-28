@@ -144,6 +144,8 @@ if __name__ == "__main__":
     if sys.version_info.major <= 3 and sys.version_info.minor <= 11:
         py_headers = headers
         headers = [ ]
+    else:
+        py_headers = [ ]
 
     setup(
         "pygame_sdl2",
