@@ -30,7 +30,6 @@ import os
 import platform
 import shutil
 import sys
-import pathlib
 
 
 def setup_env(name):
@@ -160,6 +159,7 @@ if __name__ == "__main__":
         os.unlink(os.path.join(os.path.dirname(__file__), "src", "pygame_sdl2", i))
 
     if headers:
+        import pathlib
 
         virtual_env = os.environ.get("VIRTUAL_ENV", None)
 
