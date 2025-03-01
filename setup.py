@@ -148,6 +148,7 @@ if __name__ == "__main__":
     setup(
         "pygame_sdl2",
         VERSION,
+        headers=py_headers,
         url="https://github.com/renpy/pygame_sdl2",
         maintainer="Tom Rothamel",
         maintainer_email="tom@rothamel.us",
