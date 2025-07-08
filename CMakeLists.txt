@@ -86,15 +86,17 @@ function(add_cython_extension name)
         set(final_c_file ${c_file})
     endif()
 
+
     # Create Python extension
     python_add_library(${name} MODULE ${final_c_file} ${ARG_SOURCES})
+
+    # Extract the base filename for the extension
+    get_filename_component(base_filename ${module_path} NAME)
 
     # Set properties for Python 3.12
     set_target_properties(${name} PROPERTIES
         PREFIX ""
-        OUTPUT_NAME ${name}
-        C_STANDARD 99
-        CXX_STANDARD 11
+        OUTPUT_NAME ${base_filename}
     )
 
     # Link libraries
@@ -115,7 +117,10 @@ function(add_cython_extension name)
     endif()
 
     # Install the extension
-    install(TARGETS ${name} DESTINATION pygame_sdl2)
+    string(REPLACE "." "/" install_subpath ${name})
+    get_filename_component(install_dir ${install_subpath} DIRECTORY)
+    install(TARGETS ${name} DESTINATION ${install_dir})
+
 endfunction()
 
 # Add all Cython extensions

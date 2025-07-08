@@ -2,7 +2,7 @@
 name = "pygame_sdl2"
 version = "2.1.0"
 readme = "README.rst"
-requires-python = ">=3.12, <3.13"
+requires-python = "==3.12.*"
 dependencies = []
 
 [build-system]
@@ -10,10 +10,9 @@ requires = ["scikit-build-core>=0.11", "cython>=3.1.0"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
-minimum-version = "build-system.requires"
-build-dir = "build/{wheel_tag}"
-build.verbose = true
-logging.level = "INFO"
+build-dir = "build"
+# build.verbose = true
+# logging.level = "INFO"
 
 [tool.scikit-build.cmake.define]
 CMAKE_C_COMPILER = { env = "CC", default = "gcc" }
