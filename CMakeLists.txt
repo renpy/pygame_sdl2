@@ -188,3 +188,12 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.display_api.h
     DESTINATION include/pygame_sdl2
 )
+
+install(
+    FILES
+        src/pygame_sdl2/pygame_sdl2.h
+        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.rwobject_api.h
+        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.surface_api.h
+        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.display_api.h
+    DESTINATION pygame_sdl2/headers
+)
