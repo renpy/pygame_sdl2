@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES C)
 
 # Find required packages
-find_package(Python 3.12 EXACT REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(Python 3.12 EXACT REQUIRED
+    COMPONENTS Interpreter Development.Module Development.Embed)
 find_package(PkgConfig REQUIRED)
+include(UseCython)
 
 # Find SDL2 and related libraries
 pkg_check_modules(SDL2 REQUIRED sdl2)
@@ -15,66 +17,49 @@ pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
 find_library(JPEG_LIBRARY jpeg REQUIRED)
 find_library(PNG_LIBRARY png REQUIRED)
 
-# Set up Cython
-find_program(CYTHON_EXECUTABLE cython REQUIRED)
-
 # Global settings
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/gen3
     ${SDL2_INCLUDE_DIRS}
 )
 
-# Create gen3 directory
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen3)
+set(CYTHON_ARGS
+    -X embedsignature=True
+    -I${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Static build configuration
 option(PYGAME_SDL2_STATIC "Build static version" OFF)
 if(DEFINED ENV{PYGAME_SDL2_STATIC})
-    set(PYGAME_SDL2_STATIC ON)
+    if (ENV{PYGAME_SDL2_STATIC})
+        set(PYGAME_SDL2_STATIC ON)
+    endif()
 endif()
 
 # Function to create Cython extension
 function(add_cython_extension name)
     set(options)
     set(oneValueArgs)
-    set(multiValueArgs SOURCES LIBRARIES DEFINITIONS)
+    set(multiValueArgs SOURCES LIBRARIES)
     cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Convert module name to path
     string(REPLACE "." "/" module_path ${name})
     set(pyx_file ${CMAKE_CURRENT_SOURCE_DIR}/src/${module_path}.pyx)
-    set(c_file ${CMAKE_CURRENT_BINARY_DIR}/gen3/${name}.c)
 
-    # Generate C file from Cython (Python 3.12 specific flags)
-    add_custom_command(
-        OUTPUT ${c_file}
-        COMMAND ${CYTHON_EXECUTABLE}
-            --3str
-            -3
-            -X profile=False
-            -X embedsignature=True
-            -I${CMAKE_CURRENT_SOURCE_DIR}/include
-            -I${CMAKE_CURRENT_BINARY_DIR}/gen3
-            -a
-            ${pyx_file}
-            -o ${c_file}
-        DEPENDS ${pyx_file}
-        COMMENT "Generating ${c_file} from ${pyx_file}"
-    )
+    cython_transpile(${pyx_file} OUTPUT_VARIABLE c_file)
 
     # Handle static build modifications for Python 3.12
     if(PYGAME_SDL2_STATIC)
-        set(static_c_file ${CMAKE_CURRENT_BINARY_DIR}/gen3/${name}_static.c)
+        set(static_c_file ${CMAKE_CURRENT_BINARY_DIR}/src/${module_path}_static.c)
 
         add_custom_command(
             OUTPUT ${static_c_file}
-            COMMAND ${CMAKE_COMMAND} -E copy ${c_file} ${c_file}.dynamic
             COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/fix_static.py
                 ${c_file} ${static_c_file} ${name}
             DEPENDS ${c_file}
@@ -85,7 +70,6 @@ function(add_cython_extension name)
     else()
         set(final_c_file ${c_file})
     endif()
-
 
     # Create Python extension
     python_add_library(${name} MODULE ${final_c_file} ${ARG_SOURCES})
@@ -110,11 +94,6 @@ function(add_cython_extension name)
         ${SDL2_CFLAGS_OTHER}
         ${EXTRA_CFLAGS}
     )
-
-    # Add definitions
-    if(ARG_DEFINITIONS)
-        target_compile_definitions(${name} PRIVATE ${ARG_DEFINITIONS})
-    endif()
 
     # Install the extension
     string(REPLACE "." "/" install_subpath ${name})
@@ -180,20 +159,21 @@ install(
     DESTINATION pygame_sdl2
 )
 
+# Install headers
 install(
     FILES
         src/pygame_sdl2/pygame_sdl2.h
-        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.rwobject_api.h
-        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.surface_api.h
-        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.display_api.h
+        ${CMAKE_CURRENT_BINARY_DIR}/src/pygame_sdl2/rwobject_api.h
+        ${CMAKE_CURRENT_BINARY_DIR}/src/pygame_sdl2/surface_api.h
+        ${CMAKE_CURRENT_BINARY_DIR}/src/pygame_sdl2/display_api.h
     DESTINATION include/pygame_sdl2
 )
 
-install(
-    FILES
-        src/pygame_sdl2/pygame_sdl2.h
-        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.rwobject_api.h
-        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.surface_api.h
-        ${CMAKE_CURRENT_BINARY_DIR}/gen3/pygame_sdl2.display_api.h
-    DESTINATION pygame_sdl2/headers/pygame_sdl2
-)
+# Install dlls
+if (NOT PYGAME_SDL2_STATIC AND WIN32)
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/pygame_sdl2_windeps/lib/x64/
+        DESTINATION pygame_sdl2
+        FILES_MATCHING PATTERN "*.dll"
+    )
+endif()
