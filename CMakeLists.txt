@@ -33,14 +33,6 @@ set(CYTHON_ARGS
     -X embedsignature=True
     -I${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Static build configuration
-option(PYGAME_SDL2_STATIC "Build static version" OFF)
-if(DEFINED ENV{PYGAME_SDL2_STATIC})
-    if (ENV{PYGAME_SDL2_STATIC})
-        set(PYGAME_SDL2_STATIC ON)
-    endif()
-endif()
-
 # Function to create Cython extension
 function(add_cython_extension name)
     set(options)
@@ -54,25 +46,8 @@ function(add_cython_extension name)
 
     cython_transpile(${pyx_file} OUTPUT_VARIABLE c_file)
 
-    # Handle static build modifications for Python 3.12
-    if(PYGAME_SDL2_STATIC)
-        set(static_c_file ${CMAKE_CURRENT_BINARY_DIR}/src/${module_path}_static.c)
-
-        add_custom_command(
-            OUTPUT ${static_c_file}
-            COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/fix_static.py
-                ${c_file} ${static_c_file} ${name}
-            DEPENDS ${c_file}
-            COMMENT "Creating static version of ${name}"
-        )
-
-        set(final_c_file ${static_c_file})
-    else()
-        set(final_c_file ${c_file})
-    endif()
-
     # Create Python extension
-    python_add_library(${name} MODULE ${final_c_file} ${ARG_SOURCES})
+    python_add_library(${name} MODULE ${c_file} ${ARG_SOURCES})
 
     # Extract the base filename for the extension
     get_filename_component(base_filename ${module_path} NAME)
@@ -170,7 +145,7 @@ install(
 )
 
 # Install dlls
-if (NOT PYGAME_SDL2_STATIC AND WIN32)
+if (WIN32)
     install(
         DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/pygame_sdl2_windeps/lib/x64/
         DESTINATION pygame_sdl2
