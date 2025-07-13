@@ -1,0 +1,13 @@
+[project]
+name = "pygame_sdl2"
+version = "2.1.0"
+readme = "README.rst"
+requires-python = "==3.12.*"
+dependencies = []
+
+[build-system]
+requires = ["scikit-build-core>=0.11", "cython>=3.1.0", "cython-cmake"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+build-dir = "build"
