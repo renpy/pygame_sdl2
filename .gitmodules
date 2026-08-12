@@ -1,0 +1,3 @@
+[submodule "pygame_sdl2_windeps"]
+    path = pygame_sdl2_windeps
+    url = https://github.com/renpy/pygame_sdl2_windeps.git
